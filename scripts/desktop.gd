@@ -292,17 +292,29 @@ func _build_start_menu() -> void:
 	heading.add_theme_color_override("font_color", Color("1d2a40"))
 	layout.add_child(heading)
 
+	var pinned := GridContainer.new()
+	pinned.columns = 3
+	pinned.add_theme_constant_override("h_separation", 6)
+	pinned.add_theme_constant_override("v_separation", 6)
+	layout.add_child(pinned)
+	_add_pinned_app(pinned, "🌐", "Browser", _open_browser)
+	_add_pinned_app(pinned, "📁", "Fichiers", _open_files)
+	_add_pinned_app(pinned, "⚙", "Paramètres", _open_settings)
+	_add_pinned_app(pinned, "✨", "Microslop AI", _open_ai)
+	_add_pinned_app(pinned, "↻", "Mise à jour", _trigger_update)
+	_add_pinned_app(pinned, "🗑", "Corbeille", _open_recycle_bin)
+
+	var recommended := Label.new()
+	recommended.text = "Recommandé"
+	recommended.add_theme_font_size_override("font_size", 17)
+	recommended.add_theme_color_override("font_color", Color("1d2a40"))
+	layout.add_child(recommended)
+
 	var sponsored := Label.new()
-	sponsored.text = "RECOMMANDÉ POUR VOUS · SPONSORISÉ"
+	sponsored.text = "Microslop Premium · SPONSORISÉ · 3 % de productivité en plus"
 	sponsored.add_theme_font_size_override("font_size", 11)
 	sponsored.add_theme_color_override("font_color", Color("68758c"))
 	layout.add_child(sponsored)
-
-	_add_menu_button(layout, "✨ Microslop AI — recommandé", _open_ai)
-	_add_menu_button(layout, "🌐 Microslop Browser", _open_browser)
-	_add_menu_button(layout, "📁 Explorateur de fichiers", _open_files)
-	_add_menu_button(layout, "⚙ Paramètres", _open_settings)
-	_add_menu_button(layout, "🔄 Rechercher des mises à jour", _trigger_update)
 
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -349,6 +361,17 @@ func _build_mission_hint() -> void:
 	_mission_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_mission_label.add_theme_color_override("font_color", Color.WHITE)
 	margin.add_child(_mission_label)
+
+func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, callback: Callable) -> void:
+	var button := Button.new()
+	button.text = "%s\n%s" % [glyph, caption]
+	button.custom_minimum_size = Vector2(168, 62)
+	button.add_theme_font_size_override("font_size", 13)
+	button.add_theme_color_override("font_color", Color("263247"))
+	button.add_theme_stylebox_override("normal", _flat_style(Color(1, 1, 1, 0.46), 10))
+	button.add_theme_stylebox_override("hover", _flat_style(Color(0.78, 0.86, 0.97, 0.92), 10))
+	button.pressed.connect(callback)
+	parent.add_child(button)
 
 func _add_menu_button(parent: VBoxContainer, caption: String, callback: Callable) -> void:
 	var button := Button.new()
