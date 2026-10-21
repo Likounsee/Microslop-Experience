@@ -44,7 +44,7 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	titlebar_style.corner_radius_bottom_left = 0
 	titlebar_style.corner_radius_bottom_right = 0
 	titlebar.add_theme_stylebox_override("panel", titlebar_style)
-	titlebar.custom_minimum_size.y = 42
+	titlebar.custom_minimum_size.y = 40
 	titlebar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	titlebar.mouse_filter = Control.MOUSE_FILTER_STOP
 	layout.add_child(titlebar)
@@ -80,7 +80,7 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	var minimize_button := Button.new()
 	minimize_button.text = "—"
 	minimize_button.tooltip_text = "Réduire"
-	minimize_button.custom_minimum_size = Vector2(36, 28)
+	minimize_button.custom_minimum_size = Vector2(40, 32)
 	minimize_button.add_theme_color_override("font_color", Color("24344d"))
 	minimize_button.add_theme_stylebox_override("normal", _panel_style(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
 	minimize_button.add_theme_stylebox_override("hover", _panel_style(Color("dce6f4"), Color(0, 0, 0, 0)))
@@ -91,7 +91,7 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	var maximize_button := Button.new()
 	maximize_button.text = "□"
 	maximize_button.tooltip_text = "Agrandir"
-	maximize_button.custom_minimum_size = Vector2(36, 28)
+	maximize_button.custom_minimum_size = Vector2(40, 32)
 	maximize_button.add_theme_color_override("font_color", Color("24344d"))
 	maximize_button.add_theme_stylebox_override("normal", _panel_style(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
 	maximize_button.add_theme_stylebox_override("hover", _panel_style(Color("dce6f4"), Color(0, 0, 0, 0)))
@@ -109,7 +109,7 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	var close_button := Button.new()
 	close_button.text = "✕"
 	close_button.tooltip_text = "Fermer"
-	close_button.custom_minimum_size = Vector2(44, 28)
+	close_button.custom_minimum_size = Vector2(46, 32)
 	close_button.add_theme_color_override("font_color", Color("24344d"))
 	close_button.add_theme_stylebox_override("normal", _panel_style(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
 	close_button.add_theme_stylebox_override("hover", _panel_style(Color("c42b1c"), Color(0, 0, 0, 0)))

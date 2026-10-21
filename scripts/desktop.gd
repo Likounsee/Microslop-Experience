@@ -211,7 +211,7 @@ func _build_taskbar() -> void:
 	var start_button := Button.new()
 	start_button.text = ""
 	start_button.tooltip_text = "Démarrer"
-	start_button.custom_minimum_size = Vector2(44, 42)
+	start_button.custom_minimum_size = Vector2(42, 42)
 	start_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 9))
 	start_button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 9))
 	start_button.pressed.connect(_toggle_start_menu)
@@ -259,9 +259,9 @@ func _build_taskbar() -> void:
 	row.add_child(right_spacer)
 
 	_tray_button = Button.new()
-	_tray_button.text = "⌃  ◖  ◉  🔊  🔋"
+	_tray_button.text = "⌃  ◉  ◖  🔊"
 	_tray_button.tooltip_text = "Paramètres rapides"
-	_tray_button.custom_minimum_size = Vector2(76, 48)
+	_tray_button.custom_minimum_size = Vector2(66, 48)
 	_tray_button.add_theme_font_size_override("font_size", 11)
 	_tray_button.add_theme_color_override("font_color", Color("24344d"))
 	_tray_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 9))
@@ -1595,7 +1595,7 @@ func _process(delta: float) -> void:
 	if _clock_refresh_elapsed >= 1.0:
 		_clock_refresh_elapsed = 0.0
 		if is_instance_valid(_clock_button):
-			_clock_button.text = "%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system().replace("-", "/")]
+			_clock_button.text = "%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), _get_short_french_date()]
 	_event_elapsed += delta
 	if _event_elapsed >= 75.0:
 		_event_elapsed = 0.0
