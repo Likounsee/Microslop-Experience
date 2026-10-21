@@ -153,8 +153,8 @@ func _build_taskbar() -> void:
 	search_button.focus_mode = Control.FOCUS_NONE
 	row.add_child(search_button)
 
-	_add_taskbar_app(row, "🌐", "Microslop Browser", _open_browser)
-	_add_taskbar_app(row, "📁", "Explorateur de fichiers", _open_files)
+	_add_taskbar_app(row, "◎", "Microslop Browser", _open_browser)
+	_add_taskbar_app(row, "▤", "Explorateur de fichiers", _open_files)
 	_add_taskbar_app(row, "⚙", "Paramètres", _open_settings)
 	_add_taskbar_app(row, "↻", "Mise à jour", _trigger_update)
 
@@ -352,12 +352,12 @@ func _build_start_menu() -> void:
 	pinned.add_theme_constant_override("h_separation", 6)
 	pinned.add_theme_constant_override("v_separation", 6)
 	layout.add_child(pinned)
-	_add_pinned_app(pinned, "🌐", "Browser", _open_browser)
-	_add_pinned_app(pinned, "📁", "Fichiers", _open_files)
+	_add_pinned_app(pinned, "◎", "Browser", _open_browser)
+	_add_pinned_app(pinned, "▤", "Fichiers", _open_files)
 	_add_pinned_app(pinned, "⚙", "Paramètres", _open_settings)
-	_add_pinned_app(pinned, "✨", "Microslop AI", _open_ai)
+	_add_pinned_app(pinned, "✧", "Microslop AI", _open_ai)
 	_add_pinned_app(pinned, "↻", "Mise à jour", _trigger_update)
-	_add_pinned_app(pinned, "🗑", "Corbeille", _open_recycle_bin)
+	_add_pinned_app(pinned, "▧", "Corbeille", _open_recycle_bin)
 
 	var recommended := Label.new()
 	recommended.text = "Recommandé"
@@ -469,6 +469,7 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 	button.add_theme_stylebox_override("normal", _flat_style(Color(1, 1, 1, 0.46), 10))
 	button.add_theme_stylebox_override("hover", _flat_style(Color(0.78, 0.86, 0.97, 0.92), 10))
 	button.pressed.connect(callback)
+	button.focus_mode = Control.FOCUS_NONE
 	parent.add_child(button)
 
 func _add_menu_button(parent: VBoxContainer, caption: String, callback: Callable) -> void:
@@ -478,6 +479,7 @@ func _add_menu_button(parent: VBoxContainer, caption: String, callback: Callable
 	button.custom_minimum_size.y = 40
 	button.add_theme_color_override("font_color", Color("263247"))
 	button.pressed.connect(callback)
+	button.focus_mode = Control.FOCUS_NONE
 	parent.add_child(button)
 
 func _toggle_start_menu() -> void:
@@ -778,6 +780,13 @@ func _show_notification(title: String, message: String) -> void:
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.add_theme_color_override("font_color", Color("34425b"))
 	layout.add_child(body)
+	# Toasts use the same short, restrained motion as Windows 11 notifications.
+	card.modulate.a = 0.0
+	card.scale = Vector2(0.97, 0.97)
+	var toast_tween := create_tween().set_parallel(true)
+	toast_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	toast_tween.tween_property(card, "modulate:a", 1.0, 0.18)
+	toast_tween.tween_property(card, "scale", Vector2.ONE, 0.20)
 	# queue_free() is deferred until the end of the frame. Remove the node
 	# from its parent first, otherwise the child count never decreases here
 	# and this loop can freeze the entire game on the fourth notification.
