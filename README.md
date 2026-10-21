@@ -6,7 +6,7 @@
 
 ## Current status
 
-**Prototype stage — P0 in progress.** The repository now contains a Windows 11-inspired desktop shell using the project's supplied wallpaper with a procedural blue bloom wallpaper, a translucent centered taskbar and Start menu, rounded draggable app windows with minimize/maximize/close controls, interactive simulated applications, timed notifications, a three-step tutorial mission, locally saved campaign progress, and persistent display, audio, and FPS settings.
+**Prototype stage — P0 in progress.** The repository now contains a Windows 11-inspired desktop shell using the wallpaper supplied in `assets/wallpaper.jpg`, a floating translucent centered taskbar, a Start menu with a pinned-app grid, a quick-settings flyout with working in-game volume control, rounded draggable app windows with minimize/maximize/close controls, interactive simulated applications, timed notifications, a three-step tutorial mission, locally saved campaign progress, and persistent display, audio, and FPS settings.
 
 ## Direction
 
@@ -32,7 +32,7 @@ The game combines three elements:
 Keyboard shortcuts in the prototype:
 - `F1`: open Settings
 - `F2`: advance the prototype mission (progress is saved locally)
-- `Esc`: close the Start menu
+- `Esc`: close the Start menu and quick settings
 
 ## Roadmap
 
