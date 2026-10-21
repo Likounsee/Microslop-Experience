@@ -12,8 +12,11 @@ var _clock_label: Label
 var _start_open := false
 var _mission_label: Label
 var _mission_step := 0
+var _event_elapsed := 0.0
+var _event_index := 0
 
 func _ready() -> void:
+	_load_progress()
 	_build_desktop()
 	SettingsStore.apply_display_settings()
 	SettingsStore.apply_audio_settings()
@@ -224,13 +227,46 @@ func _open_files() -> void:
 	_open_window("Explorateur de fichiers", "Accueil\n\nDocuments\nTéléchargements\nImages\n\nVos fichiers sont parfaitement simulés. Aucun fichier personnel n'est consulté.", Vector2(600, 360))
 
 func _open_browser() -> void:
-	_open_window("Microslop Browser", "Votre navigateur nouvelle génération.\n\nRecherche : comment travailler sans être interrompu\n\nRésultat sponsorisé : Achetez Microslop Premium pour réduire les interruptions de 3 %.", Vector2(680, 400))
+	var app := _open_window("Microslop Browser", "Votre navigateur nouvelle génération.", Vector2(680, 400))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	var address := LineEdit.new()
+	address.placeholder_text = "Rechercher sur le Web ou saisir une adresse"
+	address.text = "comment travailler sans être interrompu"
+	content.add_child(address)
+	var results := Label.new()
+	results.text = "Résultat sponsorisé : Achetez Microslop Premium pour réduire les interruptions de 3 %."
+	results.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	results.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(results)
+	var search := Button.new()
+	search.text = "Rechercher"
+	search.pressed.connect(func():
+		results.text = "Résultats pour : « %s »\\n\\n1. Microslop Premium — SPONSORISÉ\\n2. Microslop AI — recommandé\\n3. Résultat utile masqué par les annonces." % address.text
+	)
+	content.add_child(search)
 
 func _open_recycle_bin() -> void:
 	_open_window("Corbeille", "La corbeille est vide.\n\nElle a tout de même besoin d'une mise à jour de 4,7 Go.", Vector2(440, 240))
 
 func _open_ai() -> void:
-	_open_window("Microslop AI", "Bonjour ! J'ai analysé votre demande et préparé 46 suggestions.\n\nVous vouliez ouvrir le Bloc-notes ? Je peux plutôt vous proposer un abonnement.", Vector2(500, 300))
+	var app := _open_window("Microslop AI", "Bonjour ! J'ai analysé votre demande et préparé 46 suggestions.", Vector2(500, 330))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	var response := Label.new()
+	response.text = "Vous vouliez ouvrir le Bloc-notes ? Je peux plutôt vous proposer un abonnement."
+	response.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	response.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(response)
+	var suggestion := Button.new()
+	suggestion.text = "Générer une autre suggestion"
+	suggestion.pressed.connect(func():
+		var suggestions := ["Avez-vous essayé de redémarrer votre redémarrage ?", "Votre productivité serait 2 % meilleure avec Premium.", "J'ai trouvé 18 solutions. Aucune ne répond à la question.", "Souhaitez-vous résumer ce bouton avec l'IA ?"]
+		response.text = suggestions[randi() % suggestions.size()]
+	)
+	content.add_child(suggestion)
 
 func _open_search() -> void:
 	_open_window("Recherche Microslop", "Résultats pour : « ouvrir une application »\n\n1. Microslop Premium — SPONSORISÉ\n2. Microslop AI — recommandé\n3. L'application que vous recherchiez (peut-être).", Vector2(560, 300))
@@ -239,6 +275,16 @@ func _trigger_update() -> void:
 	if _mission_step == 2:
 		_advance_mission("Mise à jour consultée. Elle reste à 99 %, évidemment.")
 	_open_window("Microslop Update", "Une mise à jour importante est disponible.\n\nMicroslop Experience Update 1.0.99 (préversion)\nProgression : 99 %\n\nNe fermez pas votre ordinateur. Cette opération peut prendre quelques instants…", Vector2(520, 280))
+	var app := _window_layer.get_child(_window_layer.get_child_count() - 1) as Control
+	var content := _get_window_content(app)
+	if content != null:
+		var later := Button.new()
+		later.text = "Me rappeler dans 5 minutes"
+		later.pressed.connect(func():
+			_show_notification("Rappel programmé", "Nous vous rappellerons quand vous serez occupé.")
+			app.queue_free()
+		)
+		content.add_child(later)
 	_show_notification("Mise à jour en attente", "Redémarrage recommandé. Nous choisirons le moment.")
 
 func _open_settings() -> void:
@@ -361,6 +407,17 @@ func _open_settings() -> void:
 	note.add_theme_color_override("font_color", Color("596780"))
 	content.add_child(note)
 
+func _get_window_content(app: Control) -> VBoxContainer:
+	if app.get_child_count() == 0:
+		return null
+	var layout := app.get_child(0) as VBoxContainer
+	if layout == null or layout.get_child_count() < 2:
+		return null
+	var body := layout.get_child(1) as MarginContainer
+	if body == null or body.get_child_count() == 0:
+		return null
+	return body.get_child(0) as VBoxContainer
+
 func _show_notification(title: String, message: String) -> void:
 	if not is_instance_valid(_notification_layer):
 		return
@@ -390,9 +447,22 @@ func _show_notification(title: String, message: String) -> void:
 func _advance_mission(reason: String) -> void:
 	var previous_step := _mission_step
 	_mission_step = mini(_mission_step + 1, 3)
+	_save_progress()
 	_update_mission()
 	if _mission_step != previous_step:
 		_show_notification("Mission accomplie", reason)
+
+func _load_progress() -> void:
+	var progress := ConfigFile.new()
+	if progress.load("user://campaign.cfg") == OK:
+		_mission_step = clampi(int(progress.get_value("campaign", "mission_step", 0)), 0, 3)
+
+func _save_progress() -> void:
+	var progress := ConfigFile.new()
+	progress.set_value("campaign", "mission_step", _mission_step)
+	var error := progress.save("user://campaign.cfg")
+	if error != OK:
+		push_warning("Impossible d'enregistrer la progression : %s" % error)
 
 func _update_mission() -> void:
 	if not is_instance_valid(_mission_label):
@@ -415,9 +485,24 @@ func _input(event: InputEvent) -> void:
 		elif event.keycode == KEY_F2:
 			_advance_mission("Progression de la campagne avancée manuellement pour le prototype.")
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if is_instance_valid(_clock_label):
 		_clock_label.text = Time.get_time_string_from_system().substr(0, 5)
+	_event_elapsed += delta
+	if _event_elapsed >= 75.0:
+		_event_elapsed = 0.0
+		_trigger_system_event()
+
+func _trigger_system_event() -> void:
+	var events := [
+		["Offre exclusive", "Microslop Premium est en promotion. L'offre se termine dans 47 secondes."],
+		["Microslop AI", "Votre assistant a une suggestion que vous n'avez pas demandée."],
+		["Optimisation terminée", "Nous avons optimisé votre PC. Les performances sont identiques."],
+		["Rappel système", "Vous n'avez pas encore évalué votre expérience. Note : obligatoire (mais facultative)."]
+	]
+	var event: Array = events[_event_index % events.size()]
+	_event_index += 1
+	_show_notification(str(event[0]), str(event[1]))
 
 func _flat_style(color: Color) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
