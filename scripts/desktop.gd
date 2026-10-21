@@ -642,16 +642,10 @@ func _advance_mission(reason: String) -> void:
 		_show_notification("Mission accomplie", reason)
 
 func _load_progress() -> void:
-	var progress := ConfigFile.new()
-	if progress.load("user://campaign.cfg") == OK:
-		_mission_step = clampi(int(progress.get_value("campaign", "mission_step", 0)), 0, 3)
+	_mission_step = CampaignStore.load_progress()
 
 func _save_progress() -> void:
-	var progress := ConfigFile.new()
-	progress.set_value("campaign", "mission_step", _mission_step)
-	var error := progress.save("user://campaign.cfg")
-	if error != OK:
-		push_warning("Impossible d'enregistrer la progression : %s" % error)
+	CampaignStore.save_progress(_mission_step)
 
 func _update_mission() -> void:
 	if not is_instance_valid(_mission_label):
