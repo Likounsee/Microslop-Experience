@@ -6,7 +6,7 @@
 
 ## Current status
 
-**Prototype stage — P0 in progress.** The repository now contains the first Godot desktop shell, basic simulated applications, notifications, a mission hint, and initial display settings.
+**Prototype stage — P0 in progress.** The repository now contains the first Godot desktop shell, interactive simulated applications, timed system notifications, a three-step tutorial mission, locally saved campaign progress, and persistent display, audio, and FPS settings.
 
 ## Direction
 
@@ -31,7 +31,7 @@ The game combines three elements:
 
 Keyboard shortcuts in the prototype:
 - `F1`: open Settings
-- `F2`: advance the prototype mission
+- `F2`: advance the prototype mission (progress is saved locally)
 - `Esc`: close the Start menu
 
 ## Roadmap
@@ -39,8 +39,8 @@ Keyboard shortcuts in the prototype:
 | Phase | Scope | Status |
 |---|---|---|
 | P0 | Project foundation, desktop shell, window system | In progress |
-| P1 | Fake OS applications and persistent settings | Partly prototyped |
-| P2 | Campaign, missions, ads, update events and progression | Planned |
+| P1 | Fake OS applications and persistent display/audio/performance settings | Partly prototyped |
+| P2 | Campaign, missions, ads, update events and progression | Initial tutorial and timed event prototypes |
 | P3 | Audio, animation, accessibility, saves and polish | Planned |
 | P4 | Steam store page, builds, QA and release | Planned |
 
