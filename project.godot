@@ -10,6 +10,7 @@ config/features=PackedStringArray("4.4", "GL Compatibility")
 
 [autoload]
 SettingsStore="*res://scripts/settings_store.gd"
+CampaignStore="*res://scripts/campaign_store.gd"
 
 [display]
 window/size/viewport_width=1280
