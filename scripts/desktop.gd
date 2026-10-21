@@ -372,14 +372,14 @@ func _build_notification_center() -> void:
 	_notification_center.anchor_top = 1.0
 	_notification_center.anchor_right = 1.0
 	_notification_center.anchor_bottom = 1.0
-	_notification_center.offset_left = -360
+	_notification_center.offset_left = -384
 	_notification_center.offset_right = -12
-	_notification_center.offset_top = -500
+	_notification_center.offset_top = -520
 	_notification_center.offset_bottom = -76
 	_notification_center.visible = false
-	var style := _flat_style(Color("f2f5fa", 0.98), 18)
-	style.shadow_color = Color(0.02, 0.04, 0.10, 0.30)
-	style.shadow_size = 20
+	var style := _flat_style(Color("edf2f9", 0.96), 18)
+	style.shadow_color = Color(0.02, 0.04, 0.10, 0.32)
+	style.shadow_size = 22
 	style.shadow_offset = Vector2(0, 5)
 	style.set_border_width_all(1)
 	style.border_color = Color("d8e0ec")
@@ -395,7 +395,7 @@ func _build_notification_center() -> void:
 	var heading := HBoxContainer.new()
 	var title := Label.new()
 	title.text = "Notifications"
-	title.add_theme_font_size_override("font_size", 20)
+	title.add_theme_font_size_override("font_size", 21)
 	title.add_theme_color_override("font_color", Color("17243a"))
 	title.add_theme_color_override("font_color", Color("1d2a40"))
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -513,14 +513,14 @@ func _build_quick_settings() -> void:
 	_quick_settings_panel.anchor_top = 1.0
 	_quick_settings_panel.anchor_right = 1.0
 	_quick_settings_panel.anchor_bottom = 1.0
-	_quick_settings_panel.offset_left = -336
+	_quick_settings_panel.offset_left = -356
 	_quick_settings_panel.offset_right = -12
-	_quick_settings_panel.offset_top = -350
+	_quick_settings_panel.offset_top = -370
 	_quick_settings_panel.offset_bottom = -76
 	_quick_settings_panel.visible = false
-	var panel_style := _flat_style(Color(0.92, 0.95, 0.99, 0.97), 18)
-	panel_style.shadow_color = Color(0.02, 0.04, 0.10, 0.30)
-	panel_style.shadow_size = 20
+	var panel_style := _flat_style(Color(0.89, 0.93, 0.98, 0.95), 18)
+	panel_style.shadow_color = Color(0.02, 0.04, 0.10, 0.32)
+	panel_style.shadow_size = 22
 	panel_style.shadow_offset = Vector2(0, 5)
 	panel_style.set_border_width_all(1)
 	panel_style.border_color = Color(1, 1, 1, 0.70)
@@ -647,18 +647,30 @@ func _add_quick_toggle(parent: GridContainer, caption: String, initially_on: boo
 	toggle.tooltip_text = feature_name
 	toggle.toggle_mode = true
 	toggle.button_pressed = initially_on
-	toggle.custom_minimum_size = Vector2(138, 52)
+	toggle.custom_minimum_size = Vector2(148, 54)
 	toggle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	toggle.add_theme_font_size_override("font_size", 12)
 	toggle.focus_mode = Control.FOCUS_NONE
 	toggle.add_theme_color_override("font_color", Color("1d2a40"))
-	toggle.add_theme_stylebox_override("normal", _flat_style(Color("cfe3ff") if initially_on else Color("e8edf4"), 10))
-	toggle.add_theme_stylebox_override("hover", _flat_style(Color("bdd8fb") if initially_on else Color("dce4ef"), 10))
+	var toggle_normal := _flat_style(Color("cfe3ff") if initially_on else Color("e8edf4"), 10)
+	toggle_normal.set_border_width_all(1)
+	toggle_normal.border_color = Color("a9c9f0") if initially_on else Color("d5deea")
+	toggle.add_theme_stylebox_override("normal", toggle_normal)
+	var toggle_hover := _flat_style(Color("bdd8fb") if initially_on else Color("dce4ef"), 10)
+	toggle_hover.set_border_width_all(1)
+	toggle_hover.border_color = Color("83b5ec")
+	toggle.add_theme_stylebox_override("hover", toggle_hover)
 	toggle.add_theme_stylebox_override("pressed", _flat_style(Color("80b8f5"), 10))
 	toggle.toggled.connect(func(enabled: bool):
-		toggle.add_theme_stylebox_override("normal", _flat_style(Color("cfe3ff") if enabled else Color("e8edf4"), 10))
-		toggle.add_theme_stylebox_override("hover", _flat_style(Color("bdd8fb") if enabled else Color("dce4ef"), 10))
+		var active_style := _flat_style(Color("cfe3ff") if enabled else Color("e8edf4"), 10)
+		active_style.set_border_width_all(1)
+		active_style.border_color = Color("a9c9f0") if enabled else Color("d5deea")
+		toggle.add_theme_stylebox_override("normal", active_style)
+		var active_hover := _flat_style(Color("bdd8fb") if enabled else Color("dce4ef"), 10)
+		active_hover.set_border_width_all(1)
+		active_hover.border_color = Color("83b5ec")
+		toggle.add_theme_stylebox_override("hover", active_hover)
 		_show_notification(feature_name, "%s : %s." % [feature_name, "activé" if enabled else "désactivé"])
 	)
 	parent.add_child(toggle)
