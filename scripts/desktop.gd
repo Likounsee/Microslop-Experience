@@ -187,11 +187,11 @@ func _build_taskbar() -> void:
 	taskbar.anchor_top = 1.0
 	taskbar.anchor_right = 0.5
 	taskbar.anchor_bottom = 1.0
-	taskbar.offset_left = -390
-	taskbar.offset_right = 390
-	taskbar.offset_top = -70
-	taskbar.offset_bottom = -10
-	var panel_style := _flat_style(Color(0.91, 0.94, 0.99, 0.90), 16)
+	taskbar.offset_left = -410
+	taskbar.offset_right = 410
+	taskbar.offset_top = -72
+	taskbar.offset_bottom = -12
+	var panel_style := _flat_style(Color(0.88, 0.92, 0.98, 0.84), 16)
 	panel_style.shadow_color = Color(0.02, 0.04, 0.10, 0.28)
 	panel_style.shadow_size = 18
 	panel_style.shadow_offset = Vector2(0, 4)
@@ -201,7 +201,7 @@ func _build_taskbar() -> void:
 	add_child(taskbar)
 
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 4)
+	row.add_theme_constant_override("separation", 5)
 	taskbar.add_child(row)
 	var left_spacer := Control.new()
 	left_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -240,11 +240,12 @@ func _build_taskbar() -> void:
 	var search_button := Button.new()
 	search_button.text = "⌕  Rechercher"
 	search_button.tooltip_text = "Rechercher des applications et des paramètres"
-	search_button.custom_minimum_size = Vector2(144, 42)
+	search_button.custom_minimum_size = Vector2(156, 42)
 	search_button.add_theme_font_size_override("font_size", 13)
 	search_button.add_theme_color_override("font_color", Color("24344d"))
-	search_button.add_theme_stylebox_override("normal", _flat_style(Color(1, 1, 1, 0.66), 9))
-	search_button.add_theme_stylebox_override("hover", _flat_style(Color(1, 1, 1, 0.96), 9))
+	search_button.add_theme_stylebox_override("normal", _flat_style(Color(1, 1, 1, 0.72), 11))
+	search_button.add_theme_stylebox_override("hover", _flat_style(Color(1, 1, 1, 0.98), 11))
+	search_button.add_theme_stylebox_override("pressed", _flat_style(Color("dce9f8"), 11))
 	search_button.pressed.connect(_open_search)
 	search_button.focus_mode = Control.FOCUS_NONE
 	row.add_child(search_button)
@@ -265,7 +266,7 @@ func _build_taskbar() -> void:
 	_tray_button.add_theme_font_size_override("font_size", 11)
 	_tray_button.add_theme_color_override("font_color", Color("24344d"))
 	_tray_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 9))
-	_tray_button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 9))
+	_tray_button.add_theme_stylebox_override("hover", _flat_style(Color(0.78, 0.86, 0.96, 0.72), 9))
 	_tray_button.pressed.connect(_toggle_quick_settings)
 	_tray_button.focus_mode = Control.FOCUS_NONE
 	row.add_child(_tray_button)
@@ -277,7 +278,7 @@ func _build_taskbar() -> void:
 	_clock_button.add_theme_font_size_override("font_size", 11)
 	_clock_button.add_theme_color_override("font_color", Color("24344d"))
 	_clock_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 9))
-	_clock_button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 9))
+	_clock_button.add_theme_stylebox_override("hover", _flat_style(Color(0.78, 0.86, 0.96, 0.72), 9))
 	_clock_button.pressed.connect(_toggle_calendar)
 	_clock_button.focus_mode = Control.FOCUS_NONE
 	row.add_child(_clock_button)
@@ -767,9 +768,9 @@ func _build_start_menu() -> void:
 	_start_menu.offset_top = -(TASKBAR_HEIGHT + 540)
 	_start_menu.offset_bottom = -(TASKBAR_HEIGHT + 12)
 	_start_menu.visible = false
-	var start_style := _flat_style(Color(0.94, 0.96, 0.99, 0.97), 18)
+	var start_style := _flat_style(Color(0.91, 0.94, 0.98, 0.94), 18)
 	start_style.shadow_color = Color(0.02, 0.04, 0.10, 0.30)
-	start_style.shadow_size = 22
+	start_style.shadow_size = 24
 	start_style.shadow_offset = Vector2(0, 5)
 	start_style.set_border_width_all(1)
 	start_style.border_color = Color(1, 1, 1, 0.68)
