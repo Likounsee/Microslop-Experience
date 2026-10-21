@@ -402,6 +402,7 @@ func _toggle_quick_settings() -> void:
 	if should_open:
 		_start_menu.visible = false
 		_start_open = false
+		_calendar_panel.visible = false
 	_animate_flyout(_quick_settings_panel, should_open, true)
 
 func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, callback: Callable) -> void:
@@ -629,6 +630,7 @@ func _toggle_start_menu() -> void:
 	_animate_flyout(_start_menu, _start_open, false)
 	if _start_open:
 		_quick_settings_panel.visible = false
+		_calendar_panel.visible = false
 		if _mission_step == 0:
 			_advance_mission("Vous avez ouvert le menu Démarrer.")
 
