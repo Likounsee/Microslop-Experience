@@ -1,0 +1,27 @@
+; Engine configuration file.
+; Microslop Experience - satirical desktop simulation.
+config_version=5
+
+[application]
+config/name="Microslop Experience"
+config/description="A satirical desktop simulation about the modern PC experience."
+run/main_scene="res://scenes/desktop.tscn"
+config/features=PackedStringArray("4.4", "GL Compatibility")
+
+[autoload]
+SettingsStore="*res://scripts/settings_store.gd"
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.0352941, 0.0627451, 0.113725, 1)
+
+[gui]
+theme/default_font_multichannel_signed_distance_field=true

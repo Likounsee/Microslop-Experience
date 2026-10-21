@@ -1,0 +1,33 @@
+name: Godot CI
+
+on:
+  push:
+    branches:
+      - main
+      - Microslop-Experience
+  pull_request:
+    branches:
+      - main
+      - Microslop-Experience
+  workflow_dispatch:
+
+jobs:
+  validate-project:
+    name: Validate Godot project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.4.1
+          use-dotnet: false
+          include-templates: false
+
+      - name: Check project imports and script parsing
+        run: godot --headless --editor --path . --quit
+
+      - name: Smoke-test main scene startup
+        run: godot --headless --path . --quit-after 5
