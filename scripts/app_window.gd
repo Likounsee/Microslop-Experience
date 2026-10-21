@@ -18,6 +18,7 @@ var _resize_start_mouse := Vector2.ZERO
 var _resize_start_position := Vector2.ZERO
 var _resize_start_size := Vector2.ZERO
 var _drag_start_mouse := Vector2.ZERO
+var _minimize_tween: Tween
 
 func configure(title: String, message: String, window_size := Vector2(520, 300)) -> void:
 	custom_minimum_size = window_size
@@ -102,7 +103,7 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	minimize_button.add_theme_color_override("font_color", Color("24344d"))
 	minimize_button.add_theme_stylebox_override("normal", _panel_style(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
 	minimize_button.add_theme_stylebox_override("hover", _panel_style(Color("dce6f4"), Color(0, 0, 0, 0)))
-	minimize_button.pressed.connect(func(): hide())
+	minimize_button.pressed.connect(_animate_minimize)
 	minimize_button.focus_mode = Control.FOCUS_NONE
 	title_row.add_child(minimize_button)
 
@@ -402,6 +403,19 @@ func _snap_to_edge(pointer: Vector2) -> void:
 		_snap_mode = "left" if pointer.x <= SNAP_MARGIN else "right"
 	else:
 		_snap_mode = ""
+
+func _animate_minimize() -> void:
+	if _minimize_tween and _minimize_tween.is_running():
+		_minimize_tween.kill()
+	_minimize_tween = create_tween().set_parallel(true)
+	_minimize_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	_minimize_tween.tween_property(self, "modulate:a", 0.0, 0.12)
+	_minimize_tween.tween_property(self, "scale", Vector2(0.97, 0.97), 0.12)
+	_minimize_tween.chain().tween_callback(func():
+		hide()
+		modulate.a = 1.0
+		scale = Vector2.ONE
+	)
 
 func _panel_style(background: Color, border: Color) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
