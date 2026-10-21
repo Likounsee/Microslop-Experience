@@ -8,15 +8,16 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	custom_minimum_size = window_size
 	size = window_size
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	add_theme_stylebox_override("panel", _panel_style(Color("f5f6f8"), Color("aeb7c4")))
+	add_theme_stylebox_override("panel", _panel_style(Color("f7f9fc"), Color("c8d2e2")))
+	z_index = 30
 
 	var layout := VBoxContainer.new()
 	layout.add_theme_constant_override("separation", 0)
 	add_child(layout)
 
 	var titlebar := PanelContainer.new()
-	titlebar.add_theme_stylebox_override("panel", _panel_style(Color("e3e8f0"), Color("c4ccd8")))
-	titlebar.custom_minimum_size.y = 38
+	titlebar.add_theme_stylebox_override("panel", _panel_style(Color("eef3fa"), Color("dbe3ef")))
+	titlebar.custom_minimum_size.y = 42
 	titlebar.mouse_filter = Control.MOUSE_FILTER_STOP
 	layout.add_child(titlebar)
 	titlebar.gui_input.connect(_on_titlebar_input.bind(titlebar))
@@ -28,14 +29,45 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	var title_label := Label.new()
 	title_label.text = title
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title_label.add_theme_color_override("font_color", Color("182235"))
-	title_label.add_theme_font_size_override("font_size", 14)
+	title_label.add_theme_color_override("font_color", Color("24344d"))
+	title_label.add_theme_font_size_override("font_size", 13)
 	title_row.add_child(title_label)
+
+	var minimize_button := Button.new()
+	minimize_button.text = "—"
+	minimize_button.tooltip_text = "Réduire"
+	minimize_button.custom_minimum_size = Vector2(36, 28)
+	minimize_button.add_theme_color_override("font_color", Color("24344d"))
+	minimize_button.add_theme_stylebox_override("normal", _panel_style(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
+	minimize_button.add_theme_stylebox_override("hover", _panel_style(Color("dce6f4"), Color(0, 0, 0, 0)))
+	minimize_button.pressed.connect(func(): hide())
+	title_row.add_child(minimize_button)
+
+	var maximize_button := Button.new()
+	maximize_button.text = "□"
+	maximize_button.tooltip_text = "Agrandir"
+	maximize_button.custom_minimum_size = Vector2(36, 28)
+	maximize_button.add_theme_color_override("font_color", Color("24344d"))
+	maximize_button.add_theme_stylebox_override("normal", _panel_style(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
+	maximize_button.add_theme_stylebox_override("hover", _panel_style(Color("dce6f4"), Color(0, 0, 0, 0)))
+	maximize_button.pressed.connect(func():
+		if size == get_viewport_rect().size:
+			size = custom_minimum_size
+			position = (get_viewport_rect().size - size) / 2.0
+		else:
+			size = get_viewport_rect().size
+			position = Vector2.ZERO
+	)
+	title_row.add_child(maximize_button)
 
 	var close_button := Button.new()
 	close_button.text = "✕"
 	close_button.tooltip_text = "Fermer"
-	close_button.custom_minimum_size = Vector2(36, 28)
+	close_button.custom_minimum_size = Vector2(44, 28)
+	close_button.add_theme_color_override("font_color", Color("24344d"))
+	close_button.add_theme_stylebox_override("normal", _panel_style(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
+	close_button.add_theme_stylebox_override("hover", _panel_style(Color("c42b1c"), Color(0, 0, 0, 0)))
+	close_button.add_theme_color_override("font_hover_color", Color.WHITE)
 	close_button.pressed.connect(queue_free)
 	title_row.add_child(close_button)
 
@@ -71,7 +103,10 @@ func _panel_style(background: Color, border: Color) -> StyleBoxFlat:
 	style.bg_color = background
 	style.border_color = border
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(8)
+	style.set_corner_radius_all(10)
+	style.shadow_color = Color(0.02, 0.04, 0.08, 0.22)
+	style.shadow_size = 12
+	style.shadow_offset = Vector2(0, 4)
 	style.content_margin_left = 8
 	style.content_margin_right = 8
 	style.content_margin_top = 4
