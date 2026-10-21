@@ -17,8 +17,6 @@ var _quick_settings_panel: PanelContainer
 var _start_open := false
 var _mission_label: Label
 var _mission_step := 0
-var _event_elapsed := 0.0
-var _event_index := 0
 var _clock_refresh_elapsed := 0.0
 var _start_menu_tween: Tween
 var _quick_settings_tween: Tween
@@ -1648,22 +1646,6 @@ func _process(delta: float) -> void:
 		if is_instance_valid(_clock_button):
 			_clock_button.text = "%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), _get_short_french_date()]
 		_update_taskbar_indicators()
-	_event_elapsed += delta
-	if _event_elapsed >= 75.0:
-		_event_elapsed = 0.0
-		_trigger_system_event()
-
-func _trigger_system_event() -> void:
-	var events := [
-		["Offre exclusive", "Microslop Premium est en promotion. L'offre se termine dans 47 secondes."],
-		["Microslop AI", "Votre assistant a une suggestion que vous n'avez pas demandée."],
-		["Optimisation terminée", "Nous avons optimisé votre PC. Les performances sont identiques."],
-		["Rappel système", "Vous n'avez pas encore évalué votre expérience. Note : obligatoire (mais facultative)."]
-	]
-	var event: Array = events[_event_index % events.size()]
-	_event_index += 1
-	_show_notification(str(event[0]), str(event[1]))
-
 func _flat_style(color: Color, radius := 10) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = color
