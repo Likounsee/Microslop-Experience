@@ -1,6 +1,9 @@
 extends PanelContainer
 ## Lightweight in-game window (never creates or changes real OS windows).
 
+const EDGE_RIGHT := 1
+const EDGE_BOTTOM := 2
+
 var _dragging := false
 var _drag_offset := Vector2.ZERO
 var _is_maximized := false
@@ -121,9 +124,9 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	text.add_theme_color_override("font_color", Color("263247"))
 	content.add_child(text)
 
-	_add_resize_handle(Control.RESIZE_RIGHT, Control.CURSOR_HSIZE, Vector2(0, 48), Vector2(6, -6))
-	_add_resize_handle(Control.RESIZE_BOTTOM, Control.CURSOR_VSIZE, Vector2(0, 0), Vector2(-6, 6))
-	_add_resize_handle(Control.RESIZE_RIGHT | Control.RESIZE_BOTTOM, Control.CURSOR_FDIAGSIZE, Vector2(-14, -14), Vector2(0, 0))
+	_add_resize_handle(EDGE_RIGHT, Control.CURSOR_HSIZE, Vector2(0, 48), Vector2(6, -6))
+	_add_resize_handle(EDGE_BOTTOM, Control.CURSOR_VSIZE, Vector2(0, 0), Vector2(-6, 6))
+	_add_resize_handle(EDGE_RIGHT | EDGE_BOTTOM, Control.CURSOR_FDIAGSIZE, Vector2(-14, -14), Vector2(0, 0))
 
 func _add_resize_handle(edges: int, cursor_shape: Control.CursorShape, top_left: Vector2, bottom_right: Vector2) -> void:
 	var handle := Control.new()
@@ -134,7 +137,7 @@ func _add_resize_handle(edges: int, cursor_shape: Control.CursorShape, top_left:
 	handle.anchor_top = 0.0
 	handle.anchor_right = 1.0
 	handle.anchor_bottom = 1.0
-	if edges == Control.RESIZE_RIGHT:
+	if edges == EDGE_RIGHT:
 		handle.anchor_left = 1.0
 		handle.anchor_right = 1.0
 		handle.anchor_top = 0.0
@@ -143,7 +146,7 @@ func _add_resize_handle(edges: int, cursor_shape: Control.CursorShape, top_left:
 		handle.offset_right = 0.0
 		handle.offset_top = 48.0
 		handle.offset_bottom = -6.0
-	elif edges == Control.RESIZE_BOTTOM:
+	elif edges == EDGE_BOTTOM:
 		handle.anchor_left = 0.0
 		handle.anchor_right = 1.0
 		handle.anchor_top = 1.0
@@ -182,9 +185,9 @@ func _on_resize_handle_input(event: InputEvent, edges: int) -> void:
 	elif event is InputEventMouseMotion and _resizing:
 		var delta := get_global_mouse_position() - _resize_start_mouse
 		var new_size := _resize_start_size
-		if (_resize_edges & Control.RESIZE_RIGHT) != 0:
+		if (_resize_edges & EDGE_RIGHT) != 0:
 			new_size.x = maxf(280.0, _resize_start_size.x + delta.x)
-		if (_resize_edges & Control.RESIZE_BOTTOM) != 0:
+		if (_resize_edges & EDGE_BOTTOM) != 0:
 			new_size.y = maxf(180.0, _resize_start_size.y + delta.y)
 		var viewport_size := get_viewport_rect().size
 		new_size.x = minf(new_size.x, maxf(280.0, viewport_size.x - _resize_start_position.x))
