@@ -241,8 +241,9 @@ func _build_taskbar() -> void:
 
 	var search_button := Button.new()
 	search_button.text = "⌕  Rechercher"
-	search_button.tooltip_text = "Rechercher"
-	search_button.custom_minimum_size = Vector2(132, 42)
+	search_button.tooltip_text = "Rechercher des applications et des paramètres"
+	search_button.custom_minimum_size = Vector2(144, 42)
+	search_button.add_theme_font_size_override("font_size", 13)
 	search_button.add_theme_color_override("font_color", Color("24344d"))
 	search_button.add_theme_stylebox_override("normal", _flat_style(Color(1, 1, 1, 0.66), 9))
 	search_button.add_theme_stylebox_override("hover", _flat_style(Color(1, 1, 1, 0.96), 9))
@@ -707,6 +708,7 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 			if existing.visible and _active_app_id == app_id:
 				existing.hide()
 				_active_app_id = ""
+				_update_taskbar_indicators()
 			else:
 				existing.show()
 				existing.move_to_front()
@@ -1622,6 +1624,7 @@ func _process(delta: float) -> void:
 		_clock_refresh_elapsed = 0.0
 		if is_instance_valid(_clock_button):
 			_clock_button.text = "%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), _get_short_french_date()]
+		_update_taskbar_indicators()
 	_event_elapsed += delta
 	if _event_elapsed >= 75.0:
 		_event_elapsed = 0.0
