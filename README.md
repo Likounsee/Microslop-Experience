@@ -6,13 +6,13 @@
 
 ## Current status
 
-**Prototype stage — P0 in progress.** The repository now contains the first Godot desktop shell, interactive simulated applications, timed system notifications, a three-step tutorial mission, locally saved campaign progress, and persistent display, audio, and FPS settings.
+**Prototype stage — P0 in progress.** The repository now contains a Windows 11-inspired desktop shell with a procedural blue bloom wallpaper, a translucent centered taskbar and Start menu, rounded draggable app windows with minimize/maximize/close controls, interactive simulated applications, timed notifications, a three-step tutorial mission, locally saved campaign progress, and persistent display, audio, and FPS settings.
 
 ## Direction
 
 The game combines three elements:
 
-- **A fake desktop OS:** taskbar, Start menu, draggable application windows, simulated files and settings.
+- **A fake desktop OS:** Windows 11-inspired wallpaper, translucent taskbar, centered Start menu, rounded draggable windows, simulated quick settings, files and settings.
 - **A campaign:** short missions that gradually introduce new interruptions and mechanics.
 - **A systemic comedy layer:** ads, update prompts, AI suggestions, and events that can interact.
 
