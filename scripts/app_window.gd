@@ -19,6 +19,7 @@ var _resize_start_position := Vector2.ZERO
 var _resize_start_size := Vector2.ZERO
 var _drag_start_mouse := Vector2.ZERO
 var _minimize_tween: Tween
+var _resize_overlay: Control
 
 func configure(title: String, message: String, window_size := Vector2(520, 300)) -> void:
 	custom_minimum_size = window_size
@@ -36,7 +37,19 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 
 	var layout := VBoxContainer.new()
 	layout.add_theme_constant_override("separation", 0)
+	layout.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	layout.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	add_child(layout)
+
+	# Keep resize hit areas in a dedicated overlay. Adding them directly to this
+	# PanelContainer makes the container stretch each handle across the content.
+	_resize_overlay = Control.new()
+	_resize_overlay.name = "ResizeOverlay"
+	_resize_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_resize_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_resize_overlay.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_resize_overlay.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	add_child(_resize_overlay)
 
 	var titlebar := PanelContainer.new()
 	titlebar.name = "TitleBar"
@@ -198,7 +211,7 @@ func _add_resize_handle(edges: int, cursor_shape: Control.CursorShape, top_left:
 		handle.offset_top = -14.0
 		handle.offset_bottom = 0.0
 	handle.gui_input.connect(_on_resize_handle_input.bind(edges))
-	add_child(handle)
+	_resize_overlay.add_child(handle)
 
 func _on_resize_handle_input(event: InputEvent, edges: int) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
