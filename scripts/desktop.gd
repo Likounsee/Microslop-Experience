@@ -16,6 +16,14 @@ var _mission_label: Label
 var _mission_step := 0
 var _event_elapsed := 0.0
 var _event_index := 0
+var _clock_refresh_elapsed := 0.0
+
+func _process(delta: float) -> void:
+	_clock_refresh_elapsed += delta
+	if _clock_refresh_elapsed >= 1.0:
+		_clock_refresh_elapsed = 0.0
+		if is_instance_valid(_tray_button):
+			_tray_button.text = "⌃  ◖  ◉  🔊  🔋\n%s  ·  %s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system().replace("-", "/")]
 
 func _ready() -> void:
 	_load_progress()
