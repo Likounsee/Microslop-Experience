@@ -21,6 +21,7 @@ var _clock_refresh_elapsed := 0.0
 var _start_menu_tween: Tween
 var _quick_settings_tween: Tween
 var _wallpaper: TextureRect
+var _desktop_context_menu: PanelContainer
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED and is_instance_valid(_start_menu):
@@ -847,7 +848,16 @@ func _update_mission() -> void:
 	_mission_label.text = missions[mini(_mission_step, missions.size() - 1)]
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+		if _is_pointer_over_window(event.position):
+			return
+		if _start_menu.visible or _quick_settings_panel.visible:
+			_start_menu.visible = false
+			_start_open = false
+			_quick_settings_panel.visible = false
+			return
+		_show_desktop_context_menu(event.position)
+	elif event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_ESCAPE and _start_menu.visible:
 			_start_menu.visible = false
 			_start_open = false
@@ -857,6 +867,71 @@ func _input(event: InputEvent) -> void:
 			_open_settings()
 		elif event.keycode == KEY_F2:
 			_advance_mission("Progression de la campagne avancée manuellement pour le prototype.")
+
+func _is_pointer_over_window(pointer: Vector2) -> bool:
+	if not is_instance_valid(_window_layer):
+		return false
+	for child in _window_layer.get_children():
+		if child is Control and child.visible and child.get_global_rect().has_point(pointer):
+			return true
+	return false
+
+func _show_desktop_context_menu(pointer: Vector2) -> void:
+	if not is_instance_valid(_desktop_context_menu):
+		_desktop_context_menu = PanelContainer.new()
+		_desktop_context_menu.name = "DesktopContextMenu"
+		_desktop_context_menu.z_index = 100
+		var menu_style := _flat_style(Color("f4f6fa", 0.98), 10)
+		menu_style.shadow_color = Color(0.02, 0.04, 0.10, 0.30)
+		menu_style.shadow_size = 18
+		menu_style.shadow_offset = Vector2(0, 4)
+		menu_style.set_border_width_all(1)
+		menu_style.border_color = Color("d8e0ec")
+		_desktop_context_menu.add_theme_stylebox_override("panel", menu_style)
+		var margin := MarginContainer.new()
+		for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+			margin.add_theme_constant_override(side, 5)
+		_desktop_context_menu.add_child(margin)
+		var items := VBoxContainer.new()
+		items.add_theme_constant_override("separation", 2)
+		margin.add_child(items)
+		_add_context_action(items, "Actualiser", func():
+			_show_notification("Bureau actualisé", "Le bureau est déjà à jour. Aucun changement nécessaire.")
+		)
+		_add_context_action(items, "Nouveau dossier", func():
+			_show_notification("Nouveau dossier", "Le dossier a été créé dans votre imagination. L'explorateur complet arrive bientôt.")
+		)
+		var separator := HSeparator.new()
+		items.add_child(separator)
+		_add_context_action(items, "Paramètres d’affichage", _open_settings)
+		_add_context_action(items, "Personnaliser", func():
+			_open_window("Personnalisation", "Arrière-plan\n\nLe bureau utilise le fond d’écran fourni avec Microslop Experience.\n\nCouleurs : bleu Windows · Mode : clair", Vector2(390, 240))
+		)
+		add_child(_desktop_context_menu)
+	_desktop_context_menu.visible = true
+	var viewport_size := get_viewport_rect().size
+	var menu_size := _desktop_context_menu.size
+	if menu_size == Vector2.ZERO:
+		menu_size = _desktop_context_menu.get_combined_minimum_size()
+	_desktop_context_menu.position = Vector2(
+		clampf(pointer.x, 8.0, maxf(8.0, viewport_size.x - menu_size.x - 8.0)),
+		clampf(pointer.y, 8.0, maxf(8.0, viewport_size.y - menu_size.y - 8.0))
+	)
+
+func _add_context_action(parent: VBoxContainer, caption: String, callback: Callable) -> void:
+	var button := Button.new()
+	button.text = caption
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.custom_minimum_size = Vector2(210, 34)
+	button.add_theme_color_override("font_color", Color("24344d"))
+	button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 6))
+	button.add_theme_stylebox_override("hover", _flat_style(Color("dce8f8"), 6))
+	button.focus_mode = Control.FOCUS_NONE
+	button.pressed.connect(func():
+		_desktop_context_menu.visible = false
+		callback.call()
+	)
+	parent.add_child(button)
 
 func _process(delta: float) -> void:
 	_clock_refresh_elapsed += delta
