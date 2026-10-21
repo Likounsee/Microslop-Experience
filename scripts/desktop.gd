@@ -20,6 +20,7 @@ var _event_index := 0
 var _clock_refresh_elapsed := 0.0
 var _start_menu_tween: Tween
 var _quick_settings_tween: Tween
+var _wallpaper: TextureRect
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED and is_instance_valid(_start_menu):
@@ -58,7 +59,8 @@ func _ready() -> void:
 
 func _build_desktop() -> void:
 	# Use the wallpaper supplied in the repository instead of a generated placeholder.
-	var wallpaper := TextureRect.new()
+	_wallpaper = TextureRect.new()
+	var wallpaper := _wallpaper
 	wallpaper.name = "DesktopWallpaper"
 	wallpaper.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	wallpaper.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -232,6 +234,28 @@ func _build_quick_settings() -> void:
 	)
 	volume_row.add_child(volume)
 
+	var brightness_row := HBoxContainer.new()
+	brightness_row.add_theme_constant_override("separation", 8)
+	layout.add_child(brightness_row)
+	var brightness_icon := Label.new()
+	brightness_icon.text = "☼"
+	brightness_icon.add_theme_font_size_override("font_size", 20)
+	brightness_icon.add_theme_color_override("font_color", Color("24344d"))
+	brightness_row.add_child(brightness_icon)
+	var brightness := HSlider.new()
+	brightness.min_value = 55
+	brightness.max_value = 100
+	brightness.step = 5
+	brightness.value = 100
+	brightness.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	brightness.tooltip_text = "Luminosité du bureau"
+	brightness.value_changed.connect(func(value: float):
+		if is_instance_valid(_wallpaper):
+			var level := value / 100.0
+			_wallpaper.modulate = Color(level, level, level, 1.0)
+	)
+	brightness_row.add_child(brightness)
+
 	var footer := HBoxContainer.new()
 	layout.add_child(footer)
 	var status := Label.new()
@@ -257,10 +281,12 @@ func _add_quick_toggle(parent: GridContainer, caption: String, initially_on: boo
 	toggle.custom_minimum_size = Vector2(138, 52)
 	toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	toggle.add_theme_color_override("font_color", Color("1d2a40"))
-	toggle.add_theme_stylebox_override("normal", _flat_style(Color("dce9fa"), 10))
-	toggle.add_theme_stylebox_override("hover", _flat_style(Color("d1e2fa"), 10))
+	toggle.add_theme_stylebox_override("normal", _flat_style(Color("dce9fa") if initially_on else Color("e9edf4"), 10))
+	toggle.add_theme_stylebox_override("hover", _flat_style(Color("d1e2fa") if initially_on else Color("dce3ee"), 10))
 	toggle.add_theme_stylebox_override("pressed", _flat_style(Color("80b8f5"), 10))
 	toggle.toggled.connect(func(enabled: bool):
+		toggle.add_theme_stylebox_override("normal", _flat_style(Color("dce9fa") if enabled else Color("e9edf4"), 10))
+		toggle.add_theme_stylebox_override("hover", _flat_style(Color("d1e2fa") if enabled else Color("dce3ee"), 10))
 		_show_notification(feature_name, "%s : %s." % [feature_name, "activé" if enabled else "désactivé"])
 	)
 	parent.add_child(toggle)
