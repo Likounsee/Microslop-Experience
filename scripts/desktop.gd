@@ -27,6 +27,10 @@ var _wallpaper: TextureRect
 var _desktop_context_menu: PanelContainer
 var _pinned_buttons: Array[Button] = []
 var _pinned_empty_label: Label
+var _pinned_heading_label: Label
+var _all_apps_button: Button
+var _start_search: LineEdit
+var _all_apps_view := false
 var _recommended_card: PanelContainer
 var _recommended_heading: Label
 var _taskbar_app_buttons: Dictionary = {}
@@ -760,6 +764,7 @@ func _build_start_menu() -> void:
 	margin.add_child(layout)
 
 	var search := LineEdit.new()
+	_start_search = search
 	search.placeholder_text = "Rechercher des applications, paramètres et documents"
 	search.custom_minimum_size.y = 40
 	search.add_theme_color_override("font_color", Color("1d2a40"))
@@ -776,21 +781,21 @@ func _build_start_menu() -> void:
 	pinned_header.add_theme_constant_override("separation", 8)
 	layout.add_child(pinned_header)
 	var heading := Label.new()
+	_pinned_heading_label = heading
 	heading.text = "Épinglé"
 	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	heading.add_theme_font_size_override("font_size", 18)
 	heading.add_theme_color_override("font_color", Color("1d2a40"))
 	pinned_header.add_child(heading)
 	var all_apps := Button.new()
+	_all_apps_button = all_apps
 	all_apps.text = "Tous  ›"
 	all_apps.custom_minimum_size = Vector2(78, 30)
 	all_apps.add_theme_font_size_override("font_size", 12)
 	all_apps.add_theme_color_override("font_color", Color("263247"))
 	all_apps.add_theme_stylebox_override("normal", _flat_style(Color("e5eaf3"), 7))
 	all_apps.add_theme_stylebox_override("hover", _flat_style(Color("d6e4f8"), 7))
-	all_apps.pressed.connect(func():
-		_show_notification("Toutes les applications", "6 applications sont disponibles dans ce prototype.")
-	)
+	all_apps.pressed.connect(_toggle_all_apps_view)
 	pinned_header.add_child(all_apps)
 
 	var pinned := GridContainer.new()
@@ -968,9 +973,22 @@ func _filter_pinned_apps(query: String) -> void:
 	if is_instance_valid(_pinned_empty_label):
 		_pinned_empty_label.visible = not normalized_query.is_empty() and visible_count == 0
 	if is_instance_valid(_recommended_card):
-		_recommended_card.visible = normalized_query.is_empty()
+		_recommended_card.visible = normalized_query.is_empty() and not _all_apps_view
 	if is_instance_valid(_recommended_heading):
-		_recommended_heading.visible = normalized_query.is_empty()
+		_recommended_heading.visible = normalized_query.is_empty() and not _all_apps_view
+
+func _toggle_all_apps_view() -> void:
+	_all_apps_view = not _all_apps_view
+	if is_instance_valid(_pinned_heading_label):
+		_pinned_heading_label.text = "Toutes les applications" if _all_apps_view else "Épinglé"
+	if is_instance_valid(_all_apps_button):
+		_all_apps_button.text = "Épinglé  ‹" if _all_apps_view else "Tous  ›"
+	if is_instance_valid(_recommended_card):
+		_recommended_card.visible = not _all_apps_view and _start_search.text.strip_edges().is_empty()
+	if is_instance_valid(_recommended_heading):
+		_recommended_heading.visible = not _all_apps_view and _start_search.text.strip_edges().is_empty()
+	if _all_apps_view and is_instance_valid(_start_search):
+		_start_search.grab_focus()
 
 func _add_menu_button(parent: VBoxContainer, caption: String, callback: Callable) -> void:
 	var button := Button.new()
