@@ -9,6 +9,7 @@ var _window_layer: Control
 var _start_menu: PanelContainer
 var _notification_layer: VBoxContainer
 var _clock_label: Label
+var _tray_button: Button
 var _start_open := false
 var _mission_label: Label
 var _mission_step := 0
@@ -123,16 +124,16 @@ func _build_taskbar() -> void:
 	right_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(right_spacer)
 
-	var tray := Button.new()
-	tray.text = "⌃  ◖  ◉  Wi-Fi  🔊  🔋\n%s\n21/10/2026" % Time.get_time_string_from_system().substr(0, 5)
-	tray.tooltip_text = "Zone de notification"
-	tray.custom_minimum_size = Vector2(150, 48)
-	tray.add_theme_font_size_override("font_size", 11)
-	tray.add_theme_color_override("font_color", Color("24344d"))
-	tray.add_theme_stylebox_override("normal", _flat_style(Color(0.0, 0.0, 0.0, 0.0), 7))
-	tray.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 7))
-	tray.pressed.connect(func(): _show_notification("Paramètres rapides", "Wi-Fi connecté à MicroslopNet. Batterie : 100 %. Une mise à jour est recommandée."))
-	row.add_child(tray)
+	_tray_button = Button.new()
+	_tray_button.text = "⌃  ◖  ◉  Wi-Fi  🔊  🔋\n%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system()]
+	_tray_button.tooltip_text = "Zone de notification"
+	_tray_button.custom_minimum_size = Vector2(154, 48)
+	_tray_button.add_theme_font_size_override("font_size", 11)
+	_tray_button.add_theme_color_override("font_color", Color("24344d"))
+	_tray_button.add_theme_stylebox_override("normal", _flat_style(Color(0.0, 0.0, 0.0, 0.0), 7))
+	_tray_button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 7))
+	_tray_button.pressed.connect(func(): _show_notification("Paramètres rapides", "Wi-Fi connecté à MicroslopNet. Batterie : 100 %. Une mise à jour est recommandée."))
+	row.add_child(_tray_button)
 
 func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, callback: Callable) -> void:
 	var button := Button.new()
@@ -536,8 +537,8 @@ func _input(event: InputEvent) -> void:
 			_advance_mission("Progression de la campagne avancée manuellement pour le prototype.")
 
 func _process(delta: float) -> void:
-	if is_instance_valid(_clock_label):
-		_clock_label.text = Time.get_time_string_from_system().substr(0, 5)
+	if is_instance_valid(_tray_button):
+		_tray_button.text = "⌃  ◖  ◉  Wi-Fi  🔊  🔋\n%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system()]
 	_event_elapsed += delta
 	if _event_elapsed >= 75.0:
 		_event_elapsed = 0.0
