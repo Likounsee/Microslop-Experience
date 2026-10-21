@@ -16,6 +16,7 @@ var _mission_step := 0
 func _ready() -> void:
 	_build_desktop()
 	SettingsStore.apply_display_settings()
+	SettingsStore.apply_audio_settings()
 	_show_notification("Bienvenue", "Votre expérience Microslop est prête. Vous n'avez rien demandé, mais nous avons tout activé.")
 	_update_mission()
 
@@ -204,6 +205,8 @@ func _add_menu_button(parent: VBoxContainer, caption: String, callback: Callable
 func _toggle_start_menu() -> void:
 	_start_open = not _start_open
 	_start_menu.visible = _start_open
+	if _start_open and _mission_step == 0:
+		_advance_mission("Vous avez ouvert le menu Démarrer.")
 
 func _open_window(title: String, message: String, window_size := Vector2(520, 300)) -> Control:
 	_start_menu.visible = false
@@ -216,6 +219,8 @@ func _open_window(title: String, message: String, window_size := Vector2(520, 30
 	return app
 
 func _open_files() -> void:
+	if _mission_step == 1:
+		_advance_mission("Explorateur ouvert. Vos fichiers restent fictifs.")
 	_open_window("Explorateur de fichiers", "Accueil\n\nDocuments\nTéléchargements\nImages\n\nVos fichiers sont parfaitement simulés. Aucun fichier personnel n'est consulté.", Vector2(600, 360))
 
 func _open_browser() -> void:
@@ -231,13 +236,15 @@ func _open_search() -> void:
 	_open_window("Recherche Microslop", "Résultats pour : « ouvrir une application »\n\n1. Microslop Premium — SPONSORISÉ\n2. Microslop AI — recommandé\n3. L'application que vous recherchiez (peut-être).", Vector2(560, 300))
 
 func _trigger_update() -> void:
+	if _mission_step == 2:
+		_advance_mission("Mise à jour consultée. Elle reste à 99 %, évidemment.")
 	_open_window("Microslop Update", "Une mise à jour importante est disponible.\n\nMicroslop Experience Update 1.0.99 (préversion)\nProgression : 99 %\n\nNe fermez pas votre ordinateur. Cette opération peut prendre quelques instants…", Vector2(520, 280))
 	_show_notification("Mise à jour en attente", "Redémarrage recommandé. Nous choisirons le moment.")
 
 func _open_settings() -> void:
 	_start_menu.visible = false
 	_start_open = false
-	var panel := _open_window("Paramètres", "Configurez l'affichage, le son et la langue.", Vector2(560, 500))
+	var panel := _open_window("Paramètres", "Configurez l'affichage, le son, les performances et la langue.", Vector2(560, 620))
 	var layout := panel.get_child(0) as VBoxContainer
 	var body := layout.get_child(1) as MarginContainer
 	var content := body.get_child(0) as VBoxContainer
@@ -294,6 +301,44 @@ func _open_settings() -> void:
 	)
 	content.add_child(vsync)
 
+	var fps_label := Label.new()
+	fps_label.text = "Limite d'images par seconde"
+	fps_label.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(fps_label)
+
+	var fps_limit := OptionButton.new()
+	var fps_options := [0, 30, 60, 120, 144, 240]
+	for fps in fps_options:
+		fps_limit.add_item("Illimitée" if fps == 0 else "%d FPS" % fps)
+	var current_fps := int(SettingsStore.values.get("fps_limit", 0))
+	for i in range(fps_options.size()):
+		if fps_options[i] == current_fps:
+			fps_limit.select(i)
+	fps_limit.item_selected.connect(func(index: int):
+		SettingsStore.values["fps_limit"] = fps_options[index]
+		SettingsStore.apply_display_settings()
+		SettingsStore.save_settings()
+	)
+	content.add_child(fps_limit)
+
+	var volume_label := Label.new()
+	volume_label.text = "Volume général"
+	volume_label.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(volume_label)
+
+	var volume := HSlider.new()
+	volume.min_value = 0.0
+	volume.max_value = 100.0
+	volume.step = 1.0
+	volume.value = float(SettingsStore.values.get("master_volume", 0.8)) * 100.0
+	volume.custom_minimum_size.x = 220
+	volume.value_changed.connect(func(value: float):
+		SettingsStore.values["master_volume"] = value / 100.0
+		SettingsStore.apply_audio_settings()
+		SettingsStore.save_settings()
+	)
+	content.add_child(volume)
+
 	var language_label := Label.new()
 	language_label.text = "Langue"
 	language_label.add_theme_color_override("font_color", Color("263247"))
@@ -342,6 +387,13 @@ func _show_notification(title: String, message: String) -> void:
 	while _notification_layer.get_child_count() > 3:
 		_notification_layer.get_child(0).queue_free()
 
+func _advance_mission(reason: String) -> void:
+	var previous_step := _mission_step
+	_mission_step = mini(_mission_step + 1, 3)
+	_update_mission()
+	if _mission_step != previous_step:
+		_show_notification("Mission accomplie", reason)
+
 func _update_mission() -> void:
 	if not is_instance_valid(_mission_label):
 		return
@@ -361,9 +413,7 @@ func _input(event: InputEvent) -> void:
 		elif event.keycode == KEY_F1:
 			_open_settings()
 		elif event.keycode == KEY_F2:
-			_mission_step = mini(_mission_step + 1, 3)
-			_update_mission()
-			_show_notification("Mission mise à jour", "Progression de la campagne modifiée pour le prototype.")
+			_advance_mission("Progression de la campagne avancée manuellement pour le prototype.")
 
 func _process(_delta: float) -> void:
 	if is_instance_valid(_clock_label):
