@@ -58,6 +58,17 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	title_row.add_theme_constant_override("separation", 8)
 	titlebar.add_child(title_row)
 
+	var app_icon := PanelContainer.new()
+	app_icon.custom_minimum_size = Vector2(24, 24)
+	app_icon.add_theme_stylebox_override("panel", _panel_style(Color("0878d1"), Color("0878d1")))
+	title_row.add_child(app_icon)
+	var app_icon_glyph := Label.new()
+	app_icon_glyph.text = "▣"
+	app_icon_glyph.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	app_icon_glyph.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	app_icon_glyph.add_theme_color_override("font_color", Color.WHITE)
+	app_icon.add_child(app_icon_glyph)
+
 	var title_label := Label.new()
 	title_label.text = title
 	title_label.clip_text = true

@@ -1386,6 +1386,9 @@ func _input(event: InputEvent) -> void:
 		elif event.alt_pressed and event.keycode == KEY_F4:
 			_close_active_window()
 			get_viewport().set_input_as_handled()
+		elif event.ctrl_pressed and event.keycode == KEY_W:
+			_close_active_window()
+			get_viewport().set_input_as_handled()
 		elif event.ctrl_pressed and event.keycode == KEY_E:
 			_open_files()
 			get_viewport().set_input_as_handled()
