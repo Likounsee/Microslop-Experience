@@ -22,6 +22,7 @@ var _start_menu_tween: Tween
 var _quick_settings_tween: Tween
 var _wallpaper: TextureRect
 var _desktop_context_menu: PanelContainer
+var _pinned_buttons: Array[Button] = []
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED and is_instance_valid(_start_menu):
@@ -346,6 +347,7 @@ func _build_start_menu() -> void:
 	search.custom_minimum_size.y = 40
 	search.add_theme_color_override("font_color", Color("1d2a40"))
 	search.add_theme_stylebox_override("normal", _flat_style(Color.WHITE, 10))
+	search.text_changed.connect(_filter_pinned_apps)
 	search.text_submitted.connect(func(query: String):
 		_start_menu.visible = false
 		_start_open = false
@@ -489,6 +491,8 @@ func _build_mission_hint() -> void:
 
 func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, callback: Callable) -> void:
 	var button := Button.new()
+	button.set_meta("app_name", caption.to_lower())
+	_pinned_buttons.append(button)
 	button.text = "%s\n%s" % [glyph, caption]
 	button.custom_minimum_size = Vector2(168, 62)
 	button.add_theme_font_size_override("font_size", 13)
@@ -498,6 +502,13 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 	button.pressed.connect(callback)
 	button.focus_mode = Control.FOCUS_NONE
 	parent.add_child(button)
+
+func _filter_pinned_apps(query: String) -> void:
+	var normalized_query := query.strip_edges().to_lower()
+	for button in _pinned_buttons:
+		if is_instance_valid(button):
+			var app_name := str(button.get_meta("app_name", ""))
+			button.visible = normalized_query.is_empty() or app_name.contains(normalized_query)
 
 func _add_menu_button(parent: VBoxContainer, caption: String, callback: Callable) -> void:
 	var button := Button.new()
