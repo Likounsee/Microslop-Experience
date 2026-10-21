@@ -676,7 +676,7 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 	var button := Button.new()
 	button.text = ""
 	button.tooltip_text = tooltip
-	button.custom_minimum_size = Vector2(44, 42)
+	button.custom_minimum_size = Vector2(46, 44)
 	var icon_color := Color("0878d1")
 	match app_id:
 		"files": icon_color = Color("e4b33f")
@@ -700,8 +700,8 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 	button.add_child(icon_tile)
 	button.add_theme_color_override("font_color", Color("24344d"))
 	button.add_theme_stylebox_override("normal", _flat_style(Color(0.0, 0.0, 0.0, 0.0), 7))
-	button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.22), 7))
-	button.add_theme_stylebox_override("pressed", _flat_style(Color(0.4, 0.58, 0.82, 0.36), 7))
+	button.add_theme_stylebox_override("hover", _flat_style(Color(0.78, 0.86, 0.96, 0.72), 8))
+	button.add_theme_stylebox_override("pressed", _flat_style(Color(0.66, 0.79, 0.94, 0.88), 8))
 	button.focus_mode = Control.FOCUS_NONE
 	button.set_meta("app_id", app_id)
 	var active_marker := PanelContainer.new()
@@ -710,8 +710,8 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 	active_marker.anchor_right = 0.5
 	active_marker.anchor_top = 1.0
 	active_marker.anchor_bottom = 1.0
-	active_marker.offset_left = -8
-	active_marker.offset_right = 8
+	active_marker.offset_left = -9
+	active_marker.offset_right = 9
 	active_marker.offset_top = -3
 	active_marker.offset_bottom = 0
 	active_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -988,7 +988,7 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 	content.add_theme_constant_override("margin_top", 5)
 	button.add_child(content)
 	var icon_tile := PanelContainer.new()
-	icon_tile.custom_minimum_size = Vector2(42, 42)
+	icon_tile.custom_minimum_size = Vector2(44, 44)
 	icon_tile.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	var icon_color := Color("0878d1")
 	var icon_glyph := glyph
