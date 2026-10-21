@@ -391,6 +391,13 @@ func _toggle_start_menu() -> void:
 func _open_window(title: String, message: String, window_size := Vector2(520, 300)) -> Control:
 	_start_menu.visible = false
 	_start_open = false
+	# Keep the simulated desktop bounded: opening apps repeatedly must not
+	# accumulate an unlimited number of live Control trees.
+	const MAX_OPEN_WINDOWS := 8
+	while _window_layer.get_child_count() >= MAX_OPEN_WINDOWS:
+		var oldest_window := _window_layer.get_child(0)
+		_window_layer.remove_child(oldest_window)
+		oldest_window.queue_free()
 	var app: Control = AppWindow.new()
 	_window_layer.add_child(app)
 	app.call("configure", title, message, window_size)
@@ -618,8 +625,13 @@ func _show_notification(title: String, message: String) -> void:
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.add_theme_color_override("font_color", Color("34425b"))
 	layout.add_child(body)
+	# queue_free() is deferred until the end of the frame. Remove the node
+	# from its parent first, otherwise the child count never decreases here
+	# and this loop can freeze the entire game on the fourth notification.
 	while _notification_layer.get_child_count() > 3:
-		_notification_layer.get_child(0).queue_free()
+		var oldest := _notification_layer.get_child(0)
+		_notification_layer.remove_child(oldest)
+		oldest.queue_free()
 
 func _advance_mission(reason: String) -> void:
 	var previous_step := _mission_step
