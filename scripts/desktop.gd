@@ -764,9 +764,9 @@ func _build_start_menu() -> void:
 	_start_menu.anchor_right = 0.5
 	_start_menu.anchor_top = 1.0
 	_start_menu.anchor_bottom = 1.0
-	_start_menu.offset_left = -310
-	_start_menu.offset_right = 310
-	_start_menu.offset_top = -(TASKBAR_HEIGHT + 520)
+	_start_menu.offset_left = -320
+	_start_menu.offset_right = 320
+	_start_menu.offset_top = -(TASKBAR_HEIGHT + 540)
 	_start_menu.offset_bottom = -(TASKBAR_HEIGHT + 12)
 	_start_menu.visible = false
 	var start_style := _flat_style(Color(0.94, 0.96, 0.99, 0.97), 18)
@@ -828,8 +828,9 @@ func _build_start_menu() -> void:
 	var pinned := GridContainer.new()
 	_pinned_grid = pinned
 	pinned.columns = 3
-	pinned.add_theme_constant_override("h_separation", 6)
-	pinned.add_theme_constant_override("v_separation", 6)
+	pinned.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pinned.add_theme_constant_override("h_separation", 10)
+	pinned.add_theme_constant_override("v_separation", 8)
 	layout.add_child(pinned)
 	_add_pinned_app(pinned, "◎", "Browser", _open_browser)
 	_add_pinned_app(pinned, "▤", "Fichiers", _open_files)
@@ -873,10 +874,12 @@ func _build_start_menu() -> void:
 	_recommended_heading.add_theme_font_size_override("font_size", 17)
 	_recommended_heading.add_theme_color_override("font_color", Color("1d2a40"))
 	layout.add_child(_recommended_heading)
+	var recommended_divider := HSeparator.new()
+	layout.add_child(recommended_divider)
 
 	_recommended_card = PanelContainer.new()
 	var recommended_card := _recommended_card
-	var recommended_style := _flat_style(Color("e7edf7"), 10)
+	var recommended_style := _flat_style(Color("eaf0f8"), 10)
 	recommended_style.set_border_width_all(1)
 	recommended_style.border_color = Color("dce4f0")
 	recommended_card.add_theme_stylebox_override("panel", recommended_style)
@@ -886,19 +889,21 @@ func _build_start_menu() -> void:
 		recommended_margin.add_theme_constant_override(side, 9)
 	recommended_card.add_child(recommended_margin)
 	var recommended_layout := VBoxContainer.new()
-	recommended_layout.add_theme_constant_override("separation", 3)
+	recommended_layout.add_theme_constant_override("separation", 5)
 	recommended_margin.add_child(recommended_layout)
-	var sponsored := Label.new()
-	sponsored.text = "Microslop Premium  ·  SPONSORISÉ"
-	sponsored.add_theme_font_size_override("font_size", 12)
-	sponsored.add_theme_color_override("font_color", Color("34425b"))
-	recommended_layout.add_child(sponsored)
-	var sponsored_description := Label.new()
-	sponsored_description.text = "Votre productivité pourrait augmenter de 3 %. Cliquez ici pour voir une offre que vous n'avez pas demandée."
-	sponsored_description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	sponsored_description.add_theme_font_size_override("font_size", 11)
-	sponsored_description.add_theme_color_override("font_color", Color("68758c"))
-	recommended_layout.add_child(sponsored_description)
+	var recent_icon := Label.new()
+	recent_icon.text = "◷"
+	recent_icon.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	recent_icon.add_theme_font_size_override("font_size", 24)
+	recent_icon.add_theme_color_override("font_color", Color("477bb8"))
+	recommended_layout.add_child(recent_icon)
+	var recent_empty := Label.new()
+	recent_empty.text = "Vos fichiers récents apparaîtront ici."
+	recent_empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	recent_empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	recent_empty.add_theme_font_size_override("font_size", 12)
+	recent_empty.add_theme_color_override("font_color", Color("596780"))
+	recommended_layout.add_child(recent_empty)
 
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
