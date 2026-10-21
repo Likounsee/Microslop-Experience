@@ -397,6 +397,7 @@ func _build_notification_center() -> void:
 	var title := Label.new()
 	title.text = "Notifications"
 	title.add_theme_font_size_override("font_size", 20)
+	title.add_theme_color_override("font_color", Color("17243a"))
 	title.add_theme_color_override("font_color", Color("1d2a40"))
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	heading.add_child(title)
@@ -413,6 +414,7 @@ func _build_notification_center() -> void:
 	layout.add_child(separator)
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	layout.add_child(scroll)
 	var entries := VBoxContainer.new()
 	entries.name = "NotificationEntries"
@@ -480,11 +482,24 @@ func _refresh_notification_center() -> void:
 		var content := VBoxContainer.new()
 		content.add_theme_constant_override("separation", 4)
 		padding.add_child(content)
+		var heading_row := HBoxContainer.new()
+		heading_row.add_theme_constant_override("separation", 8)
+		var app_mark := PanelContainer.new()
+		app_mark.custom_minimum_size = Vector2(5, 5)
+		app_mark.add_theme_stylebox_override("panel", _flat_style(Color("2879d0"), 3))
+		heading_row.add_child(app_mark)
 		var heading := Label.new()
 		heading.text = str(item.get("title", "Notification"))
 		heading.add_theme_font_size_override("font_size", 13)
 		heading.add_theme_color_override("font_color", Color("1d2a40"))
-		content.add_child(heading)
+		heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		heading_row.add_child(heading)
+		var timestamp := Label.new()
+		timestamp.text = str(item.get("time", ""))
+		timestamp.add_theme_font_size_override("font_size", 10)
+		timestamp.add_theme_color_override("font_color", Color("697991"))
+		heading_row.add_child(timestamp)
+		content.add_child(heading_row)
 		var body := Label.new()
 		body.text = str(item.get("message", ""))
 		body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -634,14 +649,17 @@ func _add_quick_toggle(parent: GridContainer, caption: String, initially_on: boo
 	toggle.toggle_mode = true
 	toggle.button_pressed = initially_on
 	toggle.custom_minimum_size = Vector2(138, 52)
+	toggle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	toggle.add_theme_font_size_override("font_size", 12)
+	toggle.focus_mode = Control.FOCUS_NONE
 	toggle.add_theme_color_override("font_color", Color("1d2a40"))
-	toggle.add_theme_stylebox_override("normal", _flat_style(Color("dce9fa") if initially_on else Color("e9edf4"), 10))
-	toggle.add_theme_stylebox_override("hover", _flat_style(Color("d1e2fa") if initially_on else Color("dce3ee"), 10))
+	toggle.add_theme_stylebox_override("normal", _flat_style(Color("cfe3ff") if initially_on else Color("e8edf4"), 10))
+	toggle.add_theme_stylebox_override("hover", _flat_style(Color("bdd8fb") if initially_on else Color("dce4ef"), 10))
 	toggle.add_theme_stylebox_override("pressed", _flat_style(Color("80b8f5"), 10))
 	toggle.toggled.connect(func(enabled: bool):
-		toggle.add_theme_stylebox_override("normal", _flat_style(Color("dce9fa") if enabled else Color("e9edf4"), 10))
-		toggle.add_theme_stylebox_override("hover", _flat_style(Color("d1e2fa") if enabled else Color("dce3ee"), 10))
+		toggle.add_theme_stylebox_override("normal", _flat_style(Color("cfe3ff") if enabled else Color("e8edf4"), 10))
+		toggle.add_theme_stylebox_override("hover", _flat_style(Color("bdd8fb") if enabled else Color("dce4ef"), 10))
 		_show_notification(feature_name, "%s : %s." % [feature_name, "activé" if enabled else "désactivé"])
 	)
 	parent.add_child(toggle)
@@ -1408,7 +1426,7 @@ func _get_window_content(app: Control) -> VBoxContainer:
 func _show_notification(title: String, message: String) -> void:
 	if not is_instance_valid(_notification_layer):
 		return
-	_notification_history.append({"title": title, "message": message})
+	_notification_history.append({"title": title, "message": message, "time": Time.get_time_string_from_system().substr(0, 5)})
 	while _notification_history.size() > 20:
 		_notification_history.pop_front()
 	_refresh_notification_center()
