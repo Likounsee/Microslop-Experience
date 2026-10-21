@@ -953,18 +953,33 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 	content.add_theme_constant_override("margin_top", 5)
 	button.add_child(content)
 	var icon_tile := PanelContainer.new()
-	icon_tile.custom_minimum_size = Vector2(38, 38)
+	icon_tile.custom_minimum_size = Vector2(42, 42)
 	icon_tile.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	var icon_color := Color("0878d1")
-	if caption == "Fichiers": icon_color = Color("e6b43c")
-	elif caption == "Paramètres": icon_color = Color("65758b")
-	elif caption == "Microslop AI": icon_color = Color("7868d8")
-	elif caption == "Mise à jour": icon_color = Color("2b9b73")
-	elif caption == "Corbeille": icon_color = Color("5a9fd8")
-	icon_tile.add_theme_stylebox_override("panel", _flat_style(icon_color, 9))
+	var icon_glyph := glyph
+	match caption:
+		"Fichiers":
+			icon_color = Color("e6b43c")
+			icon_glyph = "▰"
+		"Paramètres":
+			icon_color = Color("65758b")
+			icon_glyph = "⚙"
+		"Microslop AI":
+			icon_color = Color("7868d8")
+			icon_glyph = "✧"
+		"Mise à jour":
+			icon_color = Color("2b9b73")
+			icon_glyph = "↻"
+		"Corbeille":
+			icon_color = Color("5a9fd8")
+			icon_glyph = "▤"
+		"Navigateur":
+			icon_color = Color("2879d0")
+			icon_glyph = "◎"
+	icon_tile.add_theme_stylebox_override("panel", _flat_style(icon_color, 10))
 	content.add_child(icon_tile)
 	var icon_label := Label.new()
-	icon_label.text = glyph
+	icon_label.text = icon_glyph
 	icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	icon_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	icon_label.add_theme_font_size_override("font_size", 20)

@@ -60,10 +60,28 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 
 	var app_icon := PanelContainer.new()
 	app_icon.custom_minimum_size = Vector2(24, 24)
-	app_icon.add_theme_stylebox_override("panel", _panel_style(Color("0878d1"), Color("0878d1")))
+	var icon_background := Color("0878d1")
+	var icon_glyph := "▣"
+	var normalized_title := title.to_lower()
+	if normalized_title.contains("fichier") or normalized_title.contains("explorateur"):
+		icon_background = Color("e6b43c")
+		icon_glyph = "▰"
+	elif normalized_title.contains("paramètre"):
+		icon_background = Color("65758b")
+		icon_glyph = "⚙"
+	elif normalized_title.contains("ai"):
+		icon_background = Color("7868d8")
+		icon_glyph = "✧"
+	elif normalized_title.contains("navigateur") or normalized_title.contains("browser"):
+		icon_background = Color("2879d0")
+		icon_glyph = "◎"
+	elif normalized_title.contains("corbeille"):
+		icon_background = Color("5a9fd8")
+		icon_glyph = "▤"
+	app_icon.add_theme_stylebox_override("panel", _panel_style(icon_background, icon_background))
 	title_row.add_child(app_icon)
 	var app_icon_glyph := Label.new()
-	app_icon_glyph.text = "▣"
+	app_icon_glyph.text = icon_glyph
 	app_icon_glyph.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	app_icon_glyph.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	app_icon_glyph.add_theme_color_override("font_color", Color.WHITE)
