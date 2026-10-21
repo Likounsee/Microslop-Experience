@@ -1397,14 +1397,22 @@ func _show_desktop_context_menu(pointer: Vector2) -> void:
 		var items := VBoxContainer.new()
 		items.add_theme_constant_override("separation", 2)
 		margin.add_child(items)
+		_add_context_action(items, "Afficher", func():
+			_show_notification("Bureau", "Les éléments du bureau sont affichés.")
+		)
+		_add_context_action(items, "Trier par  ›", func():
+			_show_notification("Organisation", "Le tri sera disponible avec la gestion réelle des fichiers.")
+		)
 		_add_context_action(items, "Actualiser", func():
 			_show_notification("Bureau actualisé", "Le bureau est déjà à jour. Aucun changement nécessaire.")
 		)
-		_add_context_action(items, "Nouveau dossier", func():
-			_show_notification("Nouveau dossier", "Le dossier a été créé dans votre imagination. L'explorateur complet arrive bientôt.")
-		)
 		var separator := HSeparator.new()
 		items.add_child(separator)
+		_add_context_action(items, "Nouveau  ›", func():
+			_show_notification("Nouveau", "La création de fichiers sera disponible dans l’explorateur.")
+		)
+		var separator_two := HSeparator.new()
+		items.add_child(separator_two)
 		_add_context_action(items, "Paramètres d’affichage", _open_settings)
 		_add_context_action(items, "Personnaliser", func():
 			_open_window("Personnalisation", "Arrière-plan\n\nLe bureau utilise le fond d’écran fourni avec Microslop Experience.\n\nCouleurs : bleu Windows · Mode : clair", Vector2(390, 240))
