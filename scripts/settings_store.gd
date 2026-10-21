@@ -16,6 +16,7 @@ var values: Dictionary = {
 
 func _ready() -> void:
 	load_settings()
+	apply_audio_settings()
 
 func load_settings() -> void:
 	var config := ConfigFile.new()
@@ -61,6 +62,12 @@ func apply_display_settings() -> void:
 
 	var fps_limit := int(values.get("fps_limit", 0))
 	Engine.max_fps = fps_limit if fps_limit > 0 else 0
+
+func apply_audio_settings() -> void:
+	var master_bus := AudioServer.get_bus_index("Master")
+	if master_bus >= 0:
+		AudioServer.set_bus_volume_db(master_bus, get_volume_db("master_volume"))
+		AudioServer.set_bus_mute(master_bus, float(values.get("master_volume", 0.8)) <= 0.0)
 
 func get_volume_db(key: String) -> float:
 	var linear_value := clampf(float(values.get(key, 0.8)), 0.0, 1.0)
