@@ -212,7 +212,7 @@ func _build_taskbar() -> void:
 	start_button.tooltip_text = "Démarrer"
 	start_button.custom_minimum_size = Vector2(42, 42)
 	start_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 9))
-	start_button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 9))
+	start_button.add_theme_stylebox_override("hover", _flat_style(Color(0.78, 0.86, 0.96, 0.72), 9))
 	start_button.pressed.connect(_toggle_start_menu)
 	start_button.focus_mode = Control.FOCUS_NONE
 	var windows_logo := GridContainer.new()
@@ -687,7 +687,7 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 	var button := Button.new()
 	button.text = ""
 	button.tooltip_text = tooltip
-	button.custom_minimum_size = Vector2(46, 44)
+	button.custom_minimum_size = Vector2(48, 46)
 	var icon_color := Color("0878d1")
 	match app_id:
 		"files": icon_color = Color("e4b33f")
@@ -696,8 +696,8 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 	var icon_tile := PanelContainer.new()
 	icon_tile.name = "TaskbarAppIcon"
 	icon_tile.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	icon_tile.position = Vector2(-15, -15)
-	icon_tile.custom_minimum_size = Vector2(30, 30)
+	icon_tile.position = Vector2(-16, -16)
+	icon_tile.custom_minimum_size = Vector2(32, 32)
 	icon_tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	icon_tile.add_theme_stylebox_override("panel", _flat_style(icon_color, 7))
 	var icon_glyph := Label.new()
@@ -711,7 +711,7 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 	button.add_child(icon_tile)
 	button.add_theme_color_override("font_color", Color("24344d"))
 	button.add_theme_stylebox_override("normal", _flat_style(Color(0.0, 0.0, 0.0, 0.0), 7))
-	button.add_theme_stylebox_override("hover", _flat_style(Color(0.78, 0.86, 0.96, 0.72), 8))
+	button.add_theme_stylebox_override("hover", _flat_style(Color(0.78, 0.86, 0.96, 0.84), 9))
 	button.add_theme_stylebox_override("pressed", _flat_style(Color(0.66, 0.79, 0.94, 0.88), 8))
 	button.focus_mode = Control.FOCUS_NONE
 	button.set_meta("app_id", app_id)
@@ -721,8 +721,8 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 	active_marker.anchor_right = 0.5
 	active_marker.anchor_top = 1.0
 	active_marker.anchor_bottom = 1.0
-	active_marker.offset_left = -9
-	active_marker.offset_right = 9
+	active_marker.offset_left = -10
+	active_marker.offset_right = 10
 	active_marker.offset_top = -3
 	active_marker.offset_bottom = 0
 	active_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
