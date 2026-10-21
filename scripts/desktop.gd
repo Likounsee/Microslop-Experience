@@ -18,6 +18,8 @@ var _mission_step := 0
 var _event_elapsed := 0.0
 var _event_index := 0
 var _clock_refresh_elapsed := 0.0
+var _start_menu_tween: Tween
+var _quick_settings_tween: Tween
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED and is_instance_valid(_start_menu):
@@ -271,10 +273,11 @@ func _add_quick_toggle(parent: GridContainer, caption: String, initially_on: boo
 	parent.add_child(toggle)
 
 func _toggle_quick_settings() -> void:
-	_quick_settings_panel.visible = not _quick_settings_panel.visible
-	if _quick_settings_panel.visible:
+	var should_open := not _quick_settings_panel.visible
+	if should_open:
 		_start_menu.visible = false
 		_start_open = false
+	_animate_flyout(_quick_settings_panel, should_open, true)
 
 func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, callback: Callable) -> void:
 	var button := Button.new()
@@ -486,9 +489,50 @@ func _add_menu_button(parent: VBoxContainer, caption: String, callback: Callable
 
 func _toggle_start_menu() -> void:
 	_start_open = not _start_open
-	_start_menu.visible = _start_open
-	if _start_open and _mission_step == 0:
-		_advance_mission("Vous avez ouvert le menu Démarrer.")
+	_animate_flyout(_start_menu, _start_open, false)
+	if _start_open:
+		_quick_settings_panel.visible = false
+		if _mission_step == 0:
+			_advance_mission("Vous avez ouvert le menu Démarrer.")
+
+func _animate_flyout(panel: Control, opening: bool, from_bottom: bool) -> void:
+	if not is_instance_valid(panel):
+		return
+	var active_tween: Tween = _start_menu_tween if panel == _start_menu else _quick_settings_tween
+	if active_tween and active_tween.is_running():
+		active_tween.kill()
+	if opening:
+		panel.visible = true
+		panel.pivot_offset = panel.size / 2.0
+		panel.modulate.a = 0.0
+		panel.scale = Vector2(0.96, 0.96)
+		var start_y := 12.0 if from_bottom else 8.0
+		var target_y := panel.position.y
+		panel.position.y = target_y + start_y
+		var tween := create_tween().set_parallel(true)
+		tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tween.tween_property(panel, "modulate:a", 1.0, 0.16)
+		tween.tween_property(panel, "scale", Vector2.ONE, 0.18)
+		tween.tween_property(panel, "position:y", target_y, 0.18)
+		if panel == _start_menu:
+			_start_menu_tween = tween
+		else:
+			_quick_settings_tween = tween
+	else:
+		var tween := create_tween().set_parallel(true)
+		tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+		tween.tween_property(panel, "modulate:a", 0.0, 0.10)
+		tween.tween_property(panel, "scale", Vector2(0.97, 0.97), 0.10)
+		tween.chain().tween_callback(func():
+			if is_instance_valid(panel):
+				panel.visible = false
+				panel.modulate.a = 1.0
+				panel.scale = Vector2.ONE
+		)
+		if panel == _start_menu:
+			_start_menu_tween = tween
+		else:
+			_quick_settings_tween = tween
 
 func _open_window(title: String, message: String, window_size := Vector2(520, 300)) -> Control:
 	_start_menu.visible = false
@@ -504,7 +548,14 @@ func _open_window(title: String, message: String, window_size := Vector2(520, 30
 	_window_layer.add_child(app)
 	app.call("configure", title, message, window_size)
 	app.position = (get_viewport_rect().size - window_size) / 2.0
+	app.pivot_offset = window_size / 2.0
+	app.modulate.a = 0.0
+	app.scale = Vector2(0.985, 0.985)
 	app.z_index = 20 + _window_layer.get_child_count()
+	var appear := create_tween().set_parallel(true)
+	appear.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	appear.tween_property(app, "modulate:a", 1.0, 0.16)
+	appear.tween_property(app, "scale", Vector2.ONE, 0.18)
 	return app
 
 func _open_files() -> void:
@@ -576,6 +627,7 @@ func _trigger_update() -> void:
 func _open_settings() -> void:
 	_start_menu.visible = false
 	_start_open = false
+	_quick_settings_panel.visible = false
 	var panel := _open_window("Paramètres", "Configurez l'affichage, le son, les performances et la langue.", Vector2(560, 620))
 	var layout := panel.get_child(0) as VBoxContainer
 	var body := layout.get_child(1) as MarginContainer

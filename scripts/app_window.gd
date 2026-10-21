@@ -13,6 +13,8 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var window_style := _panel_style(Color("f7f9fc"), Color("c8d2e2"))
 	window_style.set_corner_radius_all(12)
+	window_style.border_color = Color("d5ddeb")
+	window_style.set_border_width_all(1)
 	window_style.shadow_color = Color(0.02, 0.04, 0.10, 0.28)
 	window_style.shadow_size = 18
 	window_style.shadow_offset = Vector2(0, 4)
