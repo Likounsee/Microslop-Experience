@@ -63,3 +63,8 @@ The desktop UI uses a consistent light acrylic-inspired palette, more pronounced
 ### Desktop interaction polish
 
 The Start menu now has a Windows 11-inspired pinned-app header, a distinct recommended/sponsored card, and a profile/power row. The system-tray clock is presented on a compact two-line layout. App windows raise when clicked and support double-clicking the title bar to maximize or restore. Power options remain simulated in-game and never affect the host operating system.
+
+
+### Version du moteur
+
+Le projet et la CI ciblent Godot **4.7.2-stable**, dernière version stable au moment de cette mise à jour. Godot 4.8 étant encore en bêta, il n'est pas utilisé sur la branche de production. La CI importe/vérifie le projet et lance la scène principale en mode headless.
