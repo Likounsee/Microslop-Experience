@@ -65,18 +65,31 @@ func _add_desktop_icon(parent: VBoxContainer, glyph: String, caption: String, ca
 	parent.add_child(button)
 
 func _build_taskbar() -> void:
+	# Floating, centered taskbar inspired by Windows 11.
 	var taskbar := PanelContainer.new()
-	taskbar.anchor_left = 0.0
+	taskbar.name = "FloatingTaskbar"
+	taskbar.anchor_left = 0.5
 	taskbar.anchor_top = 1.0
-	taskbar.anchor_right = 1.0
+	taskbar.anchor_right = 0.5
 	taskbar.anchor_bottom = 1.0
-	taskbar.offset_top = -TASKBAR_HEIGHT
-	taskbar.offset_bottom = 0
-	taskbar.add_theme_stylebox_override("panel", _flat_style(Color(0.91, 0.94, 0.99, 0.82), 0))
+	taskbar.offset_left = -430
+	taskbar.offset_right = 430
+	taskbar.offset_top = -64
+	taskbar.offset_bottom = -8
+	var panel_style := _flat_style(Color(0.91, 0.94, 0.99, 0.88), 16)
+	panel_style.shadow_color = Color(0.04, 0.08, 0.16, 0.22)
+	panel_style.shadow_size = 12
+	panel_style.shadow_offset = Vector2(0, 3)
+	panel_style.border_width_left = 1
+	panel_style.border_width_right = 1
+	panel_style.border_width_top = 1
+	panel_style.border_width_bottom = 1
+	panel_style.border_color = Color(1, 1, 1, 0.52)
+	taskbar.add_theme_stylebox_override("panel", panel_style)
 	add_child(taskbar)
 
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 6)
+	row.add_theme_constant_override("separation", 4)
 	taskbar.add_child(row)
 	var left_spacer := Control.new()
 	left_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -85,21 +98,21 @@ func _build_taskbar() -> void:
 	var start_button := Button.new()
 	start_button.text = "⊞"
 	start_button.tooltip_text = "Démarrer"
-	start_button.custom_minimum_size = Vector2(46, 42)
+	start_button.custom_minimum_size = Vector2(44, 42)
 	start_button.add_theme_font_size_override("font_size", 28)
 	start_button.add_theme_color_override("font_color", Color("0878d1"))
-	start_button.add_theme_stylebox_override("normal", _flat_style(Color(0.0, 0.0, 0.0, 0.0), 7))
-	start_button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 7))
+	start_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 9))
+	start_button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 9))
 	start_button.pressed.connect(_toggle_start_menu)
 	row.add_child(start_button)
 
 	var search_button := Button.new()
 	search_button.text = "⌕  Rechercher"
 	search_button.tooltip_text = "Rechercher"
-	search_button.custom_minimum_size = Vector2(150, 42)
+	search_button.custom_minimum_size = Vector2(145, 42)
 	search_button.add_theme_color_override("font_color", Color("24344d"))
-	search_button.add_theme_stylebox_override("normal", _flat_style(Color(1, 1, 1, 0.72), 7))
-	search_button.add_theme_stylebox_override("hover", _flat_style(Color(1, 1, 1, 0.96), 7))
+	search_button.add_theme_stylebox_override("normal", _flat_style(Color(1, 1, 1, 0.66), 9))
+	search_button.add_theme_stylebox_override("hover", _flat_style(Color(1, 1, 1, 0.96), 9))
 	search_button.pressed.connect(_open_search)
 	row.add_child(search_button)
 
@@ -113,13 +126,13 @@ func _build_taskbar() -> void:
 	row.add_child(right_spacer)
 
 	_tray_button = Button.new()
-	_tray_button.text = "⌃  ◖  ◉  Wi-Fi  🔊  🔋\n%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system()]
+	_tray_button.text = "⌃  ◖  ◉  🔊  🔋\n%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system()]
 	_tray_button.tooltip_text = "Zone de notification"
-	_tray_button.custom_minimum_size = Vector2(154, 48)
+	_tray_button.custom_minimum_size = Vector2(118, 48)
 	_tray_button.add_theme_font_size_override("font_size", 11)
 	_tray_button.add_theme_color_override("font_color", Color("24344d"))
-	_tray_button.add_theme_stylebox_override("normal", _flat_style(Color(0.0, 0.0, 0.0, 0.0), 7))
-	_tray_button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 7))
+	_tray_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 9))
+	_tray_button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 9))
 	_tray_button.pressed.connect(func(): _show_notification("Paramètres rapides", "Wi-Fi connecté à MicroslopNet. Batterie : 100 %. Une mise à jour est recommandée."))
 	row.add_child(_tray_button)
 
