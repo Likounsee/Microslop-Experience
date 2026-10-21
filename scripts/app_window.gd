@@ -3,12 +3,20 @@ extends PanelContainer
 
 var _dragging := false
 var _drag_offset := Vector2.ZERO
+var _is_maximized := false
+var _restore_position := Vector2.ZERO
+var _restore_size := Vector2.ZERO
 
 func configure(title: String, message: String, window_size := Vector2(520, 300)) -> void:
 	custom_minimum_size = window_size
 	size = window_size
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	add_theme_stylebox_override("panel", _panel_style(Color("f7f9fc"), Color("c8d2e2")))
+	var window_style := _panel_style(Color("f7f9fc"), Color("c8d2e2"))
+	window_style.set_corner_radius_all(12)
+	window_style.shadow_color = Color(0.02, 0.04, 0.10, 0.28)
+	window_style.shadow_size = 18
+	window_style.shadow_offset = Vector2(0, 4)
+	add_theme_stylebox_override("panel", window_style)
 	z_index = 30
 
 	var layout := VBoxContainer.new()
@@ -16,7 +24,11 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	add_child(layout)
 
 	var titlebar := PanelContainer.new()
-	titlebar.add_theme_stylebox_override("panel", _panel_style(Color("eef3fa"), Color("dbe3ef")))
+	var titlebar_style := _panel_style(Color("eef3fa"), Color("eef3fa"))
+	titlebar_style.set_corner_radius_all(12)
+	titlebar_style.corner_radius_bottom_left = 0
+	titlebar_style.corner_radius_bottom_right = 0
+	titlebar.add_theme_stylebox_override("panel", titlebar_style)
 	titlebar.custom_minimum_size.y = 42
 	titlebar.mouse_filter = Control.MOUSE_FILTER_STOP
 	layout.add_child(titlebar)
@@ -51,12 +63,16 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	maximize_button.add_theme_stylebox_override("normal", _panel_style(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
 	maximize_button.add_theme_stylebox_override("hover", _panel_style(Color("dce6f4"), Color(0, 0, 0, 0)))
 	maximize_button.pressed.connect(func():
-		if size == get_viewport_rect().size:
-			size = custom_minimum_size
-			position = (get_viewport_rect().size - size) / 2.0
+		if _is_maximized:
+			size = _restore_size
+			position = _restore_position
+			_is_maximized = false
 		else:
+			_restore_size = size
+			_restore_position = position
 			size = get_viewport_rect().size
 			position = Vector2.ZERO
+			_is_maximized = true
 	)
 	title_row.add_child(maximize_button)
 
@@ -97,6 +113,9 @@ func _on_titlebar_input(event: InputEvent, _titlebar: Control) -> void:
 			move_to_front()
 	elif event is InputEventMouseMotion and _dragging:
 		global_position = get_global_mouse_position() - _drag_offset
+		var viewport_size := get_viewport_rect().size
+		position.x = clampf(position.x, -size.x + 120.0, viewport_size.x - 120.0)
+		position.y = clampf(position.y, 0.0, viewport_size.y - 48.0)
 
 func _panel_style(background: Color, border: Color) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()

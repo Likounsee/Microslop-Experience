@@ -74,19 +74,16 @@ func _build_taskbar() -> void:
 	taskbar.anchor_top = 1.0
 	taskbar.anchor_right = 0.5
 	taskbar.anchor_bottom = 1.0
-	taskbar.offset_left = -430
-	taskbar.offset_right = 430
-	taskbar.offset_top = -64
-	taskbar.offset_bottom = -8
-	var panel_style := _flat_style(Color(0.91, 0.94, 0.99, 0.88), 16)
-	panel_style.shadow_color = Color(0.04, 0.08, 0.16, 0.22)
-	panel_style.shadow_size = 12
-	panel_style.shadow_offset = Vector2(0, 3)
-	panel_style.border_width_left = 1
-	panel_style.border_width_right = 1
-	panel_style.border_width_top = 1
-	panel_style.border_width_bottom = 1
-	panel_style.border_color = Color(1, 1, 1, 0.52)
+	taskbar.offset_left = -390
+	taskbar.offset_right = 390
+	taskbar.offset_top = -70
+	taskbar.offset_bottom = -10
+	var panel_style := _flat_style(Color(0.91, 0.94, 0.99, 0.90), 16)
+	panel_style.shadow_color = Color(0.02, 0.04, 0.10, 0.28)
+	panel_style.shadow_size = 18
+	panel_style.shadow_offset = Vector2(0, 4)
+	panel_style.set_border_width_all(1)
+	panel_style.border_color = Color(1, 1, 1, 0.62)
 	taskbar.add_theme_stylebox_override("panel", panel_style)
 	add_child(taskbar)
 
@@ -111,7 +108,7 @@ func _build_taskbar() -> void:
 	var search_button := Button.new()
 	search_button.text = "⌕  Rechercher"
 	search_button.tooltip_text = "Rechercher"
-	search_button.custom_minimum_size = Vector2(145, 42)
+	search_button.custom_minimum_size = Vector2(132, 42)
 	search_button.add_theme_color_override("font_color", Color("24344d"))
 	search_button.add_theme_stylebox_override("normal", _flat_style(Color(1, 1, 1, 0.66), 9))
 	search_button.add_theme_stylebox_override("hover", _flat_style(Color(1, 1, 1, 0.96), 9))
@@ -150,15 +147,12 @@ func _build_quick_settings() -> void:
 	_quick_settings_panel.offset_top = -350
 	_quick_settings_panel.offset_bottom = -76
 	_quick_settings_panel.visible = false
-	var panel_style := _flat_style(Color(0.92, 0.95, 0.99, 0.98), 18)
-	panel_style.shadow_color = Color(0.04, 0.08, 0.16, 0.24)
-	panel_style.shadow_size = 16
-	panel_style.shadow_offset = Vector2(0, 4)
-	panel_style.border_width_left = 1
-	panel_style.border_width_right = 1
-	panel_style.border_width_top = 1
-	panel_style.border_width_bottom = 1
-	panel_style.border_color = Color(1, 1, 1, 0.65)
+	var panel_style := _flat_style(Color(0.92, 0.95, 0.99, 0.97), 18)
+	panel_style.shadow_color = Color(0.02, 0.04, 0.10, 0.30)
+	panel_style.shadow_size = 20
+	panel_style.shadow_offset = Vector2(0, 5)
+	panel_style.set_border_width_all(1)
+	panel_style.border_color = Color(1, 1, 1, 0.70)
 	_quick_settings_panel.add_theme_stylebox_override("panel", panel_style)
 	add_child(_quick_settings_panel)
 
@@ -262,7 +256,13 @@ func _build_start_menu() -> void:
 	_start_menu.offset_top = -(TASKBAR_HEIGHT + 520)
 	_start_menu.offset_bottom = -(TASKBAR_HEIGHT + 12)
 	_start_menu.visible = false
-	_start_menu.add_theme_stylebox_override("panel", _flat_style(Color(0.94, 0.96, 0.99, 0.96), 18))
+	var start_style := _flat_style(Color(0.94, 0.96, 0.99, 0.97), 18)
+	start_style.shadow_color = Color(0.02, 0.04, 0.10, 0.30)
+	start_style.shadow_size = 22
+	start_style.shadow_offset = Vector2(0, 5)
+	start_style.set_border_width_all(1)
+	start_style.border_color = Color(1, 1, 1, 0.68)
+	_start_menu.add_theme_stylebox_override("panel", start_style)
 	add_child(_start_menu)
 
 	var margin := MarginContainer.new()
@@ -349,7 +349,13 @@ func _build_mission_hint() -> void:
 	card.offset_top = -145
 	card.offset_right = -16
 	card.offset_bottom = -TASKBAR_HEIGHT - 12
-	card.add_theme_stylebox_override("panel", _flat_style(Color(0.04, 0.07, 0.12, 0.82)))
+	var mission_style := _flat_style(Color(0.04, 0.07, 0.12, 0.78), 14)
+	mission_style.shadow_color = Color(0.02, 0.04, 0.10, 0.24)
+	mission_style.shadow_size = 12
+	mission_style.shadow_offset = Vector2(0, 3)
+	mission_style.set_border_width_all(1)
+	mission_style.border_color = Color(1, 1, 1, 0.18)
+	card.add_theme_stylebox_override("panel", mission_style)
 	add_child(card)
 
 	var margin := MarginContainer.new()
@@ -606,7 +612,13 @@ func _show_notification(title: String, message: String) -> void:
 	if not is_instance_valid(_notification_layer):
 		return
 	var card := PanelContainer.new()
-	card.add_theme_stylebox_override("panel", _flat_style(Color("f5f7fb")))
+	var notification_style := _flat_style(Color(0.96, 0.97, 0.99, 0.97), 12)
+	notification_style.shadow_color = Color(0.02, 0.04, 0.10, 0.20)
+	notification_style.shadow_size = 10
+	notification_style.shadow_offset = Vector2(0, 3)
+	notification_style.set_border_width_all(1)
+	notification_style.border_color = Color(1, 1, 1, 0.72)
+	card.add_theme_stylebox_override("panel", notification_style)
 	_notification_layer.add_child(card)
 	var margin := MarginContainer.new()
 	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:

@@ -53,3 +53,8 @@ Percentages will be reported as estimates based on verified implementation and t
 - Save game settings under Godot's `user://` path.
 - Prefer small, testable systems over one giant script.
 - Do not claim a test or build passed unless it was actually run.
+
+
+### Windows 11-inspired visual pass
+
+The desktop UI uses a consistent light acrylic-inspired palette, more pronounced rounded surfaces and shadows, a narrower centered taskbar, and matching Start, Quick Settings, notification, mission, and app-window surfaces. App windows now restore their previous position and size when unmaximized, and dragging keeps enough of the title bar on-screen to recover a window. These are in-game visual approximations, not native Windows acrylic or blur effects.
