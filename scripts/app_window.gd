@@ -3,6 +3,8 @@ extends PanelContainer
 
 const EDGE_RIGHT := 1
 const EDGE_BOTTOM := 2
+const EDGE_LEFT := 4
+const EDGE_TOP := 8
 
 var _dragging := false
 var _drag_offset := Vector2.ZERO
@@ -170,46 +172,63 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	text.add_theme_color_override("font_color", Color("263247"))
 	content.add_child(text)
 
+	_add_resize_handle(EDGE_LEFT, Control.CURSOR_HSIZE, Vector2(0, 48), Vector2(6, -6))
 	_add_resize_handle(EDGE_RIGHT, Control.CURSOR_HSIZE, Vector2(0, 48), Vector2(6, -6))
+	_add_resize_handle(EDGE_TOP, Control.CURSOR_VSIZE, Vector2(0, 0), Vector2(-6, 6))
 	_add_resize_handle(EDGE_BOTTOM, Control.CURSOR_VSIZE, Vector2(0, 0), Vector2(-6, 6))
-	_add_resize_handle(EDGE_RIGHT | EDGE_BOTTOM, Control.CURSOR_FDIAGSIZE, Vector2(-14, -14), Vector2(0, 0))
+	_add_resize_handle(EDGE_LEFT | EDGE_TOP, Control.CURSOR_FDIAGSIZE, Vector2.ZERO, Vector2(14, 14))
+	_add_resize_handle(EDGE_RIGHT | EDGE_TOP, Control.CURSOR_BDIAGSIZE, Vector2.ZERO, Vector2(14, 14))
+	_add_resize_handle(EDGE_LEFT | EDGE_BOTTOM, Control.CURSOR_BDIAGSIZE, Vector2.ZERO, Vector2(14, 14))
+	_add_resize_handle(EDGE_RIGHT | EDGE_BOTTOM, Control.CURSOR_FDIAGSIZE, Vector2(-14, -14), Vector2.ZERO)
 
 func _add_resize_handle(edges: int, cursor_shape: Control.CursorShape, top_left: Vector2, bottom_right: Vector2) -> void:
 	var handle := Control.new()
 	handle.name = "ResizeHandle_%d" % edges
 	handle.mouse_filter = Control.MOUSE_FILTER_STOP
 	handle.mouse_default_cursor_shape = cursor_shape
-	handle.anchor_left = 0.0
-	handle.anchor_top = 0.0
-	handle.anchor_right = 1.0
-	handle.anchor_bottom = 1.0
-	if edges == EDGE_RIGHT:
+	if (edges & EDGE_LEFT) != 0:
+		handle.anchor_left = 0.0
+		handle.anchor_right = 0.0
+		handle.offset_left = 0.0
+		handle.offset_right = 6.0
+	elif (edges & EDGE_RIGHT) != 0:
 		handle.anchor_left = 1.0
 		handle.anchor_right = 1.0
-		handle.anchor_top = 0.0
-		handle.anchor_bottom = 1.0
 		handle.offset_left = -6.0
 		handle.offset_right = 0.0
-		handle.offset_top = 48.0
-		handle.offset_bottom = -6.0
-	elif edges == EDGE_BOTTOM:
+	else:
 		handle.anchor_left = 0.0
 		handle.anchor_right = 1.0
+		handle.offset_left = 6.0
+		handle.offset_right = -6.0
+	if (edges & EDGE_TOP) != 0:
+		handle.anchor_top = 0.0
+		handle.anchor_bottom = 0.0
+		handle.offset_top = 0.0
+		handle.offset_bottom = 6.0
+	elif (edges & EDGE_BOTTOM) != 0:
 		handle.anchor_top = 1.0
 		handle.anchor_bottom = 1.0
-		handle.offset_left = 0.0
-		handle.offset_right = -6.0
 		handle.offset_top = -6.0
 		handle.offset_bottom = 0.0
 	else:
-		handle.anchor_left = 1.0
-		handle.anchor_right = 1.0
-		handle.anchor_top = 1.0
+		handle.anchor_top = 0.0
 		handle.anchor_bottom = 1.0
-		handle.offset_left = -14.0
-		handle.offset_right = 0.0
-		handle.offset_top = -14.0
-		handle.offset_bottom = 0.0
+		handle.offset_top = 48.0
+		handle.offset_bottom = -6.0
+	if (edges & (EDGE_LEFT | EDGE_RIGHT)) != 0 and (edges & (EDGE_TOP | EDGE_BOTTOM)) != 0:
+		if (edges & EDGE_LEFT) != 0:
+			handle.offset_left = 0.0
+			handle.offset_right = 14.0
+		else:
+			handle.offset_left = -14.0
+			handle.offset_right = 0.0
+		if (edges & EDGE_TOP) != 0:
+			handle.offset_top = 0.0
+			handle.offset_bottom = 14.0
+		else:
+			handle.offset_top = -14.0
+			handle.offset_bottom = 0.0
 	handle.gui_input.connect(_on_resize_handle_input.bind(edges))
 	_resize_overlay.add_child(handle)
 
@@ -231,13 +250,25 @@ func _on_resize_handle_input(event: InputEvent, edges: int) -> void:
 	elif event is InputEventMouseMotion and _resizing:
 		var delta := get_global_mouse_position() - _resize_start_mouse
 		var new_size := _resize_start_size
+		var new_position := _resize_start_position
 		if (_resize_edges & EDGE_RIGHT) != 0:
 			new_size.x = maxf(280.0, _resize_start_size.x + delta.x)
+		elif (_resize_edges & EDGE_LEFT) != 0:
+			new_size.x = maxf(280.0, _resize_start_size.x - delta.x)
+			new_position.x = _resize_start_position.x + _resize_start_size.x - new_size.x
 		if (_resize_edges & EDGE_BOTTOM) != 0:
 			new_size.y = maxf(180.0, _resize_start_size.y + delta.y)
+		elif (_resize_edges & EDGE_TOP) != 0:
+			new_size.y = maxf(180.0, _resize_start_size.y - delta.y)
+			new_position.y = _resize_start_position.y + _resize_start_size.y - new_size.y
 		var viewport_size := get_viewport_rect().size
-		new_size.x = minf(new_size.x, maxf(280.0, viewport_size.x - _resize_start_position.x))
-		new_size.y = minf(new_size.y, maxf(180.0, viewport_size.y - _resize_start_position.y))
+		new_size.x = minf(new_size.x, maxf(280.0, viewport_size.x - maxf(0.0, new_position.x)))
+		new_size.y = minf(new_size.y, maxf(180.0, viewport_size.y - maxf(0.0, new_position.y)))
+		if (_resize_edges & EDGE_LEFT) != 0:
+			new_position.x = _resize_start_position.x + _resize_start_size.x - new_size.x
+		if (_resize_edges & EDGE_TOP) != 0:
+			new_position.y = _resize_start_position.y + _resize_start_size.y - new_size.y
+		position = new_position
 		size = new_size
 
 func _show_snap_layouts(button: Button) -> void:
