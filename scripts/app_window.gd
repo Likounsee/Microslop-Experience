@@ -143,6 +143,7 @@ func _show_snap_layouts(button: Button) -> void:
 		_add_snap_option(layouts, "⅓ gauche", "one_third_left")
 		_add_snap_option(layouts, "⅔ droite", "two_thirds_right")
 		get_parent().add_child(_snap_layout_panel)
+		_snap_layout_panel.mouse_exited.connect(_schedule_snap_layout_hide)
 	_snap_layout_panel.visible = true
 	var button_rect := button.get_global_rect()
 	var viewport_size := get_viewport_rect().size
