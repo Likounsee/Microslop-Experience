@@ -7,6 +7,8 @@ var _is_maximized := false
 var _restore_position := Vector2.ZERO
 var _restore_size := Vector2.ZERO
 var _snap_mode := ""
+var _snap_layout_panel: PanelContainer
+var _maximize_button: Button
 
 func configure(title: String, message: String, window_size := Vector2(520, 300)) -> void:
 	custom_minimum_size = window_size
@@ -73,9 +75,14 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	maximize_button.add_theme_color_override("font_color", Color("24344d"))
 	maximize_button.add_theme_stylebox_override("normal", _panel_style(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
 	maximize_button.add_theme_stylebox_override("hover", _panel_style(Color("dce6f4"), Color(0, 0, 0, 0)))
+	_maximize_button = maximize_button
 	maximize_button.pressed.connect(func():
 		_toggle_maximize(maximize_button)
 	)
+	maximize_button.mouse_entered.connect(func():
+		_show_snap_layouts(maximize_button)
+	)
+	maximize_button.mouse_exited.connect(_schedule_snap_layout_hide)
 	maximize_button.focus_mode = Control.FOCUS_NONE
 	title_row.add_child(maximize_button)
 
@@ -108,6 +115,106 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.add_theme_color_override("font_color", Color("263247"))
 	content.add_child(text)
+
+func _show_snap_layouts(button: Button) -> void:
+	if not is_instance_valid(button) or not is_instance_valid(get_parent()):
+		return
+	if not is_instance_valid(_snap_layout_panel):
+		_snap_layout_panel = PanelContainer.new()
+		_snap_layout_panel.name = "SnapLayouts"
+		_snap_layout_panel.z_index = 100
+		var panel_style := _panel_style(Color(0.96, 0.97, 0.99, 0.99), Color("cbd5e3"))
+		panel_style.set_corner_radius_all(10)
+		panel_style.shadow_size = 16
+		_snap_layout_panel.add_theme_stylebox_override("panel", panel_style)
+		var margin := MarginContainer.new()
+		for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+			margin.add_theme_constant_override(side, 6)
+		_snap_layout_panel.add_child(margin)
+		var layouts := GridContainer.new()
+		layouts.columns = 2
+		layouts.add_theme_constant_override("h_separation", 5)
+		layouts.add_theme_constant_override("v_separation", 5)
+		margin.add_child(layouts)
+		_add_snap_option(layouts, "½ gauche", "left")
+		_add_snap_option(layouts, "½ droite", "right")
+		_add_snap_option(layouts, "⅔ gauche", "two_thirds_left")
+		_add_snap_option(layouts, "⅓ droite", "one_third_right")
+		_add_snap_option(layouts, "⅓ gauche", "one_third_left")
+		_add_snap_option(layouts, "⅔ droite", "two_thirds_right")
+		get_parent().add_child(_snap_layout_panel)
+	_snap_layout_panel.visible = true
+	var button_rect := button.get_global_rect()
+	var viewport_size := get_viewport_rect().size
+	var popup_size := _snap_layout_panel.get_combined_minimum_size()
+	_snap_layout_panel.position = Vector2(
+		clampf(button_rect.position.x + button_rect.size.x / 2.0 - popup_size.x / 2.0, 6.0, maxf(6.0, viewport_size.x - popup_size.x - 6.0)),
+		clampf(button_rect.position.y + button_rect.size.y + 6.0, 6.0, maxf(6.0, viewport_size.y - popup_size.y - 6.0))
+	)
+
+func _add_snap_option(parent: GridContainer, caption: String, mode: String) -> void:
+	var option := Button.new()
+	option.text = caption
+	option.custom_minimum_size = Vector2(96, 36)
+	option.add_theme_font_size_override("font_size", 12)
+	option.add_theme_color_override("font_color", Color("24344d"))
+	option.add_theme_stylebox_override("normal", _panel_style(Color("edf2f8"), Color("d5dfec")))
+	option.add_theme_stylebox_override("hover", _panel_style(Color("cfe2fa"), Color("8bb7e8")))
+	option.focus_mode = Control.FOCUS_NONE
+	option.pressed.connect(func():
+		_apply_snap_layout(mode)
+		if is_instance_valid(_snap_layout_panel):
+			_snap_layout_panel.queue_free()
+			_snap_layout_panel = null
+	)
+	parent.add_child(option)
+
+func _schedule_snap_layout_hide() -> void:
+	_hide_snap_layouts_if_outside()
+
+func _hide_snap_layouts_if_outside() -> void:
+	await get_tree().create_timer(0.35).timeout
+	if not is_instance_valid(_snap_layout_panel):
+		return
+	var pointer := get_global_mouse_position()
+	var over_button := is_instance_valid(_maximize_button) and _maximize_button.get_global_rect().has_point(pointer)
+	var over_panel := _snap_layout_panel.get_global_rect().has_point(pointer)
+	if not over_button and not over_panel:
+		_snap_layout_panel.queue_free()
+		_snap_layout_panel = null
+
+func _apply_snap_layout(mode: String) -> void:
+	var viewport_size := get_viewport_rect().size
+	var full_width := viewport_size.x
+	var full_height := viewport_size.y
+	var left_width := full_width / 2.0
+	var third_width := full_width / 3.0
+	_restore_size = size
+	_restore_position = position
+	_is_maximized = false
+	_snap_mode = mode
+	match mode:
+		"left":
+			position = Vector2.ZERO
+			size = Vector2(left_width, full_height)
+		"right":
+			position = Vector2(left_width, 0)
+			size = Vector2(left_width, full_height)
+		"two_thirds_left":
+			position = Vector2.ZERO
+			size = Vector2(full_width * 2.0 / 3.0, full_height)
+		"one_third_right":
+			position = Vector2(full_width * 2.0 / 3.0, 0)
+			size = Vector2(third_width, full_height)
+		"one_third_left":
+			position = Vector2.ZERO
+			size = Vector2(third_width, full_height)
+		"two_thirds_right":
+			position = Vector2(third_width, 0)
+			size = Vector2(full_width * 2.0 / 3.0, full_height)
+	if is_instance_valid(_maximize_button):
+		_maximize_button.text = "□"
+		_maximize_button.tooltip_text = "Dispositions Snap"
 
 func _toggle_maximize(button: Button = null) -> void:
 	if _is_maximized or _snap_mode != "":
