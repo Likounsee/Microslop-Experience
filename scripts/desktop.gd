@@ -26,6 +26,8 @@ var _calendar_tween: Tween
 var _wallpaper: TextureRect
 var _desktop_context_menu: PanelContainer
 var _pinned_buttons: Array[Button] = []
+var _pinned_empty_label: Label
+var _recommended_card: PanelContainer
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED and is_instance_valid(_start_menu):
@@ -493,13 +495,20 @@ func _build_start_menu() -> void:
 	_add_pinned_app(pinned, "↻", "Mise à jour", _trigger_update)
 	_add_pinned_app(pinned, "▧", "Corbeille", _open_recycle_bin)
 
+	_pinned_empty_label = Label.new()
+	_pinned_empty_label.text = "Aucune application correspondante"
+	_pinned_empty_label.add_theme_color_override("font_color", Color("596780"))
+	_pinned_empty_label.visible = false
+	layout.add_child(_pinned_empty_label)
+
 	var recommended := Label.new()
 	recommended.text = "Recommandé"
 	recommended.add_theme_font_size_override("font_size", 17)
 	recommended.add_theme_color_override("font_color", Color("1d2a40"))
 	layout.add_child(recommended)
 
-	var recommended_card := PanelContainer.new()
+	_recommended_card = PanelContainer.new()
+	var recommended_card := _recommended_card
 	var recommended_style := _flat_style(Color("e7edf7"), 10)
 	recommended_style.set_border_width_all(1)
 	recommended_style.border_color = Color("dce4f0")
@@ -610,10 +619,17 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 
 func _filter_pinned_apps(query: String) -> void:
 	var normalized_query := query.strip_edges().to_lower()
+	var visible_count := 0
 	for button in _pinned_buttons:
 		if is_instance_valid(button):
 			var app_name := str(button.get_meta("app_name", ""))
 			button.visible = normalized_query.is_empty() or app_name.contains(normalized_query)
+			if button.visible:
+				visible_count += 1
+	if is_instance_valid(_pinned_empty_label):
+		_pinned_empty_label.visible = not normalized_query.is_empty() and visible_count == 0
+	if is_instance_valid(_recommended_card):
+		_recommended_card.visible = normalized_query.is_empty()
 
 func _add_menu_button(parent: VBoxContainer, caption: String, callback: Callable) -> void:
 	var button := Button.new()
@@ -979,11 +995,24 @@ func _input(event: InputEvent) -> void:
 			return
 		_show_desktop_context_menu(event.position)
 	elif event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_ESCAPE and _start_menu.visible:
-			_start_menu.visible = false
-			_start_open = false
-			if is_instance_valid(_quick_settings_panel):
+		if event.keycode == KEY_ESCAPE:
+			var closed_flyout := false
+			if is_instance_valid(_start_menu) and _start_menu.visible:
+				_start_menu.visible = false
+				_start_open = false
+				closed_flyout = true
+			if is_instance_valid(_quick_settings_panel) and _quick_settings_panel.visible:
 				_quick_settings_panel.visible = false
+				closed_flyout = true
+			if is_instance_valid(_calendar_panel) and _calendar_panel.visible:
+				_calendar_panel.visible = false
+				closed_flyout = true
+			if is_instance_valid(_desktop_context_menu) and is_instance_valid(_desktop_context_menu.get_parent()):
+				_desktop_context_menu.queue_free()
+				_desktop_context_menu = null
+				closed_flyout = true
+			if closed_flyout:
+				get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_F1:
 			_open_settings()
 		elif event.keycode == KEY_F2:
