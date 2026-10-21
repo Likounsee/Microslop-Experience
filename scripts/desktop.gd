@@ -430,10 +430,30 @@ func _toggle_quick_settings() -> void:
 
 func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, callback: Callable, app_id: String) -> void:
 	var button := Button.new()
-	button.text = glyph
+	button.text = ""
 	button.tooltip_text = tooltip
 	button.custom_minimum_size = Vector2(44, 42)
-	button.add_theme_font_size_override("font_size", 19)
+	var icon_color := Color("0878d1")
+	match app_id:
+		"files": icon_color = Color("e4b33f")
+		"settings": icon_color = Color("68798e")
+		"update": icon_color = Color("299b74")
+	var icon_tile := PanelContainer.new()
+	icon_tile.name = "TaskbarAppIcon"
+	icon_tile.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	icon_tile.position = Vector2(-15, -15)
+	icon_tile.custom_minimum_size = Vector2(30, 30)
+	icon_tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon_tile.add_theme_stylebox_override("panel", _flat_style(icon_color, 7))
+	var icon_glyph := Label.new()
+	icon_glyph.text = glyph
+	icon_glyph.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	icon_glyph.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	icon_glyph.add_theme_font_size_override("font_size", 17)
+	icon_glyph.add_theme_color_override("font_color", Color.WHITE)
+	icon_glyph.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon_tile.add_child(icon_glyph)
+	button.add_child(icon_tile)
 	button.add_theme_color_override("font_color", Color("24344d"))
 	button.add_theme_stylebox_override("normal", _flat_style(Color(0.0, 0.0, 0.0, 0.0), 7))
 	button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.22), 7))

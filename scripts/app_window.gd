@@ -17,6 +17,7 @@ var _resize_edges := 0
 var _resize_start_mouse := Vector2.ZERO
 var _resize_start_position := Vector2.ZERO
 var _resize_start_size := Vector2.ZERO
+var _drag_start_mouse := Vector2.ZERO
 
 func configure(title: String, message: String, window_size := Vector2(520, 300)) -> void:
 	custom_minimum_size = window_size
@@ -326,7 +327,8 @@ func _on_titlebar_input(event: InputEvent, _titlebar: Control) -> void:
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			_dragging = true
-			_drag_offset = get_global_mouse_position() - global_position
+			_drag_start_mouse = get_global_mouse_position()
+			_drag_offset = _drag_start_mouse - global_position
 			move_to_front()
 		else:
 			var was_dragging := _dragging
@@ -334,7 +336,16 @@ func _on_titlebar_input(event: InputEvent, _titlebar: Control) -> void:
 			if was_dragging:
 				_snap_to_edge(get_global_mouse_position())
 	elif event is InputEventMouseMotion and _dragging:
-		global_position = get_global_mouse_position() - _drag_offset
+		var pointer := get_global_mouse_position()
+		if _is_maximized and pointer.distance_to(_drag_start_mouse) > 8.0:
+			var restore_width := maxf(280.0, _restore_size.x)
+			var horizontal_ratio := clampf(_drag_offset.x / maxf(size.x, 1.0), 0.1, 0.9)
+			_is_maximized = false
+			_snap_mode = ""
+			size = _restore_size if _restore_size != Vector2.ZERO else Vector2(520, 300)
+			_drag_offset = Vector2(restore_width * horizontal_ratio, 22.0)
+			position = pointer - _drag_offset
+		global_position = pointer - _drag_offset
 		var viewport_size := get_viewport_rect().size
 		position.x = clampf(position.x, -size.x + 120.0, viewport_size.x - 120.0)
 		position.y = clampf(position.y, 0.0, viewport_size.y - 48.0)
