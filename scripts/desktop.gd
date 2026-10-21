@@ -440,6 +440,21 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 	button.add_theme_stylebox_override("pressed", _flat_style(Color(0.4, 0.58, 0.82, 0.36), 7))
 	button.focus_mode = Control.FOCUS_NONE
 	button.set_meta("app_id", app_id)
+	var active_marker := PanelContainer.new()
+	active_marker.name = "ActiveMarker"
+	active_marker.anchor_left = 0.5
+	active_marker.anchor_right = 0.5
+	active_marker.anchor_top = 1.0
+	active_marker.anchor_bottom = 1.0
+	active_marker.offset_left = -8
+	active_marker.offset_right = 8
+	active_marker.offset_top = -3
+	active_marker.offset_bottom = 0
+	active_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	active_marker.add_theme_stylebox_override("panel", _flat_style(Color("2679d8"), 3))
+	active_marker.visible = false
+	button.add_child(active_marker)
+	button.set_meta("active_marker", active_marker)
 	_taskbar_app_buttons[app_id] = button
 	button.pressed.connect(func():
 		var existing := _find_app_window(app_id)
@@ -472,8 +487,11 @@ func _update_taskbar_indicators() -> void:
 			continue
 		var app := _find_app_window(str(app_id))
 		var active := is_instance_valid(app) and app.visible
-		button.add_theme_stylebox_override("normal", _flat_style(Color(0.38, 0.60, 0.88, 0.30) if active else Color(0.0, 0.0, 0.0, 0.0), 7))
+		button.add_theme_stylebox_override("normal", _flat_style(Color(0.38, 0.60, 0.88, 0.22) if active else Color(0.0, 0.0, 0.0, 0.0), 7))
 		button.add_theme_stylebox_override("pressed", _flat_style(Color(0.38, 0.60, 0.88, 0.42), 7))
+		var marker = button.get_meta("active_marker", null)
+		if is_instance_valid(marker):
+			marker.visible = active
 
 func _build_start_menu() -> void:
 	_start_menu = PanelContainer.new()
@@ -662,12 +680,41 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 	var button := Button.new()
 	button.set_meta("app_name", caption.to_lower())
 	_pinned_buttons.append(button)
-	button.text = "%s\n%s" % [glyph, caption]
-	button.custom_minimum_size = Vector2(168, 62)
-	button.add_theme_font_size_override("font_size", 13)
+	button.custom_minimum_size = Vector2(168, 76)
 	button.add_theme_color_override("font_color", Color("263247"))
-	button.add_theme_stylebox_override("normal", _flat_style(Color(1, 1, 1, 0.46), 10))
-	button.add_theme_stylebox_override("hover", _flat_style(Color(0.78, 0.86, 0.97, 0.92), 10))
+	button.add_theme_stylebox_override("normal", _flat_style(Color(1, 1, 1, 0.0), 10))
+	button.add_theme_stylebox_override("hover", _flat_style(Color(0.78, 0.86, 0.97, 0.78), 10))
+	var content := VBoxContainer.new()
+	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_theme_constant_override("separation", 5)
+	content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	content.add_theme_constant_override("margin_top", 5)
+	button.add_child(content)
+	var icon_tile := PanelContainer.new()
+	icon_tile.custom_minimum_size = Vector2(38, 38)
+	icon_tile.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	var icon_color := Color("0878d1")
+	if caption == "Fichiers": icon_color = Color("e6b43c")
+	elif caption == "Paramètres": icon_color = Color("65758b")
+	elif caption == "Microslop AI": icon_color = Color("7868d8")
+	elif caption == "Mise à jour": icon_color = Color("2b9b73")
+	elif caption == "Corbeille": icon_color = Color("5a9fd8")
+	icon_tile.add_theme_stylebox_override("panel", _flat_style(icon_color, 9))
+	content.add_child(icon_tile)
+	var icon_label := Label.new()
+	icon_label.text = glyph
+	icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	icon_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	icon_label.add_theme_font_size_override("font_size", 20)
+	icon_label.add_theme_color_override("font_color", Color.WHITE)
+	icon_tile.add_child(icon_label)
+	var title_label := Label.new()
+	title_label.text = caption
+	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_label.add_theme_font_size_override("font_size", 11)
+	title_label.add_theme_color_override("font_color", Color("263247"))
+	title_label.clip_text = true
+	content.add_child(title_label)
 	button.pressed.connect(callback)
 	button.focus_mode = Control.FOCUS_NONE
 	parent.add_child(button)
