@@ -62,7 +62,7 @@ func _layout_shell_for_viewport() -> void:
 		_calendar_panel.offset_bottom = -76.0
 	if is_instance_valid(_quick_settings_panel):
 		var panel_width := minf(336.0, maxf(280.0, viewport_size.x - 24.0))
-		var panel_height := minf(350.0, maxf(260.0, viewport_size.y - 96.0))
+		var panel_height := minf(400.0, maxf(300.0, viewport_size.y - 96.0))
 		_quick_settings_panel.offset_left = -panel_width - 12.0
 		_quick_settings_panel.offset_right = -12.0
 		_quick_settings_panel.offset_top = -(panel_height + 76.0)
@@ -467,6 +467,28 @@ func _build_quick_settings() -> void:
 	layout.add_theme_constant_override("separation", 10)
 	margin.add_child(layout)
 
+	var panel_header := HBoxContainer.new()
+	panel_header.add_theme_constant_override("separation", 8)
+	var panel_title := Label.new()
+	panel_title.text = "Paramètres rapides"
+	panel_title.add_theme_font_size_override("font_size", 16)
+	panel_title.add_theme_color_override("font_color", Color("1d2a40"))
+	panel_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel_header.add_child(panel_title)
+	var close_button := Button.new()
+	close_button.text = "×"
+	close_button.tooltip_text = "Fermer"
+	close_button.custom_minimum_size = Vector2(28, 28)
+	close_button.add_theme_font_size_override("font_size", 18)
+	close_button.add_theme_color_override("font_color", Color("34445d"))
+	close_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 7))
+	close_button.add_theme_stylebox_override("hover", _flat_style(Color("dce6f3"), 7))
+	close_button.pressed.connect(func(): _animate_flyout(_quick_settings_panel, false, true))
+	panel_header.add_child(close_button)
+	layout.add_child(panel_header)
+	var separator := HSeparator.new()
+	layout.add_child(separator)
+
 	var tiles := GridContainer.new()
 	tiles.columns = 2
 	tiles.add_theme_constant_override("h_separation", 8)
@@ -489,12 +511,20 @@ func _build_quick_settings() -> void:
 	volume.max_value = 100
 	volume.value = float(SettingsStore.values.get("master_volume", 0.8)) * 100.0
 	volume.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var volume_value := Label.new()
+	volume_value.text = "%d%%" % int(volume.value)
+	volume_value.custom_minimum_size.x = 34
+	volume_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	volume_value.add_theme_font_size_override("font_size", 11)
+	volume_value.add_theme_color_override("font_color", Color("596780"))
 	volume.value_changed.connect(func(value: float):
+		volume_value.text = "%d%%" % int(value)
 		SettingsStore.values["master_volume"] = value / 100.0
 		SettingsStore.apply_audio_settings()
 		SettingsStore.save_settings()
 	)
 	volume_row.add_child(volume)
+	volume_row.add_child(volume_value)
 
 	var brightness_row := HBoxContainer.new()
 	brightness_row.add_theme_constant_override("separation", 8)
@@ -511,12 +541,20 @@ func _build_quick_settings() -> void:
 	brightness.value = 100
 	brightness.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	brightness.tooltip_text = "Luminosité du bureau"
+	var brightness_value := Label.new()
+	brightness_value.text = "%d%%" % int(brightness.value)
+	brightness_value.custom_minimum_size.x = 34
+	brightness_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	brightness_value.add_theme_font_size_override("font_size", 11)
+	brightness_value.add_theme_color_override("font_color", Color("596780"))
 	brightness.value_changed.connect(func(value: float):
+		brightness_value.text = "%d%%" % int(value)
 		if is_instance_valid(_wallpaper):
 			var level := value / 100.0
 			_wallpaper.modulate = Color(level, level, level, 1.0)
 	)
 	brightness_row.add_child(brightness)
+	brightness_row.add_child(brightness_value)
 
 	var footer := HBoxContainer.new()
 	layout.add_child(footer)
@@ -538,6 +576,7 @@ func _build_quick_settings() -> void:
 func _add_quick_toggle(parent: GridContainer, caption: String, initially_on: bool, feature_name: String) -> void:
 	var toggle := Button.new()
 	toggle.text = caption
+	toggle.tooltip_text = feature_name
 	toggle.toggle_mode = true
 	toggle.button_pressed = initially_on
 	toggle.custom_minimum_size = Vector2(138, 52)
