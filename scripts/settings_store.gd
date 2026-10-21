@@ -24,7 +24,31 @@ func load_settings() -> void:
 	if error != OK:
 		return
 	for key in values.keys():
-		values[key] = config.get_value("settings", key, values[key])
+		var candidate: Variant = config.get_value("settings", key, values[key])
+		if _is_valid_setting(key, candidate):
+			values[key] = candidate
+
+func _is_valid_setting(key: String, candidate: Variant) -> bool:
+	match key:
+		"display_mode":
+			return typeof(candidate) == TYPE_STRING and candidate in [
+				"Fenêtré", "Plein écran sans bordures", "Plein écran exclusif"
+			]
+		"resolution":
+			return typeof(candidate) == TYPE_VECTOR2I and candidate in [
+				Vector2i(1280, 720), Vector2i(1600, 900), Vector2i(1920, 1080)
+			]
+		"vsync":
+			return typeof(candidate) == TYPE_BOOL
+		"fps_limit":
+			return typeof(candidate) == TYPE_INT and candidate in [0, 30, 60, 120, 144, 240]
+		"master_volume", "music_volume", "sfx_volume":
+			var numeric_type := typeof(candidate) == TYPE_FLOAT or typeof(candidate) == TYPE_INT
+			return numeric_type and float(candidate) >= 0.0 and float(candidate) <= 1.0
+		"language":
+			return typeof(candidate) == TYPE_STRING and candidate in ["Français", "English"]
+		_:
+			return false
 
 func save_settings() -> void:
 	var config := ConfigFile.new()
