@@ -125,9 +125,9 @@ func _build_taskbar() -> void:
 	row.add_child(right_spacer)
 
 	_tray_button = Button.new()
-	_tray_button.text = "⌃  ◖  ◉  🔊  🔋\n%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system()]
+	_tray_button.text = "⌃  ◖  ◉  🔊  🔋\n%s  ·  %s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system().replace("-", "/")]
 	_tray_button.tooltip_text = "Zone de notification"
-	_tray_button.custom_minimum_size = Vector2(118, 48)
+	_tray_button.custom_minimum_size = Vector2(150, 48)
 	_tray_button.add_theme_font_size_override("font_size", 11)
 	_tray_button.add_theme_color_override("font_color", Color("24344d"))
 	_tray_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 9))
@@ -286,11 +286,26 @@ func _build_start_menu() -> void:
 	)
 	layout.add_child(search)
 
+	var pinned_header := HBoxContainer.new()
+	pinned_header.add_theme_constant_override("separation", 8)
+	layout.add_child(pinned_header)
 	var heading := Label.new()
 	heading.text = "Épinglé"
+	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	heading.add_theme_font_size_override("font_size", 18)
 	heading.add_theme_color_override("font_color", Color("1d2a40"))
-	layout.add_child(heading)
+	pinned_header.add_child(heading)
+	var all_apps := Button.new()
+	all_apps.text = "Tous  ›"
+	all_apps.custom_minimum_size = Vector2(78, 30)
+	all_apps.add_theme_font_size_override("font_size", 12)
+	all_apps.add_theme_color_override("font_color", Color("263247"))
+	all_apps.add_theme_stylebox_override("normal", _flat_style(Color("e5eaf3"), 7))
+	all_apps.add_theme_stylebox_override("hover", _flat_style(Color("d6e4f8"), 7))
+	all_apps.pressed.connect(func():
+		_show_notification("Toutes les applications", "6 applications sont disponibles dans ce prototype.")
+	)
+	pinned_header.add_child(all_apps)
 
 	var pinned := GridContainer.new()
 	pinned.columns = 3
@@ -310,23 +325,60 @@ func _build_start_menu() -> void:
 	recommended.add_theme_color_override("font_color", Color("1d2a40"))
 	layout.add_child(recommended)
 
+	var recommended_card := PanelContainer.new()
+	var recommended_style := _flat_style(Color("e7edf7"), 10)
+	recommended_style.set_border_width_all(1)
+	recommended_style.border_color = Color("dce4f0")
+	recommended_card.add_theme_stylebox_override("panel", recommended_style)
+	layout.add_child(recommended_card)
+	var recommended_margin := MarginContainer.new()
+	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+		recommended_margin.add_theme_constant_override(side, 9)
+	recommended_card.add_child(recommended_margin)
+	var recommended_layout := VBoxContainer.new()
+	recommended_layout.add_theme_constant_override("separation", 3)
+	recommended_margin.add_child(recommended_layout)
 	var sponsored := Label.new()
-	sponsored.text = "Microslop Premium · SPONSORISÉ · 3 % de productivité en plus"
-	sponsored.add_theme_font_size_override("font_size", 11)
-	sponsored.add_theme_color_override("font_color", Color("68758c"))
-	layout.add_child(sponsored)
+	sponsored.text = "Microslop Premium  ·  SPONSORISÉ"
+	sponsored.add_theme_font_size_override("font_size", 12)
+	sponsored.add_theme_color_override("font_color", Color("34425b"))
+	recommended_layout.add_child(sponsored)
+	var sponsored_description := Label.new()
+	sponsored_description.text = "Votre productivité pourrait augmenter de 3 %. Cliquez ici pour voir une offre que vous n'avez pas demandée."
+	sponsored_description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	sponsored_description.add_theme_font_size_override("font_size", 11)
+	sponsored_description.add_theme_color_override("font_color", Color("68758c"))
+	recommended_layout.add_child(sponsored_description)
 
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	layout.add_child(spacer)
 
+	var profile_row := HBoxContainer.new()
+	profile_row.add_theme_constant_override("separation", 8)
+	layout.add_child(profile_row)
 	var account := Button.new()
-	account.text = "●  Enzo  ▾"
+	account.text = "◉  Profil local  ▾"
 	account.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	account.custom_minimum_size.y = 42
+	account.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	account.custom_minimum_size.y = 40
 	account.add_theme_color_override("font_color", Color("263247"))
+	account.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 8))
+	account.add_theme_stylebox_override("hover", _flat_style(Color("e1e9f5"), 8))
 	account.pressed.connect(func(): _show_notification("Compte Microslop", "Synchronisation activée. Vos préférences publicitaires ont été synchronisées."))
-	layout.add_child(account)
+	profile_row.add_child(account)
+	var power := Button.new()
+	power.text = "⏻"
+	power.tooltip_text = "Options d’alimentation simulées"
+	power.custom_minimum_size = Vector2(42, 40)
+	power.add_theme_font_size_override("font_size", 19)
+	power.add_theme_color_override("font_color", Color("263247"))
+	power.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 8))
+	power.add_theme_stylebox_override("hover", _flat_style(Color("e1e9f5"), 8))
+	power.pressed.connect(func():
+		_show_notification("Options d’alimentation", "Veille, redémarrage et arrêt sont simulés dans Microslop Experience.")
+	)
+	profile_row.add_child(power)
 
 func _build_notification_layer() -> void:
 	_notification_layer = VBoxContainer.new()
@@ -684,7 +736,7 @@ func _input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	if is_instance_valid(_tray_button):
-		_tray_button.text = "⌃  ◖  ◉  Wi-Fi  🔊  🔋\n%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system()]
+		_tray_button.text = "⌃  ◖  ◉  🔊  🔋\n%s  ·  %s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system().replace("-", "/")]
 	_event_elapsed += delta
 	if _event_elapsed >= 75.0:
 		_event_elapsed = 0.0

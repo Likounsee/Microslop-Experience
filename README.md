@@ -58,3 +58,8 @@ Percentages will be reported as estimates based on verified implementation and t
 ### Windows 11-inspired visual pass
 
 The desktop UI uses a consistent light acrylic-inspired palette, more pronounced rounded surfaces and shadows, a narrower centered taskbar, and matching Start, Quick Settings, notification, mission, and app-window surfaces. App windows now restore their previous position and size when unmaximized, and dragging keeps enough of the title bar on-screen to recover a window. These are in-game visual approximations, not native Windows acrylic or blur effects.
+
+
+### Desktop interaction polish
+
+The Start menu now has a Windows 11-inspired pinned-app header, a distinct recommended/sponsored card, and a profile/power row. The system-tray clock is presented on a compact two-line layout. App windows raise when clicked and support double-clicking the title bar to maximize or restore. Power options remain simulated in-game and never affect the host operating system.

@@ -24,6 +24,7 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	add_child(layout)
 
 	var titlebar := PanelContainer.new()
+	titlebar.name = "TitleBar"
 	var titlebar_style := _panel_style(Color("eef3fa"), Color("eef3fa"))
 	titlebar_style.set_corner_radius_all(12)
 	titlebar_style.corner_radius_bottom_left = 0
@@ -33,6 +34,10 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	titlebar.mouse_filter = Control.MOUSE_FILTER_STOP
 	layout.add_child(titlebar)
 	titlebar.gui_input.connect(_on_titlebar_input.bind(titlebar))
+	gui_input.connect(func(event: InputEvent):
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			move_to_front()
+	)
 
 	var title_row := HBoxContainer.new()
 	title_row.add_theme_constant_override("separation", 8)
@@ -111,6 +116,18 @@ func _on_titlebar_input(event: InputEvent, _titlebar: Control) -> void:
 		if _dragging:
 			_drag_offset = get_global_mouse_position() - global_position
 			move_to_front()
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.double_click:
+		var viewport_size := get_viewport_rect().size
+		if _is_maximized:
+			size = _restore_size
+			position = _restore_position
+			_is_maximized = false
+		else:
+			_restore_size = size
+			_restore_position = position
+			size = viewport_size
+			position = Vector2.ZERO
+			_is_maximized = true
 	elif event is InputEventMouseMotion and _dragging:
 		global_position = get_global_mouse_position() - _drag_offset
 		var viewport_size := get_viewport_rect().size
