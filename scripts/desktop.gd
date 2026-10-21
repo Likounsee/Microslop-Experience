@@ -287,7 +287,7 @@ func _build_calendar_panel() -> void:
 	agenda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	agenda.add_theme_color_override("font_color", Color("596780"))
 	layout.add_child(agenda)
-\tvar notifications_button := Button.new()
+	var notifications_button := Button.new()
 	notifications_button.text = "Centre de notifications"
 	notifications_button.custom_minimum_size.y = 38
 	notifications_button.add_theme_color_override("font_color", Color("24344d"))
