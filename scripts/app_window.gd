@@ -9,6 +9,11 @@ var _restore_size := Vector2.ZERO
 var _snap_mode := ""
 var _snap_layout_panel: PanelContainer
 var _maximize_button: Button
+var _resizing := false
+var _resize_edges := 0
+var _resize_start_mouse := Vector2.ZERO
+var _resize_start_position := Vector2.ZERO
+var _resize_start_size := Vector2.ZERO
 
 func configure(title: String, message: String, window_size := Vector2(520, 300)) -> void:
 	custom_minimum_size = window_size
@@ -115,6 +120,76 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.add_theme_color_override("font_color", Color("263247"))
 	content.add_child(text)
+
+	_add_resize_handle(Control.RESIZE_RIGHT, Control.CURSOR_HSIZE, Vector2(0, 48), Vector2(6, -6))
+	_add_resize_handle(Control.RESIZE_BOTTOM, Control.CURSOR_VSIZE, Vector2(0, 0), Vector2(-6, 6))
+	_add_resize_handle(Control.RESIZE_RIGHT | Control.RESIZE_BOTTOM, Control.CURSOR_FDIAGSIZE, Vector2(-14, -14), Vector2(0, 0))
+
+func _add_resize_handle(edges: int, cursor_shape: Control.CursorShape, top_left: Vector2, bottom_right: Vector2) -> void:
+	var handle := Control.new()
+	handle.name = "ResizeHandle_%d" % edges
+	handle.mouse_filter = Control.MOUSE_FILTER_STOP
+	handle.mouse_default_cursor_shape = cursor_shape
+	handle.anchor_left = 0.0
+	handle.anchor_top = 0.0
+	handle.anchor_right = 1.0
+	handle.anchor_bottom = 1.0
+	if edges == Control.RESIZE_RIGHT:
+		handle.anchor_left = 1.0
+		handle.anchor_right = 1.0
+		handle.anchor_top = 0.0
+		handle.anchor_bottom = 1.0
+		handle.offset_left = -6.0
+		handle.offset_right = 0.0
+		handle.offset_top = 48.0
+		handle.offset_bottom = -6.0
+	elif edges == Control.RESIZE_BOTTOM:
+		handle.anchor_left = 0.0
+		handle.anchor_right = 1.0
+		handle.anchor_top = 1.0
+		handle.anchor_bottom = 1.0
+		handle.offset_left = 0.0
+		handle.offset_right = -6.0
+		handle.offset_top = -6.0
+		handle.offset_bottom = 0.0
+	else:
+		handle.anchor_left = 1.0
+		handle.anchor_right = 1.0
+		handle.anchor_top = 1.0
+		handle.anchor_bottom = 1.0
+		handle.offset_left = -14.0
+		handle.offset_right = 0.0
+		handle.offset_top = -14.0
+		handle.offset_bottom = 0.0
+	handle.gui_input.connect(_on_resize_handle_input.bind(edges))
+	add_child(handle)
+
+func _on_resize_handle_input(event: InputEvent, edges: int) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_resizing = true
+			_resize_edges = edges
+			_resize_start_mouse = get_global_mouse_position()
+			_resize_start_position = position
+			_resize_start_size = size
+			_restore_size = size
+			_restore_position = position
+			_is_maximized = false
+			_snap_mode = ""
+			move_to_front()
+		else:
+			_resizing = false
+	elif event is InputEventMouseMotion and _resizing:
+		var delta := get_global_mouse_position() - _resize_start_mouse
+		var new_size := _resize_start_size
+		if (_resize_edges & Control.RESIZE_RIGHT) != 0:
+			new_size.x = maxf(280.0, _resize_start_size.x + delta.x)
+		if (_resize_edges & Control.RESIZE_BOTTOM) != 0:
+			new_size.y = maxf(180.0, _resize_start_size.y + delta.y)
+		var viewport_size := get_viewport_rect().size
+		new_size.x = minf(new_size.x, maxf(280.0, viewport_size.x - _resize_start_position.x))
+		new_size.y = minf(new_size.y, maxf(180.0, viewport_size.y - _resize_start_position.y))
+		size = new_size
 
 func _show_snap_layouts(button: Button) -> void:
 	if not is_instance_valid(button) or not is_instance_valid(get_parent()):
