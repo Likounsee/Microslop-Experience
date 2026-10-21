@@ -881,7 +881,7 @@ func _show_desktop_context_menu(pointer: Vector2) -> void:
 		_desktop_context_menu = PanelContainer.new()
 		_desktop_context_menu.name = "DesktopContextMenu"
 		_desktop_context_menu.z_index = 100
-		var menu_style := _flat_style(Color("f4f6fa", 0.98), 10)
+		var menu_style := _flat_style(Color(0.96, 0.97, 0.99, 0.98), 10)
 		menu_style.shadow_color = Color(0.02, 0.04, 0.10, 0.30)
 		menu_style.shadow_size = 18
 		menu_style.shadow_offset = Vector2(0, 4)
