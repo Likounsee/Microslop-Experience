@@ -31,6 +31,8 @@ var _recommended_card: PanelContainer
 var _recommended_heading: Label
 var _taskbar_app_buttons: Dictionary = {}
 var _active_app_id := ""
+var _notification_center: PanelContainer
+var _notification_history: Array[Dictionary] = []
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED and is_instance_valid(_start_menu):
@@ -65,6 +67,13 @@ func _layout_shell_for_viewport() -> void:
 		_quick_settings_panel.offset_right = -12.0
 		_quick_settings_panel.offset_top = -(panel_height + 76.0)
 		_quick_settings_panel.offset_bottom = -76.0
+	if is_instance_valid(_notification_center):
+		var notification_width := minf(360.0, maxf(280.0, viewport_size.x - 24.0))
+		var notification_height := minf(430.0, maxf(300.0, viewport_size.y - 96.0))
+		_notification_center.offset_left = -notification_width - 12.0
+		_notification_center.offset_right = -12.0
+		_notification_center.offset_top = -(notification_height + 76.0)
+		_notification_center.offset_bottom = -76.0
 
 func _ready() -> void:
 	_load_progress()
@@ -101,6 +110,7 @@ func _build_desktop() -> void:
 
 	_build_notification_layer()
 	_build_taskbar()
+	_build_notification_center()
 	_build_start_menu()
 	_build_quick_settings()
 	_build_calendar_panel()
@@ -277,16 +287,13 @@ func _build_calendar_panel() -> void:
 	agenda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	agenda.add_theme_color_override("font_color", Color("596780"))
 	layout.add_child(agenda)
-	var notifications_button := Button.new()
-	notifications_button.text = "Ouvrir le centre de notifications"
+\tvar notifications_button := Button.new()
+	notifications_button.text = "Centre de notifications"
 	notifications_button.custom_minimum_size.y = 38
 	notifications_button.add_theme_color_override("font_color", Color("24344d"))
 	notifications_button.add_theme_stylebox_override("normal", _flat_style(Color("e1eaf7"), 9))
 	notifications_button.add_theme_stylebox_override("hover", _flat_style(Color("d1e2f7"), 9))
-	notifications_button.pressed.connect(func():
-		_calendar_panel.visible = false
-		_show_notification("Centre de notifications", "Vous êtes à jour. Microslop n’a rien trouvé de plus à vous vendre… pour le moment.")
-	)
+	notifications_button.pressed.connect(_toggle_notification_center)
 	layout.add_child(notifications_button)
 
 func _get_french_long_date() -> String:
@@ -304,6 +311,132 @@ func _toggle_calendar() -> void:
 		_start_open = false
 		_quick_settings_panel.visible = false
 	_animate_flyout(_calendar_panel, should_open, true)
+
+func _build_notification_center() -> void:
+	_notification_center = PanelContainer.new()
+	_notification_center.name = "NotificationCenter"
+	_notification_center.anchor_left = 1.0
+	_notification_center.anchor_top = 1.0
+	_notification_center.anchor_right = 1.0
+	_notification_center.anchor_bottom = 1.0
+	_notification_center.offset_left = -360
+	_notification_center.offset_right = -12
+	_notification_center.offset_top = -500
+	_notification_center.offset_bottom = -76
+	_notification_center.visible = false
+	var style := _flat_style(Color("f2f5fa", 0.98), 18)
+	style.shadow_color = Color(0.02, 0.04, 0.10, 0.30)
+	style.shadow_size = 20
+	style.shadow_offset = Vector2(0, 5)
+	style.set_border_width_all(1)
+	style.border_color = Color("d8e0ec")
+	_notification_center.add_theme_stylebox_override("panel", style)
+	add_child(_notification_center)
+	var margin := MarginContainer.new()
+	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+		margin.add_theme_constant_override(side, 16)
+	_notification_center.add_child(margin)
+	var layout := VBoxContainer.new()
+	layout.add_theme_constant_override("separation", 12)
+	margin.add_child(layout)
+	var heading := HBoxContainer.new()
+	var title := Label.new()
+	title.text = "Notifications"
+	title.add_theme_font_size_override("font_size", 20)
+	title.add_theme_color_override("font_color", Color("1d2a40"))
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	heading.add_child(title)
+	var clear_button := Button.new()
+	clear_button.text = "Tout effacer"
+	clear_button.add_theme_font_size_override("font_size", 11)
+	clear_button.add_theme_color_override("font_color", Color("24344d"))
+	clear_button.add_theme_stylebox_override("normal", _flat_style(Color("e3eaf4"), 7))
+	clear_button.add_theme_stylebox_override("hover", _flat_style(Color("d3e2f5"), 7))
+	clear_button.pressed.connect(_clear_notification_history)
+	heading.add_child(clear_button)
+	layout.add_child(heading)
+	var separator := HSeparator.new()
+	layout.add_child(separator)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	layout.add_child(scroll)
+	var entries := VBoxContainer.new()
+	entries.name = "NotificationEntries"
+	entries.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	entries.add_theme_constant_override("separation", 8)
+	scroll.add_child(entries)
+	var empty := Label.new()
+	empty.name = "EmptyNotifications"
+	empty.text = "Vous êtes à jour.\nAucune nouvelle notification."
+	empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	empty.add_theme_color_override("font_color", Color("596780"))
+	entries.add_child(empty)
+
+func _toggle_notification_center() -> void:
+	if not is_instance_valid(_notification_center):
+		return
+	var should_open := not _notification_center.visible
+	if should_open:
+		_start_menu.visible = false
+		_start_open = false
+		_quick_settings_panel.visible = false
+		_calendar_panel.visible = false
+	_animate_flyout(_notification_center, should_open, true)
+
+func _clear_notification_history() -> void:
+	_notification_history.clear()
+	if not is_instance_valid(_notification_center):
+		return
+	var entries := _notification_center.find_child("NotificationEntries", true, false) as VBoxContainer
+	if not is_instance_valid(entries):
+		return
+	for child in entries.get_children():
+		child.queue_free()
+	var empty := Label.new()
+	empty.name = "EmptyNotifications"
+	empty.text = "Vous êtes à jour.\nAucune nouvelle notification."
+	empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	empty.add_theme_color_override("font_color", Color("596780"))
+	entries.add_child(empty)
+
+func _refresh_notification_center() -> void:
+	if not is_instance_valid(_notification_center):
+		return
+	var entries := _notification_center.find_child("NotificationEntries", true, false) as VBoxContainer
+	if not is_instance_valid(entries):
+		return
+	for child in entries.get_children():
+		child.queue_free()
+	if _notification_history.is_empty():
+		var empty := Label.new()
+		empty.name = "EmptyNotifications"
+		empty.text = "Vous êtes à jour.\nAucune nouvelle notification."
+		empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		empty.add_theme_color_override("font_color", Color("596780"))
+		entries.add_child(empty)
+		return
+	for i in range(_notification_history.size() - 1, -1, -1):
+		var item: Dictionary = _notification_history[i]
+		var card := PanelContainer.new()
+		card.add_theme_stylebox_override("panel", _flat_style(Color.WHITE, 10))
+		var padding := MarginContainer.new()
+		for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+			padding.add_theme_constant_override(side, 10)
+		card.add_child(padding)
+		var content := VBoxContainer.new()
+		content.add_theme_constant_override("separation", 4)
+		padding.add_child(content)
+		var heading := Label.new()
+		heading.text = str(item.get("title", "Notification"))
+		heading.add_theme_font_size_override("font_size", 13)
+		heading.add_theme_color_override("font_color", Color("1d2a40"))
+		content.add_child(heading)
+		var body := Label.new()
+		body.text = str(item.get("message", ""))
+		body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		body.add_theme_color_override("font_color", Color("4b5b73"))
+		content.add_child(body)
+		entries.add_child(card)
 
 func _build_quick_settings() -> void:
 	_quick_settings_panel = PanelContainer.new()
@@ -1064,6 +1197,10 @@ func _get_window_content(app: Control) -> VBoxContainer:
 func _show_notification(title: String, message: String) -> void:
 	if not is_instance_valid(_notification_layer):
 		return
+	_notification_history.append({"title": title, "message": message})
+	while _notification_history.size() > 20:
+		_notification_history.pop_front()
+	_refresh_notification_center()
 	var card := PanelContainer.new()
 	var notification_style := _flat_style(Color(0.96, 0.97, 0.99, 0.97), 12)
 	notification_style.shadow_color = Color(0.02, 0.04, 0.10, 0.20)
@@ -1152,6 +1289,9 @@ func _input(event: InputEvent) -> void:
 				closed_flyout = true
 			if is_instance_valid(_calendar_panel) and _calendar_panel.visible:
 				_calendar_panel.visible = false
+				closed_flyout = true
+			if is_instance_valid(_notification_center) and _notification_center.visible:
+				_notification_center.visible = false
 				closed_flyout = true
 			if is_instance_valid(_desktop_context_menu) and is_instance_valid(_desktop_context_menu.get_parent()):
 				_desktop_context_menu.queue_free()
