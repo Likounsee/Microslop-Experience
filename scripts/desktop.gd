@@ -25,26 +25,14 @@ func _ready() -> void:
 	_update_mission()
 
 func _build_desktop() -> void:
-	# Procedural blue bloom wallpaper inspired by the Windows 11 default aesthetic.
-	var wallpaper := ColorRect.new()
+	# Use the wallpaper supplied in the repository instead of a generated placeholder.
+	var wallpaper := TextureRect.new()
+	wallpaper.name = "DesktopWallpaper"
 	wallpaper.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	wallpaper.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	wallpaper.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	wallpaper.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var wallpaper_shader := Shader.new()
-	wallpaper_shader.code = """
-shader_type canvas_item;
-void fragment() {
-	vec2 uv = UV;
-	vec3 base = vec3(0.025, 0.055, 0.16);
-	float bloom_a = exp(-((uv.x - 0.72) * (uv.x - 0.72) * 7.0 + (uv.y - 0.48) * (uv.y - 0.48) * 4.0));
-	float bloom_b = exp(-((uv.x - 0.45) * (uv.x - 0.45) * 18.0 + (uv.y - 0.56) * (uv.y - 0.56) * 18.0));
-	float bloom_c = exp(-((uv.x - 0.82) * (uv.x - 0.82) * 20.0 + (uv.y - 0.25) * (uv.y - 0.25) * 22.0));
-	vec3 color = base + vec3(0.02, 0.12, 0.35) * bloom_a + vec3(0.05, 0.28, 0.68) * bloom_b + vec3(0.1, 0.24, 0.55) * bloom_c;
-	COLOR = vec4(color, 1.0);
-}
-"""
-	var wallpaper_material := ShaderMaterial.new()
-	wallpaper_material.shader = wallpaper_shader
-	wallpaper.material = wallpaper_material
+	wallpaper.texture = load("res://assets/wallpaper.jpg") as Texture2D
 	add_child(wallpaper)
 
 	var desktop_icons := VBoxContainer.new()
