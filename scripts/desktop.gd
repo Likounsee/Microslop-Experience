@@ -10,6 +10,7 @@ var _start_menu: PanelContainer
 var _notification_layer: VBoxContainer
 var _clock_label: Label
 var _tray_button: Button
+var _quick_settings_panel: PanelContainer
 var _start_open := false
 var _mission_label: Label
 var _mission_step := 0
@@ -51,6 +52,7 @@ func _build_desktop() -> void:
 	_build_notification_layer()
 	_build_taskbar()
 	_build_start_menu()
+	_build_quick_settings()
 	_build_mission_hint()
 
 func _add_desktop_icon(parent: VBoxContainer, glyph: String, caption: String, callback: Callable) -> void:
@@ -133,8 +135,108 @@ func _build_taskbar() -> void:
 	_tray_button.add_theme_color_override("font_color", Color("24344d"))
 	_tray_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 9))
 	_tray_button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 9))
-	_tray_button.pressed.connect(func(): _show_notification("Paramètres rapides", "Wi-Fi connecté à MicroslopNet. Batterie : 100 %. Une mise à jour est recommandée."))
+	_tray_button.pressed.connect(_toggle_quick_settings)
 	row.add_child(_tray_button)
+
+func _build_quick_settings() -> void:
+	_quick_settings_panel = PanelContainer.new()
+	_quick_settings_panel.name = "QuickSettingsPanel"
+	_quick_settings_panel.anchor_left = 1.0
+	_quick_settings_panel.anchor_top = 1.0
+	_quick_settings_panel.anchor_right = 1.0
+	_quick_settings_panel.anchor_bottom = 1.0
+	_quick_settings_panel.offset_left = -336
+	_quick_settings_panel.offset_right = -12
+	_quick_settings_panel.offset_top = -350
+	_quick_settings_panel.offset_bottom = -76
+	_quick_settings_panel.visible = false
+	var panel_style := _flat_style(Color(0.92, 0.95, 0.99, 0.98), 18)
+	panel_style.shadow_color = Color(0.04, 0.08, 0.16, 0.24)
+	panel_style.shadow_size = 16
+	panel_style.shadow_offset = Vector2(0, 4)
+	panel_style.border_width_left = 1
+	panel_style.border_width_right = 1
+	panel_style.border_width_top = 1
+	panel_style.border_width_bottom = 1
+	panel_style.border_color = Color(1, 1, 1, 0.65)
+	_quick_settings_panel.add_theme_stylebox_override("panel", panel_style)
+	add_child(_quick_settings_panel)
+
+	var margin := MarginContainer.new()
+	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+		margin.add_theme_constant_override(side, 14)
+	_quick_settings_panel.add_child(margin)
+	var layout := VBoxContainer.new()
+	layout.add_theme_constant_override("separation", 10)
+	margin.add_child(layout)
+
+	var tiles := GridContainer.new()
+	tiles.columns = 2
+	tiles.add_theme_constant_override("h_separation", 8)
+	tiles.add_theme_constant_override("v_separation", 8)
+	layout.add_child(tiles)
+	_add_quick_toggle(tiles, "◉  Wi-Fi", true, "Wi-Fi")
+	_add_quick_toggle(tiles, "ᛒ  Bluetooth", true, "Bluetooth")
+	_add_quick_toggle(tiles, "✈  Mode avion", false, "Mode avion")
+	_add_quick_toggle(tiles, "☾  Éclairage nocturne", false, "Éclairage nocturne")
+
+	var volume_row := HBoxContainer.new()
+	volume_row.add_theme_constant_override("separation", 8)
+	layout.add_child(volume_row)
+	var volume_icon := Label.new()
+	volume_icon.text = "🔊"
+	volume_icon.add_theme_color_override("font_color", Color("24344d"))
+	volume_row.add_child(volume_icon)
+	var volume := HSlider.new()
+	volume.min_value = 0
+	volume.max_value = 100
+	volume.value = float(SettingsStore.values.get("master_volume", 0.8)) * 100.0
+	volume.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	volume.value_changed.connect(func(value: float):
+		SettingsStore.values["master_volume"] = value / 100.0
+		SettingsStore.apply_audio_settings()
+		SettingsStore.save_settings()
+	)
+	volume_row.add_child(volume)
+
+	var footer := HBoxContainer.new()
+	layout.add_child(footer)
+	var status := Label.new()
+	status.text = "MicroslopNet · Batterie 100 %"
+	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status.add_theme_font_size_override("font_size", 11)
+	status.add_theme_color_override("font_color", Color("596780"))
+	footer.add_child(status)
+	var settings_button := Button.new()
+	settings_button.text = "⚙"
+	settings_button.tooltip_text = "Ouvrir les paramètres"
+	settings_button.pressed.connect(func():
+		_quick_settings_panel.visible = false
+		_open_settings()
+	)
+	footer.add_child(settings_button)
+
+func _add_quick_toggle(parent: GridContainer, caption: String, initially_on: bool, feature_name: String) -> void:
+	var toggle := Button.new()
+	toggle.text = caption
+	toggle.toggle_mode = true
+	toggle.button_pressed = initially_on
+	toggle.custom_minimum_size = Vector2(138, 52)
+	toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	toggle.add_theme_color_override("font_color", Color("1d2a40"))
+	toggle.add_theme_stylebox_override("normal", _flat_style(Color("dce9fa"), 10))
+	toggle.add_theme_stylebox_override("hover", _flat_style(Color("d1e2fa"), 10))
+	toggle.add_theme_stylebox_override("pressed", _flat_style(Color("80b8f5"), 10))
+	toggle.toggled.connect(func(enabled: bool):
+		_show_notification(feature_name, "%s : %s." % [feature_name, "activé" if enabled else "désactivé"])
+	)
+	parent.add_child(toggle)
+
+func _toggle_quick_settings() -> void:
+	_quick_settings_panel.visible = not _quick_settings_panel.visible
+	if _quick_settings_panel.visible:
+		_start_menu.visible = false
+		_start_open = false
 
 func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, callback: Callable) -> void:
 	var button := Button.new()
@@ -532,6 +634,8 @@ func _input(event: InputEvent) -> void:
 		if event.keycode == KEY_ESCAPE and _start_menu.visible:
 			_start_menu.visible = false
 			_start_open = false
+			if is_instance_valid(_quick_settings_panel):
+				_quick_settings_panel.visible = false
 		elif event.keycode == KEY_F1:
 			_open_settings()
 		elif event.keycode == KEY_F2:
