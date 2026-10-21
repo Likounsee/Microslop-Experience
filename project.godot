@@ -8,6 +8,9 @@ config/description="A satirical desktop simulation about the modern PC experienc
 run/main_scene="res://scenes/desktop.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 
+[autoload]
+SettingsStore="*res://scripts/settings_store.gd"
+
 [display]
 window/size/viewport_width=1280
 window/size/viewport_height=720
