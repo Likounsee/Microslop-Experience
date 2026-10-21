@@ -22,6 +22,7 @@ var _event_index := 0
 var _clock_refresh_elapsed := 0.0
 var _start_menu_tween: Tween
 var _quick_settings_tween: Tween
+var _calendar_tween: Tween
 var _wallpaper: TextureRect
 var _desktop_context_menu: PanelContainer
 var _pinned_buttons: Array[Button] = []
@@ -634,7 +635,7 @@ func _toggle_start_menu() -> void:
 func _animate_flyout(panel: Control, opening: bool, from_bottom: bool) -> void:
 	if not is_instance_valid(panel):
 		return
-	var active_tween: Tween = _start_menu_tween if panel == _start_menu else _quick_settings_tween
+	var active_tween: Tween = _start_menu_tween if panel == _start_menu else (_quick_settings_tween if panel == _quick_settings_panel else _calendar_tween)
 	if active_tween and active_tween.is_running():
 		active_tween.kill()
 	if opening:
@@ -652,8 +653,10 @@ func _animate_flyout(panel: Control, opening: bool, from_bottom: bool) -> void:
 		tween.tween_property(panel, "position:y", target_y, 0.18)
 		if panel == _start_menu:
 			_start_menu_tween = tween
-		else:
+		elif panel == _quick_settings_panel:
 			_quick_settings_tween = tween
+		else:
+			_calendar_tween = tween
 	else:
 		var tween := create_tween().set_parallel(true)
 		tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
@@ -667,8 +670,10 @@ func _animate_flyout(panel: Control, opening: bool, from_bottom: bool) -> void:
 		)
 		if panel == _start_menu:
 			_start_menu_tween = tween
-		else:
+		elif panel == _quick_settings_panel:
 			_quick_settings_tween = tween
+		else:
+			_calendar_tween = tween
 
 func _open_window(title: String, message: String, window_size := Vector2(520, 300)) -> Control:
 	_start_menu.visible = false
