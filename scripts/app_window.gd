@@ -60,6 +60,7 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	minimize_button.add_theme_stylebox_override("normal", _panel_style(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
 	minimize_button.add_theme_stylebox_override("hover", _panel_style(Color("dce6f4"), Color(0, 0, 0, 0)))
 	minimize_button.pressed.connect(func(): hide())
+	minimize_button.focus_mode = Control.FOCUS_NONE
 	title_row.add_child(minimize_button)
 
 	var maximize_button := Button.new()
@@ -70,17 +71,9 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	maximize_button.add_theme_stylebox_override("normal", _panel_style(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
 	maximize_button.add_theme_stylebox_override("hover", _panel_style(Color("dce6f4"), Color(0, 0, 0, 0)))
 	maximize_button.pressed.connect(func():
-		if _is_maximized:
-			size = _restore_size
-			position = _restore_position
-			_is_maximized = false
-		else:
-			_restore_size = size
-			_restore_position = position
-			size = get_viewport_rect().size
-			position = Vector2.ZERO
-			_is_maximized = true
+		_toggle_maximize(maximize_button)
 	)
+	maximize_button.focus_mode = Control.FOCUS_NONE
 	title_row.add_child(maximize_button)
 
 	var close_button := Button.new()
@@ -92,6 +85,7 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	close_button.add_theme_stylebox_override("hover", _panel_style(Color("c42b1c"), Color(0, 0, 0, 0)))
 	close_button.add_theme_color_override("font_hover_color", Color.WHITE)
 	close_button.pressed.connect(queue_free)
+	close_button.focus_mode = Control.FOCUS_NONE
 	title_row.add_child(close_button)
 
 	var body := MarginContainer.new()
@@ -112,24 +106,30 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	text.add_theme_color_override("font_color", Color("263247"))
 	content.add_child(text)
 
+func _toggle_maximize(button: Button = null) -> void:
+	if _is_maximized:
+		size = _restore_size
+		position = _restore_position
+		_is_maximized = false
+	else:
+		_restore_size = size
+		_restore_position = position
+		size = get_viewport_rect().size
+		position = Vector2.ZERO
+		_is_maximized = true
+	if is_instance_valid(button):
+		button.text = "❐" if _is_maximized else "□"
+		button.tooltip_text = "Restaurer" if _is_maximized else "Agrandir"
+
 func _on_titlebar_input(event: InputEvent, _titlebar: Control) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.double_click:
+		_dragging = false
+		_toggle_maximize()
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		_dragging = event.pressed
 		if _dragging:
 			_drag_offset = get_global_mouse_position() - global_position
 			move_to_front()
-	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.double_click:
-		var viewport_size := get_viewport_rect().size
-		if _is_maximized:
-			size = _restore_size
-			position = _restore_position
-			_is_maximized = false
-		else:
-			_restore_size = size
-			_restore_position = position
-			size = viewport_size
-			position = Vector2.ZERO
-			_is_maximized = true
 	elif event is InputEventMouseMotion and _dragging:
 		global_position = get_global_mouse_position() - _drag_offset
 		var viewport_size := get_viewport_rect().size

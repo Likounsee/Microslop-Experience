@@ -144,6 +144,7 @@ func _build_taskbar() -> void:
 	start_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 9))
 	start_button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 9))
 	start_button.pressed.connect(_toggle_start_menu)
+	start_button.focus_mode = Control.FOCUS_NONE
 	row.add_child(start_button)
 
 	var search_button := Button.new()
@@ -154,6 +155,7 @@ func _build_taskbar() -> void:
 	search_button.add_theme_stylebox_override("normal", _flat_style(Color(1, 1, 1, 0.66), 9))
 	search_button.add_theme_stylebox_override("hover", _flat_style(Color(1, 1, 1, 0.96), 9))
 	search_button.pressed.connect(_open_search)
+	search_button.focus_mode = Control.FOCUS_NONE
 	row.add_child(search_button)
 
 	_add_taskbar_app(row, "🌐", "Microslop Browser", _open_browser)
@@ -174,6 +176,7 @@ func _build_taskbar() -> void:
 	_tray_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 9))
 	_tray_button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 9))
 	_tray_button.pressed.connect(_toggle_quick_settings)
+	_tray_button.focus_mode = Control.FOCUS_NONE
 	row.add_child(_tray_button)
 
 func _build_quick_settings() -> void:
@@ -776,8 +779,11 @@ func _input(event: InputEvent) -> void:
 			_advance_mission("Progression de la campagne avancée manuellement pour le prototype.")
 
 func _process(delta: float) -> void:
-	if is_instance_valid(_tray_button):
-		_tray_button.text = "⌃  ◖  ◉  🔊  🔋\n%s  ·  %s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system().replace("-", "/")]
+	_clock_refresh_elapsed += delta
+	if _clock_refresh_elapsed >= 1.0:
+		_clock_refresh_elapsed = 0.0
+		if is_instance_valid(_tray_button):
+			_tray_button.text = "⌃  ◖  ◉  🔊  🔋\n%s  ·  %s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system().replace("-", "/")]
 	_event_elapsed += delta
 	if _event_elapsed >= 75.0:
 		_event_elapsed = 0.0
