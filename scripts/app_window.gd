@@ -31,6 +31,7 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	titlebar_style.corner_radius_bottom_right = 0
 	titlebar.add_theme_stylebox_override("panel", titlebar_style)
 	titlebar.custom_minimum_size.y = 42
+	titlebar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	titlebar.mouse_filter = Control.MOUSE_FILTER_STOP
 	layout.add_child(titlebar)
 	titlebar.gui_input.connect(_on_titlebar_input.bind(titlebar))
@@ -45,6 +46,7 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 
 	var title_label := Label.new()
 	title_label.text = title
+	title_label.clip_text = true
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_label.add_theme_color_override("font_color", Color("24344d"))
 	title_label.add_theme_font_size_override("font_size", 13)

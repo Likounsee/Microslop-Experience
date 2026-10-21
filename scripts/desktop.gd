@@ -6,6 +6,7 @@ const AppWindow = preload("res://scripts/app_window.gd")
 const TASKBAR_HEIGHT := 54
 
 var _window_layer: Control
+var _taskbar: PanelContainer
 var _start_menu: PanelContainer
 var _notification_layer: VBoxContainer
 var _clock_label: Label
@@ -17,6 +18,33 @@ var _mission_step := 0
 var _event_elapsed := 0.0
 var _event_index := 0
 var _clock_refresh_elapsed := 0.0
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_RESIZED and is_instance_valid(_start_menu):
+		_layout_shell_for_viewport()
+
+func _layout_shell_for_viewport() -> void:
+	var viewport_size := get_viewport_rect().size
+	if is_instance_valid(_taskbar):
+		var taskbar_width := minf(780.0, maxf(440.0, viewport_size.x - 24.0))
+		_taskbar.offset_left = -taskbar_width / 2.0
+		_taskbar.offset_right = taskbar_width / 2.0
+		_taskbar.offset_top = -70.0
+		_taskbar.offset_bottom = -10.0
+	if is_instance_valid(_start_menu):
+		var menu_width := minf(620.0, maxf(300.0, viewport_size.x - 24.0))
+		var menu_height := minf(520.0, maxf(360.0, viewport_size.y - 96.0))
+		_start_menu.offset_left = -menu_width / 2.0
+		_start_menu.offset_right = menu_width / 2.0
+		_start_menu.offset_top = -(menu_height + TASKBAR_HEIGHT + 12.0)
+		_start_menu.offset_bottom = -(TASKBAR_HEIGHT + 12.0)
+	if is_instance_valid(_quick_settings_panel):
+		var panel_width := minf(336.0, maxf(280.0, viewport_size.x - 24.0))
+		var panel_height := minf(350.0, maxf(260.0, viewport_size.y - 96.0))
+		_quick_settings_panel.offset_left = -panel_width - 12.0
+		_quick_settings_panel.offset_right = -12.0
+		_quick_settings_panel.offset_top = -(panel_height + 76.0)
+		_quick_settings_panel.offset_bottom = -76.0
 
 func _process(delta: float) -> void:
 	_clock_refresh_elapsed += delta
@@ -62,21 +90,26 @@ func _build_desktop() -> void:
 	_build_start_menu()
 	_build_quick_settings()
 	_build_mission_hint()
+	_layout_shell_for_viewport()
 
 func _add_desktop_icon(parent: VBoxContainer, glyph: String, caption: String, callback: Callable) -> void:
 	var button := Button.new()
-	button.custom_minimum_size = Vector2(112, 70)
+	button.custom_minimum_size = Vector2(112, 76)
 	button.text = "%s\n%s" % [glyph, caption]
+	button.tooltip_text = caption
 	button.add_theme_font_size_override("font_size", 13)
 	button.add_theme_color_override("font_color", Color.WHITE)
-	button.add_theme_stylebox_override("normal", _flat_style(Color(0.1, 0.2, 0.38, 0.15)))
-	button.add_theme_stylebox_override("hover", _flat_style(Color(0.55, 0.7, 0.95, 0.25)))
+	button.add_theme_stylebox_override("normal", _flat_style(Color(0.1, 0.2, 0.38, 0.08), 7))
+	button.add_theme_stylebox_override("hover", _flat_style(Color(0.55, 0.7, 0.95, 0.28), 7))
+	button.add_theme_stylebox_override("pressed", _flat_style(Color(0.55, 0.7, 0.95, 0.42), 7))
+	button.focus_mode = Control.FOCUS_NONE
 	button.pressed.connect(callback)
 	parent.add_child(button)
 
 func _build_taskbar() -> void:
 	# Floating, centered taskbar inspired by Windows 11.
-	var taskbar := PanelContainer.new()
+	_taskbar = PanelContainer.new()
+	var taskbar := _taskbar
 	taskbar.name = "FloatingTaskbar"
 	taskbar.anchor_left = 0.5
 	taskbar.anchor_top = 1.0
