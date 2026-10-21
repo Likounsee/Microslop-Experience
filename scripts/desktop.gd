@@ -727,7 +727,7 @@ func _update_taskbar_indicators() -> void:
 		if not is_instance_valid(button):
 			continue
 		var app := _find_app_window(str(app_id))
-		var active := is_instance_valid(app) and app.visible
+		var active := is_instance_valid(app) and app.visible and str(_active_app_id) == str(app_id)
 		button.add_theme_stylebox_override("normal", _flat_style(Color(0.38, 0.60, 0.88, 0.22) if active else Color(0.0, 0.0, 0.0, 0.0), 7))
 		button.add_theme_stylebox_override("pressed", _flat_style(Color(0.38, 0.60, 0.88, 0.42), 7))
 		var marker = button.get_meta("active_marker", null)
@@ -863,7 +863,7 @@ func _build_start_menu() -> void:
 	account.add_theme_color_override("font_color", Color("263247"))
 	account.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 8))
 	account.add_theme_stylebox_override("hover", _flat_style(Color("e1e9f5"), 8))
-	account.pressed.connect(func(): _show_notification("Compte Microslop", "Synchronisation activée. Vos préférences publicitaires ont été synchronisées."))
+	account.pressed.connect(func(): _show_account_menu(account))
 	profile_row.add_child(account)
 	var power := Button.new()
 	power.text = "⏻"
@@ -873,9 +873,7 @@ func _build_start_menu() -> void:
 	power.add_theme_color_override("font_color", Color("263247"))
 	power.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 8))
 	power.add_theme_stylebox_override("hover", _flat_style(Color("e1e9f5"), 8))
-	power.pressed.connect(func():
-		_show_notification("Options d’alimentation", "Veille, redémarrage et arrêt sont simulés dans Microslop Experience.")
-	)
+	power.pressed.connect(func(): _show_power_menu(power))
 	profile_row.add_child(power)
 
 func _build_notification_layer() -> void:
@@ -989,6 +987,37 @@ func _toggle_all_apps_view() -> void:
 		_recommended_heading.visible = not _all_apps_view and _start_search.text.strip_edges().is_empty()
 	if _all_apps_view and is_instance_valid(_start_search):
 		_start_search.grab_focus()
+
+func _show_account_menu(anchor: Control) -> void:
+	var popup := PopupMenu.new()
+	popup.add_item("Profil local", 0)
+	popup.add_separator()
+	popup.add_item("Paramètres du compte", 1)
+	popup.add_item("Verrouiller", 2)
+	popup.id_pressed.connect(func(id: int):
+		match id:
+			0: _show_notification("Profil local", "Session locale Microslop.")
+			1: _open_settings()
+			2: _show_notification("Écran verrouillé", "Le verrouillage est simulé dans ce prototype.")
+	)
+	add_child(popup)
+	popup.popup(Rect2i(Vector2i(anchor.get_global_rect().position), Vector2i(220, 120)))
+	popup.popup_hide.connect(popup.queue_free)
+
+func _show_power_menu(anchor: Control) -> void:
+	var popup := PopupMenu.new()
+	popup.add_item("Veille", 0)
+	popup.add_item("Redémarrer", 1)
+	popup.add_item("Arrêter", 2)
+	popup.id_pressed.connect(func(id: int):
+		match id:
+			0: _show_notification("Veille", "La mise en veille est simulée.")
+			1: _show_notification("Redémarrage", "Le redémarrage est simulé ; votre session reste ouverte.")
+			2: _show_notification("Arrêt", "L’arrêt est simulé ; Microslop Experience reste en cours d’exécution.")
+	)
+	add_child(popup)
+	popup.popup(Rect2i(Vector2i(anchor.get_global_rect().position), Vector2i(180, 100)))
+	popup.popup_hide.connect(popup.queue_free)
 
 func _add_menu_button(parent: VBoxContainer, caption: String, callback: Callable) -> void:
 	var button := Button.new()
