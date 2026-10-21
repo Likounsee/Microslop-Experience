@@ -31,6 +31,9 @@ var _pinned_heading_label: Label
 var _all_apps_button: Button
 var _start_search: LineEdit
 var _all_apps_view := false
+var _pinned_grid: GridContainer
+var _all_apps_list: VBoxContainer
+var _all_apps_entries: Array[Button] = []
 var _recommended_card: PanelContainer
 var _recommended_heading: Label
 var _taskbar_app_buttons: Dictionary = {}
@@ -799,6 +802,7 @@ func _build_start_menu() -> void:
 	pinned_header.add_child(all_apps)
 
 	var pinned := GridContainer.new()
+	_pinned_grid = pinned
 	pinned.columns = 3
 	pinned.add_theme_constant_override("h_separation", 6)
 	pinned.add_theme_constant_override("v_separation", 6)
@@ -809,6 +813,24 @@ func _build_start_menu() -> void:
 	_add_pinned_app(pinned, "✧", "Microslop AI", _open_ai)
 	_add_pinned_app(pinned, "↻", "Mise à jour", _trigger_update)
 	_add_pinned_app(pinned, "▧", "Corbeille", _open_recycle_bin)
+
+	var all_apps_scroll := ScrollContainer.new()
+	all_apps_scroll.name = "AllAppsScroll"
+	all_apps_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	all_apps_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	all_apps_scroll.custom_minimum_size.y = 240
+	all_apps_scroll.visible = false
+	layout.add_child(all_apps_scroll)
+	_all_apps_list = VBoxContainer.new()
+	_all_apps_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_all_apps_list.add_theme_constant_override("separation", 4)
+	all_apps_scroll.add_child(_all_apps_list)
+	_add_all_apps_entry("◎", "Microslop Browser", _open_browser)
+	_add_all_apps_entry("▤", "Explorateur de fichiers", _open_files)
+	_add_all_apps_entry("⚙", "Paramètres", _open_settings)
+	_add_all_apps_entry("✧", "Microslop AI", _open_ai)
+	_add_all_apps_entry("↻", "Mise à jour", _trigger_update)
+	_add_all_apps_entry("▧", "Corbeille", _open_recycle_bin)
 
 	_pinned_empty_label = Label.new()
 	_pinned_empty_label.text = "Aucune application correspondante"
@@ -968,8 +990,12 @@ func _filter_pinned_apps(query: String) -> void:
 			button.visible = normalized_query.is_empty() or app_name.contains(normalized_query)
 			if button.visible:
 				visible_count += 1
+	for button in _all_apps_entries:
+		if is_instance_valid(button):
+			var app_name := str(button.get_meta("app_name", ""))
+			button.visible = normalized_query.is_empty() or app_name.contains(normalized_query)
 	if is_instance_valid(_pinned_empty_label):
-		_pinned_empty_label.visible = not normalized_query.is_empty() and visible_count == 0
+		_pinned_empty_label.visible = not _all_apps_view and not normalized_query.is_empty() and visible_count == 0
 	if is_instance_valid(_recommended_card):
 		_recommended_card.visible = normalized_query.is_empty() and not _all_apps_view
 	if is_instance_valid(_recommended_heading):
@@ -977,6 +1003,12 @@ func _filter_pinned_apps(query: String) -> void:
 
 func _toggle_all_apps_view() -> void:
 	_all_apps_view = not _all_apps_view
+	if is_instance_valid(_pinned_grid):
+		_pinned_grid.visible = not _all_apps_view
+	if is_instance_valid(_all_apps_list):
+		_all_apps_list.get_parent().visible = _all_apps_view
+	if is_instance_valid(_pinned_empty_label):
+		_pinned_empty_label.visible = false
 	if is_instance_valid(_pinned_heading_label):
 		_pinned_heading_label.text = "Toutes les applications" if _all_apps_view else "Épinglé"
 	if is_instance_valid(_all_apps_button):
@@ -985,8 +1017,28 @@ func _toggle_all_apps_view() -> void:
 		_recommended_card.visible = not _all_apps_view and _start_search.text.strip_edges().is_empty()
 	if is_instance_valid(_recommended_heading):
 		_recommended_heading.visible = not _all_apps_view and _start_search.text.strip_edges().is_empty()
+	if is_instance_valid(_pinned_grid):
+		_pinned_grid.visible = not _all_apps_view
+	if is_instance_valid(_all_apps_list):
+		_all_apps_list.get_parent().visible = _all_apps_view
 	if _all_apps_view and is_instance_valid(_start_search):
 		_start_search.grab_focus()
+		_filter_pinned_apps(_start_search.text)
+
+func _add_all_apps_entry(glyph: String, caption: String, callback: Callable) -> void:
+	var button := Button.new()
+	button.text = "%s     %s" % [glyph, caption]
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.custom_minimum_size.y = 38
+	button.set_meta("app_name", caption.to_lower())
+	button.add_theme_font_size_override("font_size", 13)
+	button.add_theme_color_override("font_color", Color("263247"))
+	button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 7))
+	button.add_theme_stylebox_override("hover", _flat_style(Color("dce8f8"), 7))
+	button.pressed.connect(callback)
+	button.focus_mode = Control.FOCUS_NONE
+	_all_apps_entries.append(button)
+	_all_apps_list.add_child(button)
 
 func _show_account_menu(anchor: Control) -> void:
 	var popup := PopupMenu.new()
