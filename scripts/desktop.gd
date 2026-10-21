@@ -28,6 +28,7 @@ var _desktop_context_menu: PanelContainer
 var _pinned_buttons: Array[Button] = []
 var _pinned_empty_label: Label
 var _recommended_card: PanelContainer
+var _recommended_heading: Label
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED and is_instance_valid(_start_menu):
@@ -501,11 +502,11 @@ func _build_start_menu() -> void:
 	_pinned_empty_label.visible = false
 	layout.add_child(_pinned_empty_label)
 
-	var recommended := Label.new()
-	recommended.text = "Recommandé"
-	recommended.add_theme_font_size_override("font_size", 17)
-	recommended.add_theme_color_override("font_color", Color("1d2a40"))
-	layout.add_child(recommended)
+	_recommended_heading = Label.new()
+	_recommended_heading.text = "Recommandé"
+	_recommended_heading.add_theme_font_size_override("font_size", 17)
+	_recommended_heading.add_theme_color_override("font_color", Color("1d2a40"))
+	layout.add_child(_recommended_heading)
 
 	_recommended_card = PanelContainer.new()
 	var recommended_card := _recommended_card
@@ -630,6 +631,8 @@ func _filter_pinned_apps(query: String) -> void:
 		_pinned_empty_label.visible = not normalized_query.is_empty() and visible_count == 0
 	if is_instance_valid(_recommended_card):
 		_recommended_card.visible = normalized_query.is_empty()
+	if is_instance_valid(_recommended_heading):
+		_recommended_heading.visible = normalized_query.is_empty()
 
 func _add_menu_button(parent: VBoxContainer, caption: String, callback: Callable) -> void:
 	var button := Button.new()
