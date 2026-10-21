@@ -151,15 +151,33 @@ func _build_taskbar() -> void:
 	row.add_child(left_spacer)
 
 	var start_button := Button.new()
-	start_button.text = "⊞"
+	start_button.text = ""
 	start_button.tooltip_text = "Démarrer"
 	start_button.custom_minimum_size = Vector2(44, 42)
-	start_button.add_theme_font_size_override("font_size", 28)
-	start_button.add_theme_color_override("font_color", Color("0878d1"))
 	start_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 9))
 	start_button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 9))
 	start_button.pressed.connect(_toggle_start_menu)
 	start_button.focus_mode = Control.FOCUS_NONE
+	var windows_logo := GridContainer.new()
+	windows_logo.columns = 2
+	windows_logo.add_theme_constant_override("h_separation", 2)
+	windows_logo.add_theme_constant_override("v_separation", 2)
+	windows_logo.anchor_left = 0.5
+	windows_logo.anchor_top = 0.5
+	windows_logo.anchor_right = 0.5
+	windows_logo.anchor_bottom = 0.5
+	windows_logo.offset_left = -9
+	windows_logo.offset_top = -9
+	windows_logo.offset_right = 9
+	windows_logo.offset_bottom = 9
+	windows_logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for i in range(4):
+		var pane := ColorRect.new()
+		pane.color = Color("0878d1")
+		pane.custom_minimum_size = Vector2(8, 8)
+		pane.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		windows_logo.add_child(pane)
+	start_button.add_child(windows_logo)
 	row.add_child(start_button)
 
 	var search_button := Button.new()
