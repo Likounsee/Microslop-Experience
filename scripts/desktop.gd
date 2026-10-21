@@ -119,16 +119,57 @@ func _build_desktop() -> void:
 
 func _add_desktop_icon(parent: VBoxContainer, glyph: String, caption: String, callback: Callable) -> void:
 	var button := Button.new()
-	button.custom_minimum_size = Vector2(112, 76)
-	button.text = "%s\n%s" % [glyph, caption]
-	button.tooltip_text = caption
-	button.add_theme_font_size_override("font_size", 13)
+	button.custom_minimum_size = Vector2(104, 92)
+	button.tooltip_text = "%s — double-cliquez pour ouvrir" % caption
 	button.add_theme_color_override("font_color", Color.WHITE)
-	button.add_theme_stylebox_override("normal", _flat_style(Color(0.1, 0.2, 0.38, 0.08), 7))
-	button.add_theme_stylebox_override("hover", _flat_style(Color(0.55, 0.7, 0.95, 0.28), 7))
-	button.add_theme_stylebox_override("pressed", _flat_style(Color(0.55, 0.7, 0.95, 0.42), 7))
+	button.add_theme_stylebox_override("normal", _flat_style(Color(0.1, 0.2, 0.38, 0.0), 7))
+	button.add_theme_stylebox_override("hover", _flat_style(Color(0.55, 0.7, 0.95, 0.22), 7))
+	button.add_theme_stylebox_override("pressed", _flat_style(Color(0.35, 0.55, 0.88, 0.42), 7))
 	button.focus_mode = Control.FOCUS_NONE
-	button.pressed.connect(callback)
+	var content := VBoxContainer.new()
+	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.alignment = BoxContainer.ALIGNMENT_CENTER
+	content.add_theme_constant_override("separation", 5)
+	content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	button.add_child(content)
+	var icon_tile := PanelContainer.new()
+	icon_tile.custom_minimum_size = Vector2(40, 40)
+	icon_tile.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	var tile_color := Color("0878d1")
+	if caption == "Corbeille":
+		tile_color = Color("4c9bd6")
+	elif caption == "Fichiers":
+		tile_color = Color("d9a62e")
+	icon_tile.add_theme_stylebox_override("panel", _flat_style(tile_color, 9))
+	content.add_child(icon_tile)
+	var icon_label := Label.new()
+	icon_label.text = glyph
+	icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	icon_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	icon_label.add_theme_font_size_override("font_size", 22)
+	icon_label.add_theme_color_override("font_color", Color.WHITE)
+	icon_tile.add_child(icon_label)
+	var caption_label := Label.new()
+	caption_label.text = caption
+	caption_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	caption_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	caption_label.add_theme_font_size_override("font_size", 11)
+	caption_label.add_theme_color_override("font_color", Color.WHITE)
+	caption_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
+	caption_label.add_theme_constant_override("shadow_offset_x", 1)
+	caption_label.add_theme_constant_override("shadow_offset_y", 1)
+	content.add_child(caption_label)
+	button.pressed.connect(func():
+		for sibling in parent.get_children():
+			if sibling is Button:
+				sibling.add_theme_stylebox_override("normal", _flat_style(Color(0.1, 0.2, 0.38, 0.0), 7))
+		button.add_theme_stylebox_override("normal", _flat_style(Color(0.35, 0.55, 0.88, 0.36), 7))
+	)
+	button.gui_input.connect(func(event: InputEvent):
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.double_click:
+			callback.call()
+			button.accept_event()
+	)
 	parent.add_child(button)
 
 func _build_taskbar() -> void:
@@ -223,7 +264,7 @@ func _build_taskbar() -> void:
 	row.add_child(_tray_button)
 
 	_clock_button = Button.new()
-	_clock_button.text = "%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system().replace("-", "/")]
+	_clock_button.text = "%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), _get_short_french_date()]
 	_clock_button.tooltip_text = "Calendrier et notifications"
 	_clock_button.custom_minimum_size = Vector2(92, 48)
 	_clock_button.add_theme_font_size_override("font_size", 11)
@@ -295,6 +336,10 @@ func _build_calendar_panel() -> void:
 	notifications_button.add_theme_stylebox_override("hover", _flat_style(Color("d1e2f7"), 9))
 	notifications_button.pressed.connect(_toggle_notification_center)
 	layout.add_child(notifications_button)
+
+func _get_short_french_date() -> String:
+	var date := Time.get_date_dict_from_system()
+	return "%02d/%02d/%04d" % [date.day, date.month, date.year]
 
 func _get_french_long_date() -> String:
 	var date := Time.get_date_dict_from_system()
