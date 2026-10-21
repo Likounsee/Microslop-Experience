@@ -48,13 +48,6 @@ func _layout_shell_for_viewport() -> void:
 		_quick_settings_panel.offset_top = -(panel_height + 76.0)
 		_quick_settings_panel.offset_bottom = -76.0
 
-func _process(delta: float) -> void:
-	_clock_refresh_elapsed += delta
-	if _clock_refresh_elapsed >= 1.0:
-		_clock_refresh_elapsed = 0.0
-		if is_instance_valid(_tray_button):
-			_tray_button.text = "⌃  ◖  ◉  🔊  🔋\n%s  ·  %s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system().replace("-", "/")]
-
 func _ready() -> void:
 	_load_progress()
 	_build_desktop()
