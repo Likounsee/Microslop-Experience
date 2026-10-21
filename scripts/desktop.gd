@@ -210,7 +210,7 @@ func _open_window(title: String, message: String, window_size := Vector2(520, 30
 	_start_open = false
 	var app: Control = AppWindow.new()
 	_window_layer.add_child(app)
-	app.configure(title, message, window_size)
+	app.call("configure", title, message, window_size)
 	app.position = (get_viewport_rect().size - window_size) / 2.0
 	app.z_index = 20 + _window_layer.get_child_count()
 	return app
