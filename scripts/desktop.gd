@@ -11,6 +11,8 @@ var _start_menu: PanelContainer
 var _notification_layer: VBoxContainer
 var _clock_label: Label
 var _tray_button: Button
+var _clock_button: Button
+var _calendar_panel: PanelContainer
 var _quick_settings_panel: PanelContainer
 var _start_open := false
 var _mission_label: Label
@@ -43,6 +45,13 @@ func _layout_shell_for_viewport() -> void:
 		_start_menu.offset_right = menu_width / 2.0
 		_start_menu.offset_top = -(menu_height + TASKBAR_HEIGHT + 12.0)
 		_start_menu.offset_bottom = -(TASKBAR_HEIGHT + 12.0)
+	if is_instance_valid(_calendar_panel):
+		var calendar_width := minf(340.0, maxf(280.0, viewport_size.x - 24.0))
+		var calendar_height := minf(360.0, maxf(280.0, viewport_size.y - 96.0))
+		_calendar_panel.offset_left = -calendar_width - 12.0
+		_calendar_panel.offset_right = -12.0
+		_calendar_panel.offset_top = -(calendar_height + 76.0)
+		_calendar_panel.offset_bottom = -76.0
 	if is_instance_valid(_quick_settings_panel):
 		var panel_width := minf(336.0, maxf(280.0, viewport_size.x - 24.0))
 		var panel_height := minf(350.0, maxf(260.0, viewport_size.y - 96.0))
@@ -88,6 +97,7 @@ func _build_desktop() -> void:
 	_build_taskbar()
 	_build_start_menu()
 	_build_quick_settings()
+	_build_calendar_panel()
 	_build_mission_hint()
 	_layout_shell_for_viewport()
 
@@ -167,9 +177,9 @@ func _build_taskbar() -> void:
 	row.add_child(right_spacer)
 
 	_tray_button = Button.new()
-	_tray_button.text = "⌃  ◖  ◉  🔊  🔋\n%s  ·  %s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system().replace("-", "/")]
-	_tray_button.tooltip_text = "Zone de notification"
-	_tray_button.custom_minimum_size = Vector2(150, 48)
+	_tray_button.text = "⌃  ◖  ◉  🔊  🔋"
+	_tray_button.tooltip_text = "Paramètres rapides"
+	_tray_button.custom_minimum_size = Vector2(76, 48)
 	_tray_button.add_theme_font_size_override("font_size", 11)
 	_tray_button.add_theme_color_override("font_color", Color("24344d"))
 	_tray_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 9))
@@ -177,6 +187,99 @@ func _build_taskbar() -> void:
 	_tray_button.pressed.connect(_toggle_quick_settings)
 	_tray_button.focus_mode = Control.FOCUS_NONE
 	row.add_child(_tray_button)
+
+	_clock_button = Button.new()
+	_clock_button.text = "%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system().replace("-", "/")]
+	_clock_button.tooltip_text = "Calendrier et notifications"
+	_clock_button.custom_minimum_size = Vector2(92, 48)
+	_clock_button.add_theme_font_size_override("font_size", 11)
+	_clock_button.add_theme_color_override("font_color", Color("24344d"))
+	_clock_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 9))
+	_clock_button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 9))
+	_clock_button.pressed.connect(_toggle_calendar)
+	_clock_button.focus_mode = Control.FOCUS_NONE
+	row.add_child(_clock_button)
+
+func _build_calendar_panel() -> void:
+	_calendar_panel = PanelContainer.new()
+	_calendar_panel.name = "CalendarPanel"
+	_calendar_panel.anchor_left = 1.0
+	_calendar_panel.anchor_right = 1.0
+	_calendar_panel.anchor_top = 1.0
+	_calendar_panel.anchor_bottom = 1.0
+	_calendar_panel.offset_left = -340
+	_calendar_panel.offset_right = -12
+	_calendar_panel.offset_top = -420
+	_calendar_panel.offset_bottom = -76
+	_calendar_panel.visible = false
+	var panel_style := _flat_style(Color(0.94, 0.96, 0.99, 0.98), 18)
+	panel_style.shadow_color = Color(0.02, 0.04, 0.10, 0.30)
+	panel_style.shadow_size = 20
+	panel_style.shadow_offset = Vector2(0, 5)
+	panel_style.set_border_width_all(1)
+	panel_style.border_color = Color(1, 1, 1, 0.70)
+	_calendar_panel.add_theme_stylebox_override("panel", panel_style)
+	add_child(_calendar_panel)
+
+	var margin := MarginContainer.new()
+	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+		margin.add_theme_constant_override(side, 18)
+	_calendar_panel.add_child(margin)
+	var layout := VBoxContainer.new()
+	layout.add_theme_constant_override("separation", 12)
+	margin.add_child(layout)
+
+	var heading := Label.new()
+	heading.text = "Calendrier"
+	heading.add_theme_font_size_override("font_size", 18)
+	heading.add_theme_color_override("font_color", Color("1d2a40"))
+	layout.add_child(heading)
+
+	var today := Label.new()
+	today.text = _get_french_long_date()
+	today.add_theme_font_size_override("font_size", 25)
+	today.add_theme_color_override("font_color", Color("1d2a40"))
+	layout.add_child(today)
+
+	var divider := HSeparator.new()
+	layout.add_child(divider)
+	var agenda_heading := Label.new()
+	agenda_heading.text = "Aujourd’hui"
+	agenda_heading.add_theme_font_size_override("font_size", 14)
+	agenda_heading.add_theme_color_override("font_color", Color("24344d"))
+	layout.add_child(agenda_heading)
+	var agenda := Label.new()
+	agenda.text = "Aucun événement prévu.\nProfitez de ce moment sans réunion."
+	agenda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	agenda.add_theme_color_override("font_color", Color("596780"))
+	layout.add_child(agenda)
+	var notifications_button := Button.new()
+	notifications_button.text = "Ouvrir le centre de notifications"
+	notifications_button.custom_minimum_size.y = 38
+	notifications_button.add_theme_color_override("font_color", Color("24344d"))
+	notifications_button.add_theme_stylebox_override("normal", _flat_style(Color("e1eaf7"), 9))
+	notifications_button.add_theme_stylebox_override("hover", _flat_style(Color("d1e2f7"), 9))
+	notifications_button.pressed.connect(func():
+		_calendar_panel.visible = false
+		_show_notification("Centre de notifications", "Vous êtes à jour. Microslop n’a rien trouvé de plus à vous vendre… pour le moment.")
+	)
+	layout.add_child(notifications_button)
+
+func _get_french_long_date() -> String:
+	var date := Time.get_date_dict_from_system()
+	var weekdays := ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+	var months := ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
+	var weekday_index := int(Time.get_datetime_dict_from_system().weekday) - 1
+	weekday_index = posmod(weekday_index, weekdays.size())
+	return "%s %d %s %d" % [weekdays[weekday_index], date.day, months[date.month - 1], date.year]
+
+func _toggle_calendar() -> void:
+	var should_open := not _calendar_panel.visible
+	if should_open:
+		_start_menu.visible = false
+		_start_open = false
+		_quick_settings_panel.visible = false
+	_animate_flyout(_calendar_panel, should_open, true)
 
 func _build_quick_settings() -> void:
 	_quick_settings_panel = PanelContainer.new()
@@ -948,8 +1051,8 @@ func _process(delta: float) -> void:
 	_clock_refresh_elapsed += delta
 	if _clock_refresh_elapsed >= 1.0:
 		_clock_refresh_elapsed = 0.0
-		if is_instance_valid(_tray_button):
-			_tray_button.text = "⌃  ◖  ◉  🔊  🔋\n%s  ·  %s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system().replace("-", "/")]
+		if is_instance_valid(_clock_button):
+			_clock_button.text = "%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), Time.get_date_string_from_system().replace("-", "/")]
 	_event_elapsed += delta
 	if _event_elapsed >= 75.0:
 		_event_elapsed = 0.0
