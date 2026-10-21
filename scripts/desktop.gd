@@ -24,22 +24,27 @@ func _ready() -> void:
 	_update_mission()
 
 func _build_desktop() -> void:
+	# Procedural blue bloom wallpaper inspired by the Windows 11 default aesthetic.
 	var wallpaper := ColorRect.new()
-	wallpaper.color = Color("172d55")
 	wallpaper.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	wallpaper.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var wallpaper_shader := Shader.new()
+	wallpaper_shader.code = """
+shader_type canvas_item;
+void fragment() {
+	vec2 uv = UV;
+	vec3 base = vec3(0.025, 0.055, 0.16);
+	float bloom_a = exp(-((uv.x - 0.72) * (uv.x - 0.72) * 7.0 + (uv.y - 0.48) * (uv.y - 0.48) * 4.0));
+	float bloom_b = exp(-((uv.x - 0.45) * (uv.x - 0.45) * 18.0 + (uv.y - 0.56) * (uv.y - 0.56) * 18.0));
+	float bloom_c = exp(-((uv.x - 0.82) * (uv.x - 0.82) * 20.0 + (uv.y - 0.25) * (uv.y - 0.25) * 22.0));
+	vec3 color = base + vec3(0.02, 0.12, 0.35) * bloom_a + vec3(0.05, 0.28, 0.68) * bloom_b + vec3(0.1, 0.24, 0.55) * bloom_c;
+	COLOR = vec4(color, 1.0);
+}
+"""
+	var wallpaper_material := ShaderMaterial.new()
+	wallpaper_material.shader = wallpaper_shader
+	wallpaper.material = wallpaper_material
 	add_child(wallpaper)
-
-	var glow := ColorRect.new()
-	glow.color = Color(0.15, 0.35, 0.66, 0.42)
-	glow.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	wallpaper.add_child(glow)
-
-	var wallpaper_title := Label.new()
-	wallpaper_title.text = "microslop"
-	wallpaper_title.position = Vector2(36, 28)
-	wallpaper_title.add_theme_font_size_override("font_size", 20)
-	wallpaper_title.add_theme_color_override("font_color", Color(0.88, 0.93, 1.0, 0.9))
-	add_child(wallpaper_title)
 
 	var desktop_icons := VBoxContainer.new()
 	desktop_icons.position = Vector2(24, 84)
@@ -78,51 +83,82 @@ func _build_taskbar() -> void:
 	taskbar.anchor_bottom = 1.0
 	taskbar.offset_top = -TASKBAR_HEIGHT
 	taskbar.offset_bottom = 0
-	taskbar.add_theme_stylebox_override("panel", _flat_style(Color(0.055, 0.075, 0.12, 0.94)))
+	taskbar.add_theme_stylebox_override("panel", _flat_style(Color(0.91, 0.94, 0.99, 0.82), 0))
 	add_child(taskbar)
 
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
+	row.add_theme_constant_override("separation", 6)
 	taskbar.add_child(row)
+	var left_spacer := Control.new()
+	left_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(left_spacer)
 
 	var start_button := Button.new()
 	start_button.text = "⊞"
 	start_button.tooltip_text = "Démarrer"
-	start_button.custom_minimum_size = Vector2(48, 42)
-	start_button.add_theme_font_size_override("font_size", 24)
+	start_button.custom_minimum_size = Vector2(46, 42)
+	start_button.add_theme_font_size_override("font_size", 28)
+	start_button.add_theme_color_override("font_color", Color("0878d1"))
+	start_button.add_theme_stylebox_override("normal", _flat_style(Color(0.0, 0.0, 0.0, 0.0), 7))
+	start_button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 7))
 	start_button.pressed.connect(_toggle_start_menu)
 	row.add_child(start_button)
 
 	var search_button := Button.new()
-	search_button.text = "Rechercher (et afficher des résultats sponsorisés)"
-	search_button.custom_minimum_size.x = 300
-	search_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	search_button.text = "⌕  Rechercher"
+	search_button.tooltip_text = "Rechercher"
+	search_button.custom_minimum_size = Vector2(150, 42)
+	search_button.add_theme_color_override("font_color", Color("24344d"))
+	search_button.add_theme_stylebox_override("normal", _flat_style(Color(1, 1, 1, 0.72), 7))
+	search_button.add_theme_stylebox_override("hover", _flat_style(Color(1, 1, 1, 0.96), 7))
 	search_button.pressed.connect(_open_search)
 	row.add_child(search_button)
 
-	var settings_button := Button.new()
-	settings_button.text = "⚙ Paramètres"
-	settings_button.pressed.connect(_open_settings)
-	row.add_child(settings_button)
+	_add_taskbar_app(row, "🌐", "Microslop Browser", _open_browser)
+	_add_taskbar_app(row, "📁", "Explorateur de fichiers", _open_files)
+	_add_taskbar_app(row, "⚙", "Paramètres", _open_settings)
+	_add_taskbar_app(row, "↻", "Mise à jour", _trigger_update)
 
-	var update_button := Button.new()
-	update_button.text = "↻ Mise à jour"
-	update_button.pressed.connect(_trigger_update)
-	row.add_child(update_button)
+	var right_spacer := Control.new()
+	right_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(right_spacer)
 
-	_clock_label = Label.new()
-	_clock_label.text = Time.get_time_string_from_system().substr(0, 5)
-	_clock_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_clock_label.add_theme_color_override("font_color", Color.WHITE)
-	_clock_label.custom_minimum_size.x = 70
-	row.add_child(_clock_label)
+	var tray := Button.new()
+	tray.text = "⌃  ◖  ◉  Wi-Fi  🔊  🔋\n%s\n21/10/2026" % Time.get_time_string_from_system().substr(0, 5)
+	tray.tooltip_text = "Zone de notification"
+	tray.custom_minimum_size = Vector2(150, 48)
+	tray.add_theme_font_size_override("font_size", 11)
+	tray.add_theme_color_override("font_color", Color("24344d"))
+	tray.add_theme_stylebox_override("normal", _flat_style(Color(0.0, 0.0, 0.0, 0.0), 7))
+	tray.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.18), 7))
+	tray.pressed.connect(func(): _show_notification("Paramètres rapides", "Wi-Fi connecté à MicroslopNet. Batterie : 100 %. Une mise à jour est recommandée."))
+	row.add_child(tray)
+
+func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, callback: Callable) -> void:
+	var button := Button.new()
+	button.text = glyph
+	button.tooltip_text = tooltip
+	button.custom_minimum_size = Vector2(44, 42)
+	button.add_theme_font_size_override("font_size", 19)
+	button.add_theme_color_override("font_color", Color("24344d"))
+	button.add_theme_stylebox_override("normal", _flat_style(Color(0.0, 0.0, 0.0, 0.0), 7))
+	button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.22), 7))
+	button.add_theme_stylebox_override("pressed", _flat_style(Color(0.4, 0.58, 0.82, 0.36), 7))
+	button.pressed.connect(callback)
+	parent.add_child(button)
 
 func _build_start_menu() -> void:
 	_start_menu = PanelContainer.new()
-	_start_menu.position = Vector2(18, 180)
-	_start_menu.size = Vector2(340, 420)
+	_start_menu.anchor_left = 0.5
+	_start_menu.anchor_right = 0.5
+	_start_menu.anchor_top = 1.0
+	_start_menu.anchor_bottom = 1.0
+	_start_menu.offset_left = -310
+	_start_menu.offset_right = 310
+	_start_menu.offset_top = -(TASKBAR_HEIGHT + 520)
+	_start_menu.offset_bottom = -(TASKBAR_HEIGHT + 12)
 	_start_menu.visible = false
-	_start_menu.add_theme_stylebox_override("panel", _flat_style(Color("f4f6fb")))
+	_start_menu.add_theme_stylebox_override("panel", _flat_style(Color(0.94, 0.96, 0.99, 0.96), 18))
 	add_child(_start_menu)
 
 	var margin := MarginContainer.new()
@@ -134,9 +170,21 @@ func _build_start_menu() -> void:
 	layout.add_theme_constant_override("separation", 10)
 	margin.add_child(layout)
 
+	var search := LineEdit.new()
+	search.placeholder_text = "Rechercher des applications, paramètres et documents"
+	search.custom_minimum_size.y = 40
+	search.add_theme_color_override("font_color", Color("1d2a40"))
+	search.add_theme_stylebox_override("normal", _flat_style(Color.WHITE, 10))
+	search.text_submitted.connect(func(query: String):
+		_start_menu.visible = false
+		_start_open = false
+		_open_window("Recherche Microslop", "Résultats pour : « %s »\n\nMicroslop AI — recommandé\nMicroslop Premium — SPONSORISÉ\nLe résultat que vous cherchiez (peut-être)." % query, Vector2(560, 300))
+	)
+	layout.add_child(search)
+
 	var heading := Label.new()
-	heading.text = "Démarrer"
-	heading.add_theme_font_size_override("font_size", 24)
+	heading.text = "Épinglé"
+	heading.add_theme_font_size_override("font_size", 18)
 	heading.add_theme_color_override("font_color", Color("1d2a40"))
 	layout.add_child(heading)
 
@@ -156,10 +204,12 @@ func _build_start_menu() -> void:
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	layout.add_child(spacer)
 
-	var account := Label.new()
-	account.text = "Connectez-vous pour profiter de votre expérience."
-	account.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	account.add_theme_color_override("font_color", Color("44516a"))
+	var account := Button.new()
+	account.text = "●  Enzo  ▾"
+	account.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	account.custom_minimum_size.y = 42
+	account.add_theme_color_override("font_color", Color("263247"))
+	account.pressed.connect(func(): _show_notification("Compte Microslop", "Synchronisation activée. Vos préférences publicitaires ont été synchronisées."))
 	layout.add_child(account)
 
 func _build_notification_layer() -> void:
@@ -504,10 +554,10 @@ func _trigger_system_event() -> void:
 	_event_index += 1
 	_show_notification(str(event[0]), str(event[1]))
 
-func _flat_style(color: Color) -> StyleBoxFlat:
+func _flat_style(color: Color, radius := 10) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = color
-	style.set_corner_radius_all(8)
+	style.set_corner_radius_all(radius)
 	style.content_margin_left = 8
 	style.content_margin_right = 8
 	style.content_margin_top = 6
