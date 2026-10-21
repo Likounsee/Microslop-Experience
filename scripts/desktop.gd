@@ -34,6 +34,7 @@ var _all_apps_view := false
 var _pinned_grid: GridContainer
 var _all_apps_list: VBoxContainer
 var _all_apps_entries: Array[Button] = []
+var _all_apps_empty_label: Label
 var _recommended_card: PanelContainer
 var _recommended_heading: Label
 var _taskbar_app_buttons: Dictionary = {}
@@ -769,7 +770,10 @@ func _build_start_menu() -> void:
 	var search := LineEdit.new()
 	_start_search = search
 	search.placeholder_text = "Rechercher des applications, paramètres et documents"
+	search.clear_button_enabled = true
 	search.custom_minimum_size.y = 40
+	search.add_theme_font_size_override("font_size", 13)
+	search.add_theme_color_override("caret_color", Color("0878d1"))
 	search.add_theme_color_override("font_color", Color("1d2a40"))
 	search.add_theme_stylebox_override("normal", _flat_style(Color.WHITE, 10))
 	search.text_changed.connect(_filter_pinned_apps)
@@ -831,6 +835,12 @@ func _build_start_menu() -> void:
 	_add_all_apps_entry("✧", "Microslop AI", _open_ai)
 	_add_all_apps_entry("↻", "Mise à jour", _trigger_update)
 	_add_all_apps_entry("▧", "Corbeille", _open_recycle_bin)
+	_all_apps_empty_label = Label.new()
+	_all_apps_empty_label.text = "Aucune application correspondante"
+	_all_apps_empty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_all_apps_empty_label.add_theme_color_override("font_color", Color("596780"))
+	_all_apps_empty_label.visible = false
+	_all_apps_list.add_child(_all_apps_empty_label)
 
 	_pinned_empty_label = Label.new()
 	_pinned_empty_label.text = "Aucune application correspondante"
@@ -999,6 +1009,7 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 func _filter_pinned_apps(query: String) -> void:
 	var normalized_query := query.strip_edges().to_lower()
 	var visible_count := 0
+	var all_apps_visible_count := 0
 	for button in _pinned_buttons:
 		if is_instance_valid(button):
 			var app_name := str(button.get_meta("app_name", ""))
@@ -1009,6 +1020,10 @@ func _filter_pinned_apps(query: String) -> void:
 		if is_instance_valid(button):
 			var app_name := str(button.get_meta("app_name", ""))
 			button.visible = normalized_query.is_empty() or app_name.contains(normalized_query)
+			if button.visible:
+				all_apps_visible_count += 1
+	if is_instance_valid(_all_apps_empty_label):
+		_all_apps_empty_label.visible = _all_apps_view and not normalized_query.is_empty() and all_apps_visible_count == 0
 	if is_instance_valid(_pinned_empty_label):
 		_pinned_empty_label.visible = not _all_apps_view and not normalized_query.is_empty() and visible_count == 0
 	if is_instance_valid(_recommended_card):
@@ -1018,10 +1033,6 @@ func _filter_pinned_apps(query: String) -> void:
 
 func _toggle_all_apps_view() -> void:
 	_all_apps_view = not _all_apps_view
-	if is_instance_valid(_pinned_grid):
-		_pinned_grid.visible = not _all_apps_view
-	if is_instance_valid(_all_apps_list):
-		_all_apps_list.get_parent().visible = _all_apps_view
 	if is_instance_valid(_pinned_empty_label):
 		_pinned_empty_label.visible = false
 	if is_instance_valid(_pinned_heading_label):
