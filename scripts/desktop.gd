@@ -1338,10 +1338,37 @@ func _input(event: InputEvent) -> void:
 				closed_flyout = true
 			if closed_flyout:
 				get_viewport().set_input_as_handled()
+		elif event.alt_pressed and event.keycode == KEY_F4:
+			_close_active_window()
+			get_viewport().set_input_as_handled()
+		elif event.ctrl_pressed and event.keycode == KEY_E:
+			_open_files()
+			get_viewport().set_input_as_handled()
+		elif event.ctrl_pressed and event.keycode == KEY_I:
+			_open_settings()
+			get_viewport().set_input_as_handled()
+		elif event.ctrl_pressed and event.keycode == KEY_A:
+			_toggle_quick_settings()
+			get_viewport().set_input_as_handled()
+		elif event.ctrl_pressed and event.keycode == KEY_N:
+			_toggle_notification_center()
+			get_viewport().set_input_as_handled()
+		elif event.ctrl_pressed and event.shift_pressed and event.keycode == KEY_ESCAPE:
+			_open_window("Gestionnaire des tâches", "Applications ouvertes : %d\n\nPerformances simulées · CPU : 7 % · Mémoire : 42 %." % _window_layer.get_child_count(), Vector2(500, 300))
+			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_F1:
 			_open_settings()
 		elif event.keycode == KEY_F2:
 			_advance_mission("Progression de la campagne avancée manuellement pour le prototype.")
+
+func _close_active_window() -> void:
+	if not is_instance_valid(_window_layer):
+		return
+	for index in range(_window_layer.get_child_count() - 1, -1, -1):
+		var window := _window_layer.get_child(index)
+		if window is Control and window.visible:
+			window.queue_free()
+			return
 
 func _is_pointer_over_window(pointer: Vector2) -> bool:
 	if not is_instance_valid(_window_layer):
