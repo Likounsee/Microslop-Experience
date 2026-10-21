@@ -6,6 +6,7 @@ var _drag_offset := Vector2.ZERO
 var _is_maximized := false
 var _restore_position := Vector2.ZERO
 var _restore_size := Vector2.ZERO
+var _snap_mode := ""
 
 func configure(title: String, message: String, window_size := Vector2(520, 300)) -> void:
 	custom_minimum_size = window_size
@@ -109,10 +110,19 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	content.add_child(text)
 
 func _toggle_maximize(button: Button = null) -> void:
-	if _is_maximized:
-		size = _restore_size
-		position = _restore_position
-		_is_maximized = false
+	if _is_maximized or _snap_mode != "":
+		if _snap_mode == "maximized" or _is_maximized:
+			size = _restore_size
+			position = _restore_position
+			_is_maximized = false
+			_snap_mode = ""
+		else:
+			_snap_mode = ""
+			_restore_size = size
+			_restore_position = position
+			size = get_viewport_rect().size
+			position = Vector2.ZERO
+			_is_maximized = true
 	else:
 		_restore_size = size
 		_restore_position = position
@@ -128,15 +138,42 @@ func _on_titlebar_input(event: InputEvent, _titlebar: Control) -> void:
 		_dragging = false
 		_toggle_maximize()
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		_dragging = event.pressed
-		if _dragging:
+		if event.pressed:
+			_dragging = true
 			_drag_offset = get_global_mouse_position() - global_position
 			move_to_front()
+		else:
+			var was_dragging := _dragging
+			_dragging = false
+			if was_dragging:
+				_snap_to_edge(get_global_mouse_position())
 	elif event is InputEventMouseMotion and _dragging:
 		global_position = get_global_mouse_position() - _drag_offset
 		var viewport_size := get_viewport_rect().size
 		position.x = clampf(position.x, -size.x + 120.0, viewport_size.x - 120.0)
 		position.y = clampf(position.y, 0.0, viewport_size.y - 48.0)
+
+func _snap_to_edge(pointer: Vector2) -> void:
+	var viewport_size := get_viewport_rect().size
+	const SNAP_MARGIN := 14.0
+	if pointer.y <= SNAP_MARGIN:
+		if not _is_maximized and _snap_mode == "":
+			_restore_size = size
+			_restore_position = position
+		size = viewport_size
+		position = Vector2.ZERO
+		_is_maximized = true
+		_snap_mode = "maximized"
+	elif pointer.x <= SNAP_MARGIN or pointer.x >= viewport_size.x - SNAP_MARGIN:
+		if not _is_maximized and _snap_mode == "":
+			_restore_size = size
+			_restore_position = position
+		size = Vector2(viewport_size.x / 2.0, viewport_size.y)
+		position = Vector2.ZERO if pointer.x <= SNAP_MARGIN else Vector2(viewport_size.x / 2.0, 0.0)
+		_is_maximized = false
+		_snap_mode = "left" if pointer.x <= SNAP_MARGIN else "right"
+	else:
+		_snap_mode = ""
 
 func _panel_style(background: Color, border: Color) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
