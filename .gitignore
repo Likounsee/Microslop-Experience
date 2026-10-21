@@ -1,0 +1,15 @@
+# Godot generated files
+.godot/
+.import/
+export.cfg
+export_presets.cfg
+
+# Local IDE/editor files
+.vscode/
+.idea/
+*.tmp
+*.bak
+
+# Build output
+build/
+dist/
