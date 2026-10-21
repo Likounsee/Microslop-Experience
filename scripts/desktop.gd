@@ -29,6 +29,8 @@ var _pinned_buttons: Array[Button] = []
 var _pinned_empty_label: Label
 var _recommended_card: PanelContainer
 var _recommended_heading: Label
+var _taskbar_app_buttons: Dictionary = {}
+var _active_app_id := ""
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED and is_instance_valid(_start_menu):
@@ -171,10 +173,10 @@ func _build_taskbar() -> void:
 	search_button.focus_mode = Control.FOCUS_NONE
 	row.add_child(search_button)
 
-	_add_taskbar_app(row, "◎", "Microslop Browser", _open_browser)
-	_add_taskbar_app(row, "▤", "Explorateur de fichiers", _open_files)
-	_add_taskbar_app(row, "⚙", "Paramètres", _open_settings)
-	_add_taskbar_app(row, "↻", "Mise à jour", _trigger_update)
+	_add_taskbar_app(row, "◎", "Microslop Browser", _open_browser, "browser")
+	_add_taskbar_app(row, "▤", "Explorateur de fichiers", _open_files, "files")
+	_add_taskbar_app(row, "⚙", "Paramètres", _open_settings, "settings")
+	_add_taskbar_app(row, "↻", "Mise à jour", _trigger_update, "update")
 
 	var right_spacer := Control.new()
 	right_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -408,7 +410,7 @@ func _toggle_quick_settings() -> void:
 		_calendar_panel.visible = false
 	_animate_flyout(_quick_settings_panel, should_open, true)
 
-func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, callback: Callable) -> void:
+func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, callback: Callable, app_id: String) -> void:
 	var button := Button.new()
 	button.text = glyph
 	button.tooltip_text = tooltip
@@ -418,8 +420,42 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 	button.add_theme_stylebox_override("normal", _flat_style(Color(0.0, 0.0, 0.0, 0.0), 7))
 	button.add_theme_stylebox_override("hover", _flat_style(Color(0.4, 0.58, 0.82, 0.22), 7))
 	button.add_theme_stylebox_override("pressed", _flat_style(Color(0.4, 0.58, 0.82, 0.36), 7))
-	button.pressed.connect(callback)
+	button.focus_mode = Control.FOCUS_NONE
+	button.set_meta("app_id", app_id)
+	_taskbar_app_buttons[app_id] = button
+	button.pressed.connect(func():
+		var existing := _find_app_window(app_id)
+		if is_instance_valid(existing):
+			if existing.visible and _active_app_id == app_id:
+				existing.hide()
+				_active_app_id = ""
+			else:
+				existing.show()
+				existing.move_to_front()
+				_active_app_id = app_id
+				_update_taskbar_indicators()
+		else:
+			callback.call()
+	)
 	parent.add_child(button)
+
+func _find_app_window(app_id: String) -> Control:
+	if not is_instance_valid(_window_layer):
+		return null
+	for child in _window_layer.get_children():
+		if child is Control and child.has_meta("app_id") and str(child.get_meta("app_id")) == app_id:
+			return child as Control
+	return null
+
+func _update_taskbar_indicators() -> void:
+	for app_id in _taskbar_app_buttons:
+		var button: Button = _taskbar_app_buttons[app_id]
+		if not is_instance_valid(button):
+			continue
+		var app := _find_app_window(str(app_id))
+		var active := is_instance_valid(app) and app.visible
+		button.add_theme_stylebox_override("normal", _flat_style(Color(0.38, 0.60, 0.88, 0.30) if active else Color(0.0, 0.0, 0.0, 0.0), 7))
+		button.add_theme_stylebox_override("pressed", _flat_style(Color(0.38, 0.60, 0.88, 0.42), 7))
 
 func _build_start_menu() -> void:
 	_start_menu = PanelContainer.new()
@@ -709,6 +745,14 @@ func _open_window(title: String, message: String, window_size := Vector2(520, 30
 	var app: Control = AppWindow.new()
 	_window_layer.add_child(app)
 	app.call("configure", title, message, window_size)
+	var app_id := _app_id_for_title(title)
+	app.set_meta("app_id", app_id)
+	app.visibility_changed.connect(_update_taskbar_indicators)
+	app.tree_exited.connect(func():
+		if _active_app_id == app_id:
+			_active_app_id = ""
+		_update_taskbar_indicators()
+	)
 	app.position = (get_viewport_rect().size - window_size) / 2.0
 	app.pivot_offset = window_size / 2.0
 	app.modulate.a = 0.0
@@ -718,7 +762,21 @@ func _open_window(title: String, message: String, window_size := Vector2(520, 30
 	appear.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	appear.tween_property(app, "modulate:a", 1.0, 0.16)
 	appear.tween_property(app, "scale", Vector2.ONE, 0.18)
+	_active_app_id = app_id
+	_update_taskbar_indicators()
 	return app
+
+func _app_id_for_title(title: String) -> String:
+	var normalized := title.to_lower()
+	if normalized.contains("browser"):
+		return "browser"
+	if normalized.contains("explorateur") or normalized.contains("fichiers"):
+		return "files"
+	if normalized.contains("paramètres"):
+		return "settings"
+	if normalized.contains("update") or normalized.contains("mise à jour"):
+		return "update"
+	return normalized
 
 func _open_files() -> void:
 	if _mission_step == 1:
