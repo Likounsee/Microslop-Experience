@@ -47,7 +47,7 @@ func _notification(what: int) -> void:
 func _layout_shell_for_viewport() -> void:
 	var viewport_size := get_viewport_rect().size
 	if is_instance_valid(_taskbar):
-		var taskbar_width := minf(780.0, maxf(440.0, viewport_size.x - 24.0))
+		var taskbar_width := minf(820.0, maxf(440.0, viewport_size.x - 24.0))
 		_taskbar.offset_left = -taskbar_width / 2.0
 		_taskbar.offset_right = taskbar_width / 2.0
 		_taskbar.offset_top = -70.0
