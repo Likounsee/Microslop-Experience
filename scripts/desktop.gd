@@ -26,6 +26,7 @@ var _wallpaper: TextureRect
 var _desktop_icons: VBoxContainer
 var _desktop_context_menu: PanelContainer
 var _quick_link_menu: PanelContainer
+var _task_view_panel: PanelContainer
 var _pinned_buttons: Array[Button] = []
 var _pinned_empty_label: Label
 var _pinned_heading_label: Label
@@ -2516,6 +2517,7 @@ func _open_window(title: String, message: String, window_size := Vector2(520, 30
 	var app_id := _app_id_for_title(title)
 
 	app.set_meta("app_id", app_id)
+	app.set_meta("window_title", title)
 
 	_recent_app_title = title
 
@@ -3709,6 +3711,14 @@ func _input(event: InputEvent) -> void:
 
 				closed_flyout = true
 
+			if is_instance_valid(_task_view_panel) and _task_view_panel.visible:
+
+				_task_view_panel.queue_free()
+
+				_task_view_panel = null
+
+				closed_flyout = true
+
 			if is_instance_valid(_desktop_context_menu) and is_instance_valid(_desktop_context_menu.get_parent()):
 
 				_desktop_context_menu.queue_free()
@@ -3721,6 +3731,9 @@ func _input(event: InputEvent) -> void:
 
 				get_viewport().set_input_as_handled()
 
+		elif event.meta_pressed and event.keycode == KEY_TAB:
+			_toggle_task_view()
+			get_viewport().set_input_as_handled()
 		elif event.meta_pressed and event.keycode == KEY_LEFT:
 			var active_window := _find_app_window(_active_app_id)
 			if is_instance_valid(active_window):
@@ -3980,6 +3993,138 @@ func _add_context_action(parent: VBoxContainer, caption: String, callback: Calla
 	)
 
 	parent.add_child(button)
+
+func _toggle_task_view() -> void:
+
+	if is_instance_valid(_task_view_panel):
+		_task_view_panel.queue_free()
+		_task_view_panel = null
+		return
+
+	_start_menu.visible = false
+	_start_open = false
+	_quick_settings_panel.visible = false
+	_calendar_panel.visible = false
+	if is_instance_valid(_notification_center):
+		_notification_center.visible = false
+	if is_instance_valid(_quick_link_menu):
+		_quick_link_menu.queue_free()
+		_quick_link_menu = null
+
+	_task_view_panel = PanelContainer.new()
+	_task_view_panel.name = "TaskViewPanel"
+	_task_view_panel.z_index = 120
+	_task_view_panel.custom_minimum_size = Vector2(560, 0)
+	_task_view_panel.anchor_left = 0.5
+	_task_view_panel.anchor_right = 0.5
+	_task_view_panel.anchor_top = 0.5
+	_task_view_panel.anchor_bottom = 0.5
+	_task_view_panel.offset_left = -280
+	_task_view_panel.offset_right = 280
+	_task_view_panel.offset_top = -190
+	_task_view_panel.offset_bottom = 190
+	var panel_style := _flat_style(Color(0.94, 0.96, 0.99, 0.97), 16)
+	panel_style.border_color = Color("d5deeb")
+	panel_style.set_border_width_all(1)
+	panel_style.shadow_color = Color(0.02, 0.04, 0.10, 0.28)
+	panel_style.shadow_size = 24
+	panel_style.shadow_offset = Vector2(0, 6)
+	_task_view_panel.add_theme_stylebox_override("panel", panel_style)
+
+	var layout := VBoxContainer.new()
+	layout.add_theme_constant_override("separation", 14)
+	layout.add_theme_constant_override("margin_left", 20)
+	layout.add_theme_constant_override("margin_right", 20)
+	layout.add_theme_constant_override("margin_top", 18)
+	layout.add_theme_constant_override("margin_bottom", 18)
+	_task_view_panel.add_child(layout)
+
+	var header := HBoxContainer.new()
+	var heading := Label.new()
+	heading.text = "Affichage des tâches"
+	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	heading.add_theme_color_override("font_color", Color("24344d"))
+	heading.add_theme_font_size_override("font_size", 20)
+	header.add_child(heading)
+	var close_button := Button.new()
+	close_button.text = "✕"
+	close_button.tooltip_text = "Fermer l’affichage des tâches"
+	close_button.custom_minimum_size = Vector2(36, 32)
+	close_button.add_theme_color_override("font_color", Color("24344d"))
+	close_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 8))
+	close_button.add_theme_stylebox_override("hover", _flat_style(Color("dce6f4"), 8))
+	close_button.pressed.connect(func():
+		if is_instance_valid(_task_view_panel):
+			_task_view_panel.queue_free()
+			_task_view_panel = null
+	)
+	header.add_child(close_button)
+	layout.add_child(header)
+
+	var subtitle := Label.new()
+	subtitle.text = "Sélectionnez une fenêtre pour y revenir"
+	subtitle.add_theme_color_override("font_color", Color("61718a"))
+	subtitle.add_theme_font_size_override("font_size", 12)
+	layout.add_child(subtitle)
+
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 12)
+	layout.add_child(grid)
+
+	var window_count := 0
+	if is_instance_valid(_window_layer):
+		for child in _window_layer.get_children():
+			if not child is Control or not child.has_meta("app_id"):
+				continue
+			var app_window := child as Control
+			var app_id := str(app_window.get_meta("app_id"))
+			var title := str(app_window.get_meta("window_title", "Application"))
+			var card := Button.new()
+			card.custom_minimum_size = Vector2(245, 92)
+			card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			card.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			card.text = "%s\n%s" % [_glyph_for_app_id(app_id), title]
+			card.tooltip_text = title
+			card.add_theme_color_override("font_color", Color("24344d"))
+			card.add_theme_font_size_override("font_size", 14)
+			card.add_theme_stylebox_override("normal", _flat_style(Color("ffffff"), 10))
+			card.add_theme_stylebox_override("hover", _flat_style(Color("e4efff"), 10))
+			card.add_theme_stylebox_override("pressed", _flat_style(Color("d5e5fb"), 10))
+			card.pressed.connect(_focus_task_view_app.bind(app_window))
+			grid.add_child(card)
+			window_count += 1
+
+	if window_count == 0:
+		var empty_label := Label.new()
+		empty_label.text = "Aucune fenêtre ouverte"
+		empty_label.add_theme_color_override("font_color", Color("61718a"))
+		layout.add_child(empty_label)
+
+	add_child(_task_view_panel)
+	_task_view_panel.modulate.a = 0.0
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_task_view_panel, "modulate:a", 1.0, 0.16)
+
+
+func _focus_task_view_app(app_window: Control) -> void:
+
+	if not is_instance_valid(app_window):
+		return
+	if not app_window.visible:
+		if app_window.has_method("restore_from_taskbar"):
+			app_window.call("restore_from_taskbar")
+		else:
+			app_window.show()
+	app_window.move_to_front()
+	_active_app_id = str(app_window.get_meta("app_id", ""))
+	_update_taskbar_indicators()
+	if is_instance_valid(_task_view_panel):
+		_task_view_panel.queue_free()
+		_task_view_panel = null
+
 
 func _toggle_quick_link_menu() -> void:
 
