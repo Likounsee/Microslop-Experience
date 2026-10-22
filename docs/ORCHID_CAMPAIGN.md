@@ -34,6 +34,14 @@ La narration alterne scènes visuelles, dialogues entre le joueur, Léa, Microsl
 
 La séquence se lance depuis l’archive ORCHID. Les trente marqueurs de progression sont inclus dans le tableau de synthèse ; fermer la fenêtre ne fait pas perdre les scènes déjà vues. Il s’agit de cinématiques intégrées à l’interface du jeu, pas de vidéos pré-rendues. La durée effective, la lisibilité des scènes longues et le comportement des transitions doivent encore être testés dans Godot.
 
+## Banc de test A/B jouable — métrique contre expérience utilisateur
+
+L’archive ORCHID donne accès à un banc de test où le joueur configure trois paramètres : le scénario (document, réunion ou désactivation des notifications), le moment de déclenchement et l’objectif du tableau de bord. Une option permet de faire respecter immédiatement le refus et le mode silencieux. Le bouton de lancement compare trois variantes sur huit profils fictifs : aucune interruption, interruption prédictive et interruption dont le refus est respecté.
+
+Le résultat affiche, pour chaque variante, le nombre de tâches terminées et le nombre de retours après notification. Le choix de métrique modifie la variante que le tableau de bord recommanderait. Dans certains scénarios, maximiser les retours favorise une variante qui fait moins terminer de tâches : le joueur voit alors explicitement le conflit entre engagement et utilité. Les résultats sont déterministes et pédagogiques, sans données réelles ni prétention de validité statistique. La configuration choisie et les pièces d’archive sont sauvegardées dans la progression existante ; le test peut être rejoué avec un autre objectif.
+
+Cette mécanique transforme une partie du thème en expérience manipulable plutôt qu’en dialogue seulement. À vérifier dans Godot : disposition des contrôles dans la fenêtre, lisibilité du rapport long et sauvegarde après fermeture/redémarrage.
+
 ## Structure de campagne
 
 ### Mission 1 — Premier contact
