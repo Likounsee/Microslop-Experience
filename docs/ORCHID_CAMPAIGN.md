@@ -251,3 +251,7 @@ Validation technique encore nécessaire : lancer le projet dans Godot, vérifier
 Le dossier transversal ne présente plus les dix étapes comme des situations isolées : certains choix antérieurs modifient le texte et le contexte des étapes ultérieures. Le réglage des notifications influence la lecture des métriques ; la qualité de collecte change la situation du témoignage ; le choix de reproduction influe sur la prudence du message ; la façon de lire les métriques modifie les exigences de remédiation. Les conséquences sont déterministes et fondées sur les choix sauvegardés, pas sur des données personnelles.
 
 Le tableau de campagne inclut maintenant les preuves du dossier transversal et les douze décisions de crise. La couverture affichée peut ainsi montrer les pièces de ces deux parcours avec les catégories déjà présentes.
+
+### Sprint de travail — reprise et conséquences différées
+
+La reprise du sprint accepte désormais la plage complète des treize tâches sauvegardées (au lieu de plafonner l’étape restaurée à cinq). Le choix du mode digest applique effectivement ce réglage au centre de notifications ; l’ouverture de la promotion est tracée séparément. Les tâches d’analyse des métriques, de vérification des alertes et de préparation du correctif réaffichent des conséquences liées aux choix antérieurs. Les scénarios restent fictifs ; la validation finale nécessite toujours un lancement du projet sous Godot.
