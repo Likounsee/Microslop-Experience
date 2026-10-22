@@ -3729,6 +3729,11 @@ func _open_orchid_archive() -> void:
 	casebook.pressed.connect(_open_orchid_casebook)
 	content.add_child(casebook)
 
+	var notification_controls := Button.new()
+	notification_controls.text = "Centre de contrôle ORCHID — gérer les interruptions"
+	notification_controls.pressed.connect(_open_orchid_notification_controls)
+	content.add_child(notification_controls)
+
 	var simulator := Button.new()
 	simulator.text = "Simuler un test A/B ORCHID — comparer engagement et réussite"
 	simulator.pressed.connect(_open_orchid_experiment_simulator)
@@ -4887,6 +4892,103 @@ func _open_orchid_casebook() -> void:
 
 ## A hands-on experiment simulator: configure a fictional cohort, run three variants,
 ## compare retention with task success, and preserve the result as campaign evidence.
+
+## Player-facing notification policy controls with real effects on simulated promo toasts.
+func _open_orchid_notification_controls() -> void:
+	var app := _open_window("Centre de contrôle — ORCHID", "RÉGLAGES DE NOTIFICATION · EFFET IMMÉDIAT", Vector2(720, 590))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	var intro := Label.new()
+	intro.text = "Le système affirme que chaque rappel est utile. Vous pouvez le vérifier en modifiant la politique, puis en générant des notifications de démonstration. Ces réglages ne touchent qu’au bureau fictif du jeu. Les notifications promotionnelles peuvent être affichées normalement, bloquées ou conservées uniquement dans le centre de notifications."
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	intro.custom_minimum_size = Vector2(0, 100)
+	content.add_child(intro)
+
+	var current := CampaignStore.load_case_answer("orchid_notification_mode")
+	if current < 0 or current > 2:
+		current = 0
+	var status := Label.new()
+	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	status.custom_minimum_size = Vector2(0, 54)
+	status.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(status)
+	var choice_buttons: Array[Button] = []
+	var modes := [
+		{"label":"Mode standard — tout afficher", "description":"Les rappels promotionnels et les alertes importantes apparaissent normalement."},
+		{"label":"Bloquer les notifications promotionnelles", "description":"Les promotions identifiées ne créent pas de toast. Les alertes système restent visibles."},
+		{"label":"Mode digest — garder dans l’historique", "description":"Les promotions n’interrompent plus l’écran ; elles restent consultables dans le centre de notifications."}
+	]
+	var refresh := func() -> void:
+		var selected := CampaignStore.load_case_answer("orchid_notification_mode")
+		if selected < 0 or selected > 2:
+			selected = 0
+		status.text = "POLITIQUE ACTIVE : %s\n%s" % [str(modes[selected]["label"]), str(modes[selected]["description"])]
+		for i in range(choice_buttons.size()):
+			choice_buttons[i].disabled = i == selected
+	for i in range(modes.size()):
+		var button := Button.new()
+		button.text = str(modes[i]["label"])
+		button.custom_minimum_size = Vector2(0, 42)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.pressed.connect(func() -> void:
+			if CampaignStore.save_case_answer("orchid_notification_mode", i):
+				CampaignStore.save_evidence("control_mode_%d" % i)
+				refresh.call()
+				_show_notification("Centre de contrôle", "La politique de notifications a été modifiée.")
+			else:
+				status.text = "Échec de sauvegarde. Réessayez."
+		)
+		choice_buttons.append(button)
+		content.add_child(button)
+	refresh.call()
+
+	var separator := HSeparator.new()
+	content.add_child(separator)
+	var demo_title := Label.new()
+	demo_title.text = "TESTER LE RÉSULTAT"
+	demo_title.add_theme_font_size_override("font_size", 16)
+	content.add_child(demo_title)
+	var result := Label.new()
+	result.text = "Lancez un exemple pour vérifier si le toast s’affiche, est bloqué ou reste dans l’historique."
+	result.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	result.custom_minimum_size = Vector2(0, 52)
+	content.add_child(result)
+
+	var promo := Button.new()
+	promo.text = "Envoyer une notification promotionnelle de test"
+	promo.pressed.connect(func() -> void:
+		var before := _notification_history.size()
+		var mode := CampaignStore.load_case_answer("orchid_notification_mode")
+		_show_notification("Suggestion personnalisée", "Un article de productivité sponsorisé vous attend. Cliquez maintenant pour prolonger votre expérience.")
+		if mode == 1:
+			result.text = "RÉSULTAT : toast bloqué. Le compteur de preuve « promotion bloquée » a été mis à jour."
+		elif mode == 2:
+			result.text = "RÉSULTAT : aucune interruption à l’écran. La notification est conservée dans l’historique du centre."
+		else:
+			result.text = "RÉSULTAT : notification affichée selon la politique standard."
+	)
+	content.add_child(promo)
+	var critical := Button.new()
+	critical.text = "Envoyer une alerte système de test"
+	critical.pressed.connect(func() -> void:
+		_show_notification("État du système", "Test terminé : aucune donnée réelle n’a été consultée.")
+		result.text = "RÉSULTAT : l’alerte système reste visible quel que soit le mode promotionnel."
+	)
+	content.add_child(critical)
+	var evidence := Button.new()
+	evidence.text = "Vérifier les preuves de fonctionnement"
+	evidence.pressed.connect(func() -> void:
+		var saved: Array = CampaignStore.load_evidence()
+		result.text = "Modes essayés : %s\nPromotions bloquées : %s\nPromotions mises en digest : %s" % [
+			", ".join(["standard" if saved.has("control_mode_0") else "", "blocage" if saved.has("control_mode_1") else "", "digest" if saved.has("control_mode_2") else ""]).strip_edges().replace(", ,", ","),
+			"oui" if saved.has("control_promo_blocked") else "pas encore",
+			"oui" if saved.has("control_promo_digest") else "pas encore"
+		]
+	)
+	content.add_child(evidence)
+
+
 func _open_orchid_experiment_simulator() -> void:
 	var app := _open_window("Banc de test A/B — ORCHID", "SIMULATION QA · DONNÉES FICTIVES", Vector2(800, 680))
 	var content := _get_window_content(app)
@@ -5794,6 +5896,21 @@ func _show_notification(title: String, message: String) -> void:
 
 		return
 
+	# ORCHID controls affect promotional toasts in the simulated desktop. System-critical
+	# notices still pass through. Modes: 0=normal, 1=block promo, 2=history-only digest.
+	var orchid_mode := CampaignStore.load_case_answer("orchid_notification_mode")
+	var notification_text := (title + " " + message).to_lower()
+	var is_promotional := notification_text.contains("suggestion") or notification_text.contains("sponsor") or notification_text.contains("productivité") or notification_text.contains("personnalisée") or notification_text.contains("article") or notification_text.contains("offre")
+	if is_promotional and orchid_mode == 1:
+		CampaignStore.save_evidence("control_promo_blocked")
+		return
+	if is_promotional and orchid_mode == 2:
+		_notification_history.append({"title": title, "message": message, "time": Time.get_time_string_from_system().substr(0, 5)})
+		while _notification_history.size() > 20:
+			_notification_history.pop_front()
+		_refresh_notification_center()
+		CampaignStore.save_evidence("control_promo_digest")
+		return
 	_notification_history.append({"title": title, "message": message, "time": Time.get_time_string_from_system().substr(0, 5)})
 
 	while _notification_history.size() > 20:
