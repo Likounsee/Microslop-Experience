@@ -143,6 +143,21 @@ func _layout_shell_for_viewport() -> void:
 
 		_quick_settings_panel.offset_bottom = -76.0
 
+	if is_instance_valid(_task_view_panel):
+		var task_view_width := minf(720.0, maxf(280.0, viewport_size.x - 24.0))
+		var task_view_height := minf(440.0, maxf(220.0, viewport_size.y - 96.0))
+		_task_view_panel.custom_minimum_size = Vector2(task_view_width, 0)
+		_task_view_panel.offset_left = -task_view_width / 2.0
+		_task_view_panel.offset_right = task_view_width / 2.0
+		_task_view_panel.offset_top = -task_view_height / 2.0
+		_task_view_panel.offset_bottom = task_view_height / 2.0
+		var task_grid := _task_view_panel.find_child("TaskViewGrid", true, false) as GridContainer
+		if is_instance_valid(task_grid):
+			task_grid.columns = 2 if viewport_size.x >= 620.0 else 1
+			for task_card in task_grid.get_children():
+				if task_card is Control:
+					task_card.custom_minimum_size.x = 245.0 if task_grid.columns == 2 else task_view_width - 64.0
+
 	if is_instance_valid(_notification_center):
 
 		var notification_width := minf(360.0, maxf(260.0, viewport_size.x - 24.0))
@@ -162,6 +177,9 @@ func _ready() -> void:
 	_load_progress()
 
 	_build_desktop()
+
+	# Reflow shell panels whenever the game window or display resolution changes.
+	get_viewport().size_changed.connect(_layout_shell_for_viewport)
 
 	SettingsStore.apply_display_settings()
 
@@ -4197,6 +4215,7 @@ func _toggle_task_view() -> void:
 	layout.add_child(subtitle)
 
 	var grid := GridContainer.new()
+	grid.name = "TaskViewGrid"
 	grid.columns = 2 if viewport_size.x >= 620.0 else 1
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
