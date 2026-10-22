@@ -2491,6 +2491,10 @@ func _open_window(title: String, message: String, window_size := Vector2(520, 30
 
 		_recommended_recent_icon.text = _glyph_for_app_id(app_id)
 
+	app.connect("window_activated", func():
+		_active_app_id = app_id
+		_update_taskbar_indicators()
+	)
 	app.visibility_changed.connect(_update_taskbar_indicators)
 
 	app.tree_exited.connect(func():
