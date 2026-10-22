@@ -26,6 +26,10 @@ Chapter 1 now includes a **30-scene narrative sequence**, “La mise à jour de 
 
 The story prioritizes character moments, escalation, humor and cinematic-style transitions over a chain of investigation quizzes. It uses in-game UI, scene titles, dialogue and animated transitions rather than pre-rendered video. Godot runtime verification is still pending. Chapter 2 remains separate DLC and is not part of this work.
 
+### Laboratoire expérimental jouable
+
+L’archive ORCHID includes a configurable A/B test bench: choose one of three user scenarios, select notification timing, choose the metric the dashboard optimizes, and decide whether explicit refusal is respected. It runs three fictional variants across eight simulated profiles, compares task completion with returns after notifications, flags cases where engagement rises while task success falls, and lets the player archive the result as campaign evidence. Results are deterministic and explicitly labelled pedagogical—not real telemetry or statistically valid research. Configuration and evidence are saved in the existing campaign save.
+
 
 
 ### Parcours jouable — « Une journée avec ORCHID »
@@ -62,7 +66,7 @@ Keyboard shortcuts in the prototype:
 |---|---|---|
 | P0 | Project foundation, desktop shell, window system | In progress |
 | P1 | Fake OS applications and persistent display/audio/performance settings | Partly prototyped |
-| P2 | Campaign, missions, ads, update events and progression | ORCHID report, two saved endings, eight-piece evidence casebook, 30-scene narrative sequence, and 15-stage interactive workday implemented; runtime QA, audio and systemic interruption polish remain |
+| P2 | Campaign, missions, ads, update events and progression | ORCHID report, two saved endings, evidence casebook, 30-scene narrative sequence, 41-stage interactive workday, and configurable three-variant A/B test simulator implemented; runtime QA, audio and systemic interruption polish remain |
 | P3 | Audio, animation, accessibility, saves and polish | Planned |
 | P4 | Steam store page, builds, QA and release | Planned |
 
