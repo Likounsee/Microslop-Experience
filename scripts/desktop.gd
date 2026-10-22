@@ -30,6 +30,7 @@ var _quick_settings_tween: Tween
 var _calendar_tween: Tween
 var _notification_tween: Tween
 var _wallpaper: TextureRect
+var _wallpaper_brightness := 1.0
 var _desktop_icons: VBoxContainer
 var _desktop_context_menu: PanelContainer
 var _desktop_icon_context_menu: PanelContainer
@@ -1412,12 +1413,8 @@ func _build_quick_settings() -> void:
 	brightness.value_changed.connect(func(value: float):
 
 		brightness_value.text = "%d%%" % int(value)
-
-		if is_instance_valid(_wallpaper):
-
-			var level := value / 100.0
-
-			_wallpaper.modulate = Color(level, level, level, 1.0)
+		_wallpaper_brightness = value / 100.0
+		_apply_wallpaper_effects()
 
 	)
 
@@ -1509,6 +1506,8 @@ func _add_quick_toggle(parent: GridContainer, caption: String, initially_on: boo
 				_style_quick_toggle(airplane_button, false)
 
 		_style_quick_toggle(toggle, enabled)
+		if feature_name == "Éclairage nocturne":
+			_apply_wallpaper_effects()
 		_update_quick_settings_status()
 		_show_notification(feature_name, "%s : %s." % [feature_name, "activé" if enabled else "désactivé"])
 	)
@@ -1518,14 +1517,32 @@ func _add_quick_toggle(parent: GridContainer, caption: String, initially_on: boo
 func _update_quick_settings_status() -> void:
 	if not is_instance_valid(_quick_status_label):
 		return
+
+	var network_status := ""
 	if bool(_quick_toggle_states.get("Mode avion", false)):
-		_quick_status_label.text = "Mode avion activé · Radios désactivées"
+		network_status = "Mode avion activé · Radios désactivées"
 	elif bool(_quick_toggle_states.get("Wi-Fi", false)):
 		var bluetooth_text := "Bluetooth activé" if bool(_quick_toggle_states.get("Bluetooth", false)) else "Bluetooth désactivé"
-		_quick_status_label.text = "Wi-Fi connecté · " + bluetooth_text
+		network_status = "Wi-Fi connecté · " + bluetooth_text
 	else:
 		var bluetooth_text := "Bluetooth activé" if bool(_quick_toggle_states.get("Bluetooth", false)) else "Bluetooth désactivé"
-		_quick_status_label.text = "Wi-Fi désactivé · " + bluetooth_text
+		network_status = "Wi-Fi désactivé · " + bluetooth_text
+
+	if bool(_quick_toggle_states.get("Éclairage nocturne", false)):
+		network_status += " · Éclairage nocturne"
+	_quick_status_label.text = network_status
+
+
+func _apply_wallpaper_effects() -> void:
+	if not is_instance_valid(_wallpaper):
+		return
+
+	var level := clampf(_wallpaper_brightness, 0.0, 1.0)
+	if bool(_quick_toggle_states.get("Éclairage nocturne", false)):
+		# Warm tint approximates Windows Night light without replacing the wallpaper.
+		_wallpaper.modulate = Color(level, level * 0.91, level * 0.76, 1.0)
+	else:
+		_wallpaper.modulate = Color(level, level, level, 1.0)
 
 func _toggle_quick_settings() -> void:
 
