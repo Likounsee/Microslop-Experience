@@ -88,3 +88,8 @@ L’archive de campagne comprend maintenant des enquêtes interactives suppléme
 ### Contrôle de diffusion et comité d’incident
 
 L’archive ORCHID inclut aussi une revue de conformité en quatre contrôles (signature, canal, approbation et information utilisateur) ainsi qu’un comité d’incident proposant trois décisions persistantes : escalader avec un rapport sourcé, surveiller et reproduire, ou clore comme incident de configuration. Un récapitulatif classe les indices collectés par famille. Ces ajouts narratifs restent à valider par exécution dans Godot avant d’être considérés comme testés.
+
+
+### Parcours interactif après redémarrage
+
+La fenêtre de mise à jour propose désormais une séquence narrative en cinq étapes : redémarrage, première notification, recherche de désactivation, conversation avec l’assistant et décision sur la preuve à conserver. Trois actions sont proposées à chaque étape ; leurs conséquences sont affichées et les réponses sont sauvegardées séparément. Le bilan final récapitule la progression et donne accès à l’archive ou à l’historique du déploiement. Cette séquence reste à valider par exécution dans Godot.
