@@ -4712,6 +4712,15 @@ func _choose_orchid_cinematic_option(stage: int, choice: int, continue_button: B
 				CampaignStore.save_evidence("orchid_cinematic_premature_success_claim")
 				CampaignStore.save_case_answer("orchid_results_claim", 1)
 				feedback = "L’annonce de réussite prématurée est consignée. Si le problème revient, la crédibilité du rapport sera fragilisée."
+		38: # Final interaction: decline the prompt or test whether it changed.
+			if choice == 0:
+				CampaignStore.save_evidence("orchid_cinematic_final_prompt_declined")
+				CampaignStore.save_case_answer("orchid_final_prompt_choice", 0)
+				feedback = "Vous refusez la sollicitation et gardez les preuves. Le choix est enregistré ; le suivi reste ouvert."
+			else:
+				CampaignStore.save_evidence("orchid_cinematic_final_prompt_tested")
+				CampaignStore.save_case_answer("orchid_final_prompt_choice", 1)
+				feedback = "Vous testez la nouvelle interface. L’action est enregistrée comme un test, pas comme une preuve que le système est désormais fiable."
 	_show_notification("Conséquence narrative enregistrée", feedback)
 
 
