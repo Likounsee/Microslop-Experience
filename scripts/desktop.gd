@@ -3914,7 +3914,41 @@ func _render_orchid_workflow_board(app: Control, state: Dictionary) -> void:
 	title.add_theme_font_size_override("font_size", 23)
 	content.add_child(title)
 	var brief := Label.new()
-	brief.text = str(step["brief"])
+	var brief_text := str(step["brief"])
+	# Les choix antérieurs changent la situation des étapes suivantes.
+	if stage == 4:
+		var notification_choice := CampaignStore.load_case_answer("orchid_workflow_choice_01")
+		if notification_choice == 0:
+			brief_text += "\n\nCONSÉQUENCE : le mode digest a réduit les interruptions. L’équipe a pu comparer les abandons sans recevoir chaque promotion en plein écran."
+		elif notification_choice == 1:
+			brief_text += "\n\nCONSÉQUENCE : la coupure générale a aussi masqué une alerte système dans cette simulation. L’équipe doit distinguer protection contre les promotions et disponibilité des alertes."
+		else:
+			brief_text += "\n\nCONSÉQUENCE : les cartes ont continué à interrompre les tests. Les clics sont nombreux, mais une partie correspond à des fermetures involontaires."
+	if stage == 5:
+		var collection_choice := CampaignStore.load_case_answer("orchid_workflow_choice_02")
+		if collection_choice == 0:
+			brief_text += "\n\nSUITE DE L’ENQUÊTE : les deux captures datées sont conservées ; Lina peut décrire le contexte sans devoir reconstruire seule l’incident."
+		elif collection_choice == 1:
+			brief_text += "\n\nSUITE DE L’ENQUÊTE : la première synthèse ne contient que la capture qui confirmait l’alerte. Lina signale que la version écartée change le sens du bouton."
+		else:
+			brief_text += "\n\nSUITE DE L’ENQUÊTE : la publication prématurée a figé une explication avant l’entretien. Le support doit maintenant corriger publiquement l’incertitude."
+	if stage == 7:
+		var reproduction_choice := CampaignStore.load_case_answer("orchid_workflow_choice_03")
+		if reproduction_choice == 0:
+			brief_text += "\n\nÉLÉMENT NOUVEAU : le test isolé a reproduit le recouvrement. Vous pouvez communiquer un constat précis, tout en limitant sa portée à la configuration testée."
+		elif reproduction_choice == 1:
+			brief_text += "\n\nÉLÉMENT NOUVEAU : le test sur un poste réel a soulevé une question de confidentialité. La communication doit reconnaître cette limite et faire vérifier le périmètre."
+		else:
+			brief_text += "\n\nÉLÉMENT NOUVEAU : la vidéo ne reproduit pas le défaut sur la version actuelle. Il faut communiquer cette incertitude au lieu d’annoncer une cause confirmée."
+	if stage == 8:
+		var metric_choice := CampaignStore.load_case_answer("orchid_workflow_choice_04")
+		if metric_choice == 0:
+			brief_text += "\n\nCONTRAINTE DE REMÉDIATION : le suivi inclut déjà l’achèvement des tâches et les refus respectés ; le correctif doit conserver ces indicateurs."
+		elif metric_choice == 1:
+			brief_text += "\n\nCONTRAINTE DE REMÉDIATION : le tableau ne mesure que les clics. Le correctif doit réintroduire des indicateurs d’achèvement et de friction avant de conclure."
+		else:
+			brief_text += "\n\nCONTRAINTE DE REMÉDIATION : les abandons ont été écartés du bilan initial. Il faut rétablir leur suivi pour ne pas confondre silence et réussite."
+	brief.text = brief_text
 	brief.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	brief.custom_minimum_size = Vector2(0, 100)
 	content.add_child(brief)
