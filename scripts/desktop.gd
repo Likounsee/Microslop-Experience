@@ -38,6 +38,9 @@ var _recommended_card: PanelContainer
 var _recommended_heading: Label
 var _recommended_recent_label: Label
 var _recommended_recent_icon: Label
+var _recent_app_title := ""
+var _recent_app_message := ""
+var _recent_app_size := Vector2(520, 300)
 var _taskbar_app_buttons: Dictionary = {}
 var _active_app_id := ""
 var _notification_center: PanelContainer
@@ -955,6 +958,15 @@ func _build_start_menu() -> void:
 	recent_empty.add_theme_font_size_override("font_size", 12)
 	recent_empty.add_theme_color_override("font_color", Color("596780"))
 	recommended_layout.add_child(recent_empty)
+	var reopen_button := Button.new()
+	reopen_button.text = "Ouvrir à nouveau"
+	reopen_button.custom_minimum_size.y = 30
+	reopen_button.add_theme_font_size_override("font_size", 12)
+	reopen_button.add_theme_color_override("font_color", Color("263247"))
+	reopen_button.add_theme_stylebox_override("normal", _flat_style(Color("dce8f8"), 7))
+	reopen_button.add_theme_stylebox_override("hover", _flat_style(Color("cbdcf3"), 7))
+	reopen_button.pressed.connect(_reopen_recent_app)
+	recommended_layout.add_child(reopen_button)
 
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -1258,6 +1270,9 @@ func _open_window(title: String, message: String, window_size := Vector2(520, 30
 	app.call("configure", title, message, window_size)
 	var app_id := _app_id_for_title(title)
 	app.set_meta("app_id", app_id)
+	_recent_app_title = title
+	_recent_app_message = message
+	_recent_app_size = window_size
 	if is_instance_valid(_recommended_recent_label):
 		_recommended_recent_label.text = "%s\nOuvert récemment" % title
 	if is_instance_valid(_recommended_recent_icon):
@@ -1280,6 +1295,12 @@ func _open_window(title: String, message: String, window_size := Vector2(520, 30
 	_active_app_id = app_id
 	_update_taskbar_indicators()
 	return app
+
+func _reopen_recent_app() -> void:
+	if _recent_app_title.is_empty():
+		_show_notification("Recommandé", "Ouvrez une application pour la retrouver ici.")
+		return
+	_open_window(_recent_app_title, _recent_app_message, _recent_app_size)
 
 func _glyph_for_app_id(app_id: String) -> String:
 	match app_id:
