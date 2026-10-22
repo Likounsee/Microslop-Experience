@@ -202,7 +202,6 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	_add_resize_handle(EDGE_RIGHT | EDGE_TOP, Control.CURSOR_BDIAGSIZE, Vector2.ZERO, Vector2(14, 14))
 	_add_resize_handle(EDGE_LEFT | EDGE_BOTTOM, Control.CURSOR_BDIAGSIZE, Vector2.ZERO, Vector2(14, 14))
 	_add_resize_handle(EDGE_RIGHT | EDGE_BOTTOM, Control.CURSOR_FDIAGSIZE, Vector2(-14, -14), Vector2.ZERO)
-	call_deferred("_animate_entrance")
 
 func _add_resize_handle(edges: int, cursor_shape: Control.CursorShape, top_left: Vector2, bottom_right: Vector2) -> void:
 	var handle := Control.new()
@@ -334,6 +333,13 @@ func _show_snap_layouts(button: Button) -> void:
 		clampf(button_rect.position.x + button_rect.size.x / 2.0 - popup_size.x / 2.0, 6.0, maxf(6.0, viewport_size.x - popup_size.x - 6.0)),
 		clampf(button_rect.position.y + button_rect.size.y + 6.0, 6.0, maxf(6.0, viewport_size.y - popup_size.y - 6.0))
 	)
+	_snap_layout_panel.pivot_offset = popup_size / 2.0
+	_snap_layout_panel.modulate.a = 0.0
+	_snap_layout_panel.scale = Vector2(0.96, 0.96)
+	var popup_tween := create_tween().set_parallel(true)
+	popup_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	popup_tween.tween_property(_snap_layout_panel, "modulate:a", 1.0, 0.12)
+	popup_tween.tween_property(_snap_layout_panel, "scale", Vector2.ONE, 0.14)
 
 func _add_snap_option(parent: GridContainer, caption: String, mode: String) -> void:
 	var option := Button.new()
@@ -510,19 +516,6 @@ func _snap_to_edge(pointer: Vector2) -> void:
 		_snap_mode = "left" if near_left else "right"
 	else:
 		_snap_mode = ""
-
-func _animate_entrance() -> void:
-	if not is_inside_tree():
-		return
-	modulate.a = 0.0
-	scale = Vector2(0.985, 0.985)
-	pivot_offset = size / 2.0
-	if _minimize_tween and _minimize_tween.is_running():
-		_minimize_tween.kill()
-	_minimize_tween = create_tween().set_parallel(true)
-	_minimize_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_minimize_tween.tween_property(self, "modulate:a", 1.0, 0.18)
-	_minimize_tween.tween_property(self, "scale", Vector2.ONE, 0.20)
 
 func _animate_close() -> void:
 	if _minimize_tween and _minimize_tween.is_running():
