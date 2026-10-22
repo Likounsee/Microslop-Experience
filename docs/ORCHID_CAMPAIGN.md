@@ -77,7 +77,18 @@ Le carnet est accessible depuis l'archive ORCHID. Chaque pièce peut être exami
 7. **Enquête de satisfaction** — questionnaire qui ne propose pas un refus simple.
 8. **Résultat d'expérience A/B** — l'équipe privilégie les retours dans l'application plutôt que la satisfaction déclarée.
 
-La reconstitution distingue les éléments étayés des questions non résolues : elle ne désigne pas un responsable individuel sans preuve. La prochaine étape de contenu est d'ajouter des interruptions scénarisées et des conséquences persistantes aux choix intermédiaires, plutôt que de multiplier seulement les textes.
+La reconstitution distingue les éléments étayés des questions non résolues : elle ne désigne pas un responsable individuel sans preuve.
+
+## Laboratoire de preuves — trois mini-enquêtes jouables
+Accessible depuis l’archive, le laboratoire propose trois dossiers à choix multiples. Les réponses peuvent être modifiées et sont conservées dans `campaign.cfg` sous `case_answers`.
+
+1. **Deux traces, une source ?** — déterminer pourquoi deux compteurs identiques ne prouvent pas que des fichiers ont été lus.
+2. **Quelle métrique compte vraiment ?** — distinguer le retour dans l’application de la satisfaction de l’utilisateur.
+3. **Qui a donné l’ordre ?** — conclure à une décision organisationnelle sans accuser une personne non identifiée.
+
+Une bonne réponse valide le dossier, ajoute un indice au carnet et affiche une explication argumentée. Une réponse erronée n’est pas punitive : elle donne les éléments permettant de réessayer. Ces mini-enquêtes ajoutent une action d’analyse, au lieu de faire reposer toute la durée sur la lecture.
+
+La prochaine étape de contenu reste d’ajouter des interruptions scénarisées et des conséquences persistantes aux choix intermédiaires, puis de tester la durée réelle en jeu.
 
 ## Sauvegarde et compatibilité
 La progression historique `mission_step` reste dans `user://campaign.cfg`. La version de campagne est conservée pour migrer les sauvegardes du tutoriel antérieur. La fin est enregistrée séparément dans la même section sous la clé `ending` (`published` ou `preserved`), afin de ne pas réinitialiser les anciennes sauvegardes. Les indices du carnet sont stockés dans la clé `evidence` sous forme de liste d’identifiants. L’enregistrement des indices et de la fin recharge d’abord la configuration existante pour préserver la progression et les autres choix.
