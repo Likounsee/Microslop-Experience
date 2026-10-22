@@ -30,7 +30,7 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	size = window_size
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var window_style := _panel_style(Color("f7f9fc"), Color("c8d2e2"))
-	window_style.set_corner_radius_all(14)
+	window_style.set_corner_radius_all(16)
 	window_style.border_color = Color("d5ddeb")
 	window_style.set_border_width_all(1)
 	window_style.shadow_color = Color(0.02, 0.04, 0.10, 0.28)
@@ -57,14 +57,14 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 
 	var titlebar := PanelContainer.new()
 	titlebar.name = "TitleBar"
-	var titlebar_style := _panel_style(Color("eef3fa"), Color("d8e1ee"))
+	var titlebar_style := _panel_style(Color("f1f5fb"), Color("d8e1ee"))
 	titlebar_style.set_border_width_all(1)
 	titlebar_style.border_width_bottom = 1
-	titlebar_style.set_corner_radius_all(14)
+	titlebar_style.set_corner_radius_all(16)
 	titlebar_style.corner_radius_bottom_left = 0
 	titlebar_style.corner_radius_bottom_right = 0
 	titlebar.add_theme_stylebox_override("panel", titlebar_style)
-	titlebar.custom_minimum_size.y = 44
+	titlebar.custom_minimum_size.y = 46
 	titlebar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	titlebar.mouse_filter = Control.MOUSE_FILTER_STOP
 	layout.add_child(titlebar)
@@ -347,8 +347,18 @@ func _add_snap_option(parent: GridContainer, caption: String, mode: String) -> v
 	option.custom_minimum_size = Vector2(96, 36)
 	option.add_theme_font_size_override("font_size", 12)
 	option.add_theme_color_override("font_color", Color("24344d"))
-	option.add_theme_stylebox_override("normal", _panel_style(Color("edf2f8"), Color("d5dfec")))
-	option.add_theme_stylebox_override("hover", _panel_style(Color("cfe2fa"), Color("8bb7e8")))
+	var option_normal := _panel_style(Color("edf2f8"), Color("d5dfec"))
+	option_normal.set_corner_radius_all(8)
+	option_normal.shadow_size = 0
+	var option_hover := _panel_style(Color("cfe2fa"), Color("8bb7e8"))
+	option_hover.set_corner_radius_all(8)
+	option_hover.shadow_size = 0
+	var option_pressed := _panel_style(Color("b9d4f4"), Color("6da2df"))
+	option_pressed.set_corner_radius_all(8)
+	option_pressed.shadow_size = 0
+	option.add_theme_stylebox_override("normal", option_normal)
+	option.add_theme_stylebox_override("hover", option_hover)
+	option.add_theme_stylebox_override("pressed", option_pressed)
 	option.focus_mode = Control.FOCUS_NONE
 	option.pressed.connect(func():
 		_apply_snap_layout(mode)
