@@ -20,6 +20,12 @@ The game combines three elements:
 
 The opening chapter is a short investigation told through the desktop itself. The player follows five objectives: open Start, inspect files, review a suspicious update, question Microslop AI, then search for ORCHID in the browser. The clues build toward the reveal that interruptions are intentional product behaviour, not random bugs. The AI can explain the clue or try to distract the player with more recommendations. The update notes can also be inspected for an extra piece of evidence. Campaign progress is saved locally, and existing tutorial saves are migrated so returning players can reach the new chapter.
 
+### Chapter 2 — Separate DLC: your home OS
+
+The second chapter is planned as a separately distributed DLC, not as a required continuation bundled into the base game. It will focus on the creator's own operating system, designed to replace Windows. Its name, interface, capabilities, lore, and missions will be defined only after the creator supplies the OS files and documentation; the project will not invent technical claims about it. The base game remains complete and playable without this DLC. The in-game teaser currently marks Chapter 2 as in preparation.
+
+The DLC architecture and outstanding requirements are tracked in [`dlc/chapter-2/README.md`](dlc/chapter-2/README.md).
+
 ## Technology
 
 - Godot 4.4+
