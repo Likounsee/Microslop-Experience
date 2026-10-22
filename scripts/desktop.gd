@@ -36,6 +36,8 @@ var _all_apps_entries: Array[Button] = []
 var _all_apps_empty_label: Label
 var _recommended_card: PanelContainer
 var _recommended_heading: Label
+var _recommended_recent_label: Label
+var _recommended_recent_icon: Label
 var _taskbar_app_buttons: Dictionary = {}
 var _active_app_id := ""
 var _notification_center: PanelContainer
@@ -939,12 +941,14 @@ func _build_start_menu() -> void:
 	recommended_layout.add_theme_constant_override("separation", 5)
 	recommended_margin.add_child(recommended_layout)
 	var recent_icon := Label.new()
+	_recommended_recent_icon = recent_icon
 	recent_icon.text = "◷"
 	recent_icon.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	recent_icon.add_theme_font_size_override("font_size", 24)
 	recent_icon.add_theme_color_override("font_color", Color("477bb8"))
 	recommended_layout.add_child(recent_icon)
 	var recent_empty := Label.new()
+	_recommended_recent_label = recent_empty
 	recent_empty.text = "Vos fichiers récents apparaîtront ici."
 	recent_empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	recent_empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -1234,6 +1238,14 @@ func _animate_flyout(panel: Control, opening: bool, from_bottom: bool) -> void:
 func _open_window(title: String, message: String, window_size := Vector2(520, 300)) -> Control:
 	_start_menu.visible = false
 	_start_open = false
+	# Opening an app from the desktop must not leave the Show Desktop state stale.
+	if _show_desktop_active:
+		for hidden_app in _desktop_hidden_windows:
+			if is_instance_valid(hidden_app):
+				hidden_app.show()
+				hidden_app.move_to_front()
+		_desktop_hidden_windows.clear()
+		_show_desktop_active = false
 	# Keep the simulated desktop bounded: opening apps repeatedly must not
 	# accumulate an unlimited number of live Control trees.
 	const MAX_OPEN_WINDOWS := 8
@@ -1246,6 +1258,10 @@ func _open_window(title: String, message: String, window_size := Vector2(520, 30
 	app.call("configure", title, message, window_size)
 	var app_id := _app_id_for_title(title)
 	app.set_meta("app_id", app_id)
+	if is_instance_valid(_recommended_recent_label):
+		_recommended_recent_label.text = "%s\nOuvert récemment" % title
+	if is_instance_valid(_recommended_recent_icon):
+		_recommended_recent_icon.text = _glyph_for_app_id(app_id)
 	app.visibility_changed.connect(_update_taskbar_indicators)
 	app.tree_exited.connect(func():
 		if _active_app_id == app_id:
@@ -1264,6 +1280,21 @@ func _open_window(title: String, message: String, window_size := Vector2(520, 30
 	_active_app_id = app_id
 	_update_taskbar_indicators()
 	return app
+
+func _glyph_for_app_id(app_id: String) -> String:
+	match app_id:
+		"browser":
+			return "🌐"
+		"files":
+			return "📁"
+		"settings":
+			return "⚙"
+		"update":
+			return "↻"
+		"recycle_bin":
+			return "🗑"
+		_:
+			return "◷"
 
 func _app_id_for_title(title: String) -> String:
 	var normalized := title.to_lower()
