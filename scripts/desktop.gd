@@ -3734,6 +3734,164 @@ func _open_orchid_archive() -> void:
 	lab.pressed.connect(_open_orchid_lab)
 	content.add_child(lab)
 
+	var timeline := Button.new()
+	timeline.text = "Reconstituer la nuit du déploiement (5 événements)"
+	timeline.pressed.connect(_open_orchid_night_log)
+	content.add_child(timeline)
+
+	var support := Button.new()
+	support.text = "Consulter le ticket d’assistance interne"
+	support.pressed.connect(_open_orchid_support_ticket)
+	content.add_child(support)
+
+	var survey := Button.new()
+	survey.text = "Examiner l’enquête de satisfaction biaisée"
+	survey.pressed.connect(_open_orchid_survey)
+	content.add_child(survey)
+
+
+## Additional playable investigative scenes broaden the chapter beyond reading the final report.
+func _open_orchid_night_log() -> void:
+	var app := _open_window("Journal de nuit — 21:47 à 08:11", "RECONSTITUTION D’INCIDENT · HORAIRES SIMULÉS", Vector2(720, 560))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var old_child := content.get_child(0)
+		content.remove_child(old_child)
+		old_child.queue_free()
+	var intro := Label.new()
+	intro.text = "Cinq événements ont été exportés du journal local. Ouvrez-les dans l’ordre et cherchez le moment où une mise à jour réservée au développement devient une expérience active sur l’appareil public."
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	intro.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(intro)
+	var detail := Label.new()
+	detail.name = "NightLogDetail"
+	detail.text = "Sélectionnez un événement pour lire sa trace et l’ajouter à votre dossier."
+	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	detail.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(detail)
+	var events := [
+		{"time":"21:47","title":"Règle de ciblage modifiée","id":"night_rule","body":"Service de déploiement : la règle « test progressif — groupe interne » a été copiée vers le groupe « appareils compatibles ». Le journal ne précise pas si cette copie était une action automatique ou une modification humaine."},
+		{"time":"02:13","title":"Paquet téléchargé","id":"night_download","body":"Le paquet experience-orchid-preview 0.9.17-dev arrive depuis DEV_RING_INTERNAL. La signature est valide, mais aucun champ d’approbation de diffusion n’est présent."},
+		{"time":"02:14","title":"Installation terminée","id":"night_install","body":"Le programme d’installation indique « règle satisfaite ». La cible réelle est un appareil du canal STABLE. Aucun redémarrage manuel n’est enregistré ; l’installation est marquée « reprise au prochain démarrage »."},
+		{"time":"07:58","title":"Composant activé","id":"night_activation","body":"Après le démarrage, Notification Timing Preview est chargé. Le résumé public parle uniquement d’améliorations de confort et ne mentionne ni préversion ni canal interne."},
+		{"time":"08:11","title":"Première notification trompeuse","id":"night_notification","body":"Le système annonce que 18 fichiers ont été analysés. Aucun chemin de fichier n’est attaché à l’événement. Le compteur est classé dans la catégorie « engagement — retour après notification »."}
+	]
+	for event in events:
+		var button := Button.new()
+		button.text = "%s  ·  %s" % [event["time"], event["title"]]
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.pressed.connect(func() -> void:
+			detail.text = "%s — %s\n\n%s\n\nCette trace est fictive et ne lit aucun fichier réel." % [event["time"], event["title"], event["body"]]
+			CampaignStore.save_evidence(str(event["id"]))
+			_show_notification("Trace ajoutée", "%s est maintenant conservé dans le dossier ORCHID." % event["title"])
+		)
+		content.add_child(button)
+	var conclusion := Button.new()
+	conclusion.text = "Rédiger une conclusion provisoire"
+	conclusion.pressed.connect(func() -> void:
+		var count := 0
+		for event in events:
+			if CampaignStore.load_evidence().has(event["id"]):
+				count += 1
+		detail.text = "RECONSTITUTION : %d/5 traces examinées.\n\nLa piste la plus cohérente est une règle de déploiement trop large, suivie d’une installation automatique et d’une activation au démarrage. La note sur les métriques de retour laisse penser que l’équipe a ensuite choisi de conserver le composant. Les journaux ne suffisent pas à identifier la personne responsable ni à prouver que le premier déploiement était intentionnel." % count
+		if count >= 3:
+			CampaignStore.save_evidence("night_reconstruction")
+	)
+	content.add_child(conclusion)
+
+
+func _open_orchid_support_ticket() -> void:
+	var app := _open_window("Assistance Microslop — ticket #EXP-1842", "TICKET INTERNE · STATUT : RÉSOLU SANS ACTION", Vector2(690, 500))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var old_child := content.get_child(0)
+		content.remove_child(old_child)
+		old_child.queue_free()
+	var transcript := Label.new()
+	transcript.text = "08:19 — UTILISATEUR : « Je n’ai pas de fichiers dans Documents. Pourquoi le système dit-il en avoir analysé 18 ? »\n\n08:20 — ASSISTANCE : « Le compteur reflète une activité de personnalisation et ne signifie pas nécessairement qu’un fichier a été ouvert. »\n\n08:21 — UTILISATEUR : « Alors pourquoi l’alerte parle-t-elle d’une analyse terminée ? »\n\n08:22 — ASSISTANCE : « Nous pouvons classer votre demande comme une incompréhension du résumé. »"
+	transcript.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	transcript.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	transcript.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(transcript)
+	var question := Label.new()
+	question.text = "Quelle réponse envoyez-vous au ticket ?"
+	question.add_theme_color_override("font_color", Color("24344d"))
+	content.add_child(question)
+	var options := [
+		"Demander les chemins et les journaux de fichiers",
+		"Accepter la clôture comme un problème de vocabulaire",
+		"Demander que l’incident soit transmis à l’équipe de déploiement"
+	]
+	for index in range(options.size()):
+		var button := Button.new()
+		button.text = options[index]
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.pressed.connect(func() -> void:
+			CampaignStore.save_case_answer("support_ticket", index)
+			CampaignStore.save_evidence("support_ticket_reviewed")
+			match index:
+				0:
+					transcript.text += "\n\nVOUS : « Merci de joindre la liste des fichiers et les journaux d’accès. »\n\nASSISTANCE : « Aucun chemin n’est associé à cet événement. Votre demande a été transférée vers la catégorie “retour produit”, sans engagement de fournir des traces. »"
+				1:
+					transcript.text += "\n\nASSISTANCE : « Parfait ! Le ticket est résolu. Votre compréhension du résumé est notre indicateur de succès. »\n\nNOTE AUTOMATIQUE : aucun fichier de diagnostic joint."
+				2:
+					transcript.text += "\n\nASSISTANCE : « La demande a été transmise. »\n\nJOURNAL DE ROUTAGE : destination = Équipe Expérience ; priorité = faible ; pièce jointe = aucune."
+			for child in content.get_children():
+				if child is Button:
+					child.disabled = true
+		)
+		content.add_child(button)
+
+
+func _open_orchid_survey() -> void:
+	var app := _open_window("Enquête de satisfaction — après incident", "ENQUÊTE AUTOMATIQUE · 1 QUESTION", Vector2(620, 440))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var old_child := content.get_child(0)
+		content.remove_child(old_child)
+		old_child.queue_free()
+	var prompt := Label.new()
+	prompt.text = "Après avoir cherché à désactiver les notifications, une enquête apparaît :\n\n« Nous sommes ravis que vous soyez encore ici ! Quelle fonctionnalité vous a le plus aidé à rester engagé ? »\n\nLa question ne demande pas si les notifications étaient souhaitées. Choisissez une réponse pour voir comment le tableau de bord interprète votre choix."
+	prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	prompt.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	prompt.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(prompt)
+	var result := Label.new()
+	result.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	result.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(result)
+	var options := [
+		"Les notifications ne m’ont pas aidé",
+		"Je voulais simplement fermer la fenêtre",
+		"Je ne souhaite pas répondre"
+	]
+	for index in range(options.size()):
+		var button := Button.new()
+		button.text = options[index]
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.pressed.connect(func() -> void:
+			CampaignStore.save_case_answer("orchid_survey", index)
+			CampaignStore.save_evidence("survey_bias_reviewed")
+			if index == 0:
+				result.text = "RÉSULTAT DU TABLEAU DE BORD : « Interaction avec la fonctionnalité » — l’insatisfaction est enregistrée en note secondaire, tandis que le retour dans l’application reste le KPI principal."
+			elif index == 1:
+				result.text = "RÉSULTAT DU TABLEAU DE BORD : « Session récupérée avec succès ». Le système compte le fait que vous soyez revenu, pas la raison pour laquelle vous êtes revenu."
+			else:
+				result.text = "RÉSULTAT DU TABLEAU DE BORD : « Enquête affichée ». L’absence de réponse est elle aussi comptée comme une occasion d’interaction. Aucune mesure de satisfaction n’a été collectée."
+			prompt.text += "\n\nVotre réponse : " + options[index]
+			for child in content.get_children():
+				if child is Button:
+					child.disabled = true
+		)
+		content.add_child(button)
+
 
 func _open_orchid_casebook() -> void:
 	var app := _open_window("Carnet d’enquête — ORCHID", "DOSSIER PERSONNEL · LES PIÈCES SONT FICTIVES", Vector2(760, 560))
