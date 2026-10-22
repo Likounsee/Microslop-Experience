@@ -23,6 +23,7 @@ var _quick_toggle_states: Dictionary = {"Wi-Fi": true, "Bluetooth": true, "Mode 
 var _quick_toggle_buttons: Dictionary = {}
 var _start_open := false
 var _mission_label: Label
+var _chapter_two_button: Button
 var _mission_step := 0
 var _clock_refresh_elapsed := 0.0
 var _start_menu_tween: Tween
@@ -2423,7 +2424,7 @@ func _build_mission_hint() -> void:
 
 	card.offset_left = -330
 
-	card.offset_top = -145
+	card.offset_top = -194
 
 	card.offset_right = -16
 
@@ -2455,13 +2456,25 @@ func _build_mission_hint() -> void:
 	card.add_child(margin)
 
 
+	var mission_content := VBoxContainer.new()
+	mission_content.add_theme_constant_override("separation", 8)
+	margin.add_child(mission_content)
+
 	_mission_label = Label.new()
-
 	_mission_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-
 	_mission_label.add_theme_color_override("font_color", Color.WHITE)
+	mission_content.add_child(_mission_label)
 
-	margin.add_child(_mission_label)
+	_chapter_two_button = Button.new()
+	_chapter_two_button.text = "Chapitre 2 — DLC séparé"
+	_chapter_two_button.custom_minimum_size = Vector2(0, 34)
+	_chapter_two_button.tooltip_text = "Découvrir le prochain chapitre, prévu en DLC indépendant."
+	_chapter_two_button.add_theme_stylebox_override("normal", _flat_style(Color("24466c"), 8))
+	_chapter_two_button.add_theme_stylebox_override("hover", _flat_style(Color("315d89"), 8))
+	_chapter_two_button.add_theme_stylebox_override("pressed", _flat_style(Color("193653"), 8))
+	_chapter_two_button.add_theme_color_override("font_color", Color.WHITE)
+	_chapter_two_button.pressed.connect(_show_chapter_two_dlc)
+	mission_content.add_child(_chapter_two_button)
 
 func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, callback: Callable) -> void:
 
@@ -4177,6 +4190,21 @@ func _update_mission() -> void:
 		"CHAPITRE 1 TERMINÉ\nVous avez trouvé une preuve : les interruptions sont intentionnelles.\n\nMicroslop prépare déjà une enquête de satisfaction sur votre découverte."
 	]
 	_mission_label.text = missions[mini(_mission_step, missions.size() - 1)]
+	if is_instance_valid(_chapter_two_button):
+		_chapter_two_button.visible = _mission_step >= 5
+
+
+func _show_chapter_two_dlc() -> void:
+
+	var app := _open_window("Chapitre 2 — DLC indépendant", "CHAPITRE 2 · TON OS MAISON\n\nCe chapitre sera distribué séparément du jeu de base. L’histoire suivra la découverte de ton système d’exploitation, conçu pour remplacer Windows.\n\nLe contenu technique et narratif de cet OS reste volontairement à définir : il sera construit à partir des informations et fichiers que tu fourniras. Aucun nom, logo, fonction ou détail technique n’est inventé à ce stade.\n\nSTATUT : en préparation — DLC non disponible.", Vector2(560, 360))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	var note := Label.new()
+	note.text = "Le DLC aura sa propre distribution et son propre contenu. Le jeu principal conservera le chapitre ORCHID complet."
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(note)
 
 
 func _dismiss_flyouts_on_outside_click(pointer_position: Vector2) -> void:
