@@ -118,7 +118,7 @@ func _layout_shell_for_viewport() -> void:
 
 		var menu_width := minf(620.0, maxf(260.0, viewport_size.x - 24.0))
 
-		var menu_height := minf(520.0, maxf(300.0, viewport_size.y - 96.0))
+		var menu_height := minf(520.0, maxf(220.0, viewport_size.y - 96.0))
 
 		_start_menu.offset_left = -menu_width / 2.0
 
@@ -148,7 +148,7 @@ func _layout_shell_for_viewport() -> void:
 
 		var calendar_width := minf(340.0, maxf(260.0, viewport_size.x - 24.0))
 
-		var calendar_height := minf(360.0, maxf(280.0, viewport_size.y - 96.0))
+		var calendar_height := minf(360.0, maxf(200.0, viewport_size.y - 96.0))
 
 		_calendar_panel.offset_left = -calendar_width - 12.0
 
@@ -162,7 +162,7 @@ func _layout_shell_for_viewport() -> void:
 
 		var panel_width := minf(336.0, maxf(260.0, viewport_size.x - 24.0))
 
-		var panel_height := minf(420.0, maxf(300.0, viewport_size.y - 96.0))
+		var panel_height := minf(420.0, maxf(220.0, viewport_size.y - 96.0))
 
 		_quick_settings_panel.offset_left = -panel_width - 12.0
 
@@ -197,7 +197,7 @@ func _layout_shell_for_viewport() -> void:
 
 		var notification_width := minf(360.0, maxf(260.0, viewport_size.x - 24.0))
 
-		var notification_height := minf(430.0, maxf(300.0, viewport_size.y - 96.0))
+		var notification_height := minf(430.0, maxf(220.0, viewport_size.y - 96.0))
 
 		_notification_center.offset_left = -notification_width - 12.0
 
