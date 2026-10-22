@@ -36,3 +36,26 @@ func save_progress(step: int) -> bool:
 		push_warning("Impossible d'enregistrer la progression de campagne : %s" % error)
 		return false
 	return true
+
+
+## Stores the player's chapter-ending decision without invalidating older campaign saves.
+func save_ending(ending: String) -> bool:
+	if ending not in ["published", "preserved"]:
+		return false
+	var config := ConfigFile.new()
+	var error := config.load(SAVE_PATH)
+	if error != OK:
+		config = ConfigFile.new()
+	config.set_value("campaign", "ending", ending)
+	config.set_value("campaign", "version", CAMPAIGN_VERSION)
+	var save_error := config.save(SAVE_PATH)
+	if save_error != OK:
+		push_warning("Impossible d'enregistrer la conclusion ORCHID : %s" % save_error)
+		return false
+	return true
+
+func load_ending() -> String:
+	var config := ConfigFile.new()
+	if config.load(SAVE_PATH) != OK:
+		return ""
+	return str(config.get_value("campaign", "ending", ""))
