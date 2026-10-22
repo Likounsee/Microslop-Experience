@@ -22,9 +22,9 @@ Chapter 1 is an investigation told through the simulated desktop. The update now
 
 ### Cinematic story sequence — Chapter 1
 
-Chapter 1 now includes a ten-scene narrative sequence, “La mise à jour de trop”, accessible from the ORCHID archive. It stages the overnight update, the return to the desktop, the “18 files analyzed” notification, sponsored search diversions, the first appearance of ORCHID, a support draft, and a more candid conversation with Microslop AI. Two choices are saved locally, and scene progress can be resumed. This is a cinematic-style sequence built with in-game UI, dialogue and transitions. Godot runtime verification is still pending.
+Chapter 1 includes a **20-scene narrative sequence**, “La mise à jour de trop”, accessible from the ORCHID archive. It begins with the overnight update and follows the next workday: ORCHID appears, notifications interrupt a task and a meeting, the player exchanges messages with Léa, support classifies the interruptions as engagement opportunities, and Microslop AI explains the flaw in the metric. Four choices are saved locally; later scenes change some dialogue based on those choices, and progress can be resumed.
 
-The intended balance is narrative-first: story scenes and desktop events should carry the campaign, with evidence puzzles as supporting moments rather than the main activity. Chapter 2 remains separate DLC and is not part of this work.
+This is a cinematic-style sequence built with in-game UI, character dialogue, scene titles and animated transitions, not a pre-rendered video. The intended balance is narrative-first: story scenes and desktop events carry the campaign, with evidence puzzles as supporting moments rather than the main activity. Godot runtime verification is still pending. Chapter 2 remains separate DLC and is not part of this work.
 
 ### Chapter 2 — Separate DLC: your home OS
 
