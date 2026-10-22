@@ -39,6 +39,8 @@ var _taskbar_app_buttons: Dictionary = {}
 var _active_app_id := ""
 var _notification_center: PanelContainer
 var _notification_history: Array[Dictionary] = []
+var _desktop_hidden_windows: Array[Control] = []
+var _show_desktop_active := false
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED and is_instance_valid(_start_menu):
@@ -282,6 +284,37 @@ func _build_taskbar() -> void:
 	_clock_button.pressed.connect(_toggle_calendar)
 	_clock_button.focus_mode = Control.FOCUS_NONE
 	row.add_child(_clock_button)
+
+	var show_desktop := Button.new()
+	show_desktop.name = "ShowDesktopButton"
+	show_desktop.tooltip_text = "Afficher le bureau"
+	show_desktop.custom_minimum_size = Vector2(7, 42)
+	show_desktop.add_theme_stylebox_override("normal", _flat_style(Color(0.20, 0.29, 0.42, 0.24), 2))
+	show_desktop.add_theme_stylebox_override("hover", _flat_style(Color("8fb9eb"), 2))
+	show_desktop.add_theme_stylebox_override("pressed", _flat_style(Color("4389d5"), 2))
+	show_desktop.focus_mode = Control.FOCUS_NONE
+	show_desktop.pressed.connect(_toggle_show_desktop)
+	row.add_child(show_desktop)
+
+func _toggle_show_desktop() -> void:
+	if not is_instance_valid(_window_layer):
+		return
+	if not _show_desktop_active:
+		_desktop_hidden_windows.clear()
+		for child in _window_layer.get_children():
+			if child is Control and child.visible:
+				_desktop_hidden_windows.append(child as Control)
+				child.hide()
+		_show_desktop_active = true
+		_active_app_id = ""
+	else:
+		for app in _desktop_hidden_windows:
+			if is_instance_valid(app):
+				app.show()
+				app.move_to_front()
+		_desktop_hidden_windows.clear()
+		_show_desktop_active = false
+	_update_taskbar_indicators()
 
 func _build_calendar_panel() -> void:
 	_calendar_panel = PanelContainer.new()
