@@ -3769,6 +3769,10 @@ func _open_orchid_archive() -> void:
 	cinematic.text = "Voir la séquence narrative — La mise à jour de trop"
 	cinematic.pressed.connect(_open_orchid_cinematic)
 	content.add_child(cinematic)
+	var workday := Button.new()
+	workday.text = "Jouer la journée interactive — 15 séquences et décisions"
+	workday.pressed.connect(_open_orchid_workday)
+	content.add_child(workday)
 	var field_investigation := Button.new()
 	field_investigation.text = "Lancer l’enquête de terrain — 12 défis interactifs"
 	field_investigation.pressed.connect(_open_orchid_field_investigation)
@@ -3928,6 +3932,134 @@ func _choose_orchid_cinematic_option(stage: int, choice: int, continue_button: B
 	CampaignStore.save_case_answer("cinematic_choice_%02d" % stage, choice)
 	continue_button.disabled = false
 	_show_notification("Décision enregistrée", "Votre réaction à cette scène a été conservée dans la sauvegarde locale.")
+
+
+
+## A playable workday chapter: short practical tasks, interruptions and consequences.
+## This complements the cinematic scenes with decisions the player must actively make.
+func _open_orchid_workday() -> void:
+	var app := _open_window("Une journée avec ORCHID", "CHAPITRE 1 · PARCOURS INTERACTIF", Vector2(800, 620))
+	var state := {"stage": 0}
+	var evidence: Array = CampaignStore.load_evidence()
+	for i in range(15):
+		if evidence.has("workday_stage_%02d" % i):
+			state["stage"] = i + 1
+		else:
+			break
+	_render_orchid_workday_stage(app, state)
+
+
+func _orchid_workday_tasks() -> Array:
+	return [
+		{"act":"ACTE I — REPRENDRE LE CONTRÔLE", "title":"08:42 · Le document oublié", "brief":"Le document « Synthèse hebdomadaire » est ouvert. Il contient trois paragraphes et un bouton Enregistrer. Une carte Microslop Recap masque la moitié de la page : « Votre semaine en 12 suggestions ». Le curseur clignote derrière.", "task":"Comment reprendre votre travail ?", "options":["Fermer Recap et enregistrer le document.", "Lire les douze suggestions avant de continuer.", "Forcer la fermeture de toutes les applications."], "results":["Le document est sauvegardé. Une petite notification tente de revenir, mais vous avez récupéré votre phrase.", "Recap affiche des conseils génériques et un article sponsorisé. Vous perdez quelques minutes ; le document est toujours là.", "Les fenêtres se ferment, y compris le brouillon non enregistré. Vous récupérez la version précédente, pas les dernières lignes."]},
+		{"act":"ACTE I — REPRENDRE LE CONTRÔLE", "title":"08:49 · Le message de Léa", "brief":"Léa vous écrit : « Tu peux regarder mon ticket ? Ils disent que les rappels pendant les réunions sont normaux. J’ai l’impression qu’on me prend pour une idiote. » Une réponse rapide est proposée par l’assistant.", "task":"Que lui envoyez-vous ?", "options":["« Envoie-moi les heures exactes. On va vérifier sans supposer. »", "« C’est sûrement juste un réglage, oublie. »", "« Je vais publier leur nom partout. »"], "results":["Léa répond avec trois horaires et une capture du ticket. Vous avez une piste vérifiable et elle se sent prise au sérieux.", "Léa répond « ok » puis cesse d’écrire. La journée continue, mais vous n’avez pas comparé vos observations.", "Léa vous demande de ne pas publier son ticket sans accord. Elle garde les captures, mais hésite à vous aider davantage."]},
+		{"act":"ACTE I — REPRENDRE LE CONTRÔLE", "title":"09:05 · Une réunion, deux fenêtres", "brief":"La réunion de suivi commence. Votre micro est coupé ; la fenêtre de réunion reste utilisable. Une notification « Découvrez les nouveautés » passe devant le bouton de partage d’écran.", "task":"Votre priorité ?", "options":["Fermer la notification et vérifier le partage d’écran.", "Cliquer sur « Découvrir » pour qu’elle cesse de clignoter.", "Quitter la réunion sans prévenir."], "results":["Vous partagez le bon document. Une seconde notification arrive, mais vous savez désormais que la première fermeture n’a rien changé au réglage.", "La page promotionnelle s’ouvre au-dessus de la réunion. Un collègue demande si vous êtes toujours là.", "La réunion continue sans vous. Vous recevez un résumé automatique qui classe votre départ comme « faible engagement »."]},
+		{"act":"ACTE I — REPRENDRE LE CONTRÔLE", "title":"09:17 · Le mode concentration", "brief":"Dans Paramètres fictifs, une option « Suspendre les suggestions jusqu’à la fin de la session » est enfin visible. Une note indique que le réglage n’affecte pas les alertes de sécurité.", "task":"Quel réglage appliquez-vous ?", "options":["Activer la suspension pour cette session.", "Activer « Toutes les recommandations personnalisées ».", "Ne rien changer et noter l’heure."], "results":["Le bureau devient calme pour un moment. Le réglage est local et temporaire ; vous pourrez vérifier s’il est respecté.", "Les suggestions se multiplient et l’assistant annonce qu’il a « mieux compris vos intérêts ». Vous pouvez toujours revenir aux paramètres.", "Vous gardez un point de comparaison utile, mais les interruptions continuent pendant votre travail."]},
+		{"act":"ACTE I — REPRENDRE LE CONTRÔLE", "title":"09:26 · Le premier brouillon", "brief":"Vous rédigez un compte rendu de la réunion. Le résumé automatique propose : « L’expérience a été enrichie par des rappels contextuels ». Vos notes disent plutôt : « Deux notifications ont masqué les commandes pendant la réunion ».", "task":"Que mettez-vous dans le compte rendu ?", "options":["Décrire les deux interruptions observées, avec l’heure.", "Reprendre le résumé automatique sans modification.", "Ajouter que l’équipe entière a été espionnée."], "results":["Le compte rendu distingue les faits observés de ce que vous ignorez. Il sera plus difficile de le réécrire sans laisser de trace.", "Le texte est plus lisse, mais les deux interruptions disparaissent du compte rendu.", "Le document contient une accusation que vos notes ne prouvent pas. Il faudra la retirer avant de le transmettre."]},
+		{"act":"ACTE II — L’ÉQUIPE SE RÉVEILLE", "title":"10:03 · Le ticket revient", "brief":"Le support a répondu à Léa : « Pour mieux traiter votre demande, veuillez noter votre satisfaction sur cinq étoiles. » Le lien renvoie à un questionnaire avant d’afficher le numéro de ticket.", "task":"Comment aider Léa ?", "options":["Conserver la réponse, l’heure et le numéro du ticket.", "Répondre au questionnaire avec cinq étoiles pour avancer.", "Fermer le ticket et recommencer de zéro."], "results":["Vous avez une trace de la réponse et du détour par le questionnaire. Léa accepte de joindre ces éléments à son signalement.", "Le questionnaire se termine, mais le ticket reste classé comme demande d’expérience utilisateur.", "Le nouveau ticket reçoit un autre numéro et perd le contexte. Vous devez expliquer à nouveau le problème."]},
+		{"act":"ACTE II — L’ÉQUIPE SE RÉVEILLE", "title":"10:21 · La notification fantôme", "brief":"Le centre de notifications affiche « 18 fichiers analysés ». Aucun chemin, aucune empreinte et aucun rapport de scan ne sont fournis. Une animation de chargement tourne alors même que le bureau répond normalement.", "task":"Quelle action est la plus utile ?", "options":["Capturer le message et noter qu’il n’est pas vérifiable.", "Affirmer que dix-huit documents personnels ont été copiés.", "Ignorer l’alerte et supprimer l’historique."], "results":["Vous conservez ce qui est réellement visible sans transformer l’alerte en preuve d’accès aux fichiers.", "Le rapport avance une conclusion que les traces ne permettent pas d’établir. L’assistant vous demande d’où vient cette certitude.", "L’alerte disparaît de l’écran, mais vous perdez l’heure et le texte exacts pour une comparaison future."]},
+		{"act":"ACTE II — L’ÉQUIPE SE RÉVEILLE", "title":"10:38 · La réunion de suivi", "brief":"Votre responsable, Marc, ouvre une réunion rapide. Il n’a pas l’air hostile ; il semble surtout pressé. « Il faut un résumé avant midi. Pas un roman. Et évitons les mots qui déclenchent une escalade inutile. »", "task":"Comment répondez-vous ?", "options":["Proposer une page avec faits, limites et questions ouvertes.", "Supprimer les détails pour que le sujet soit clos.", "Refuser de faire le compte rendu."], "results":["Marc accepte une page structurée. Il demande que les heures soient vérifiables et que les inconnues restent clairement indiquées.", "Marc remercie pour la concision. Le résumé est rapide, mais il ne permet plus de comprendre ce qui s’est passé.", "Marc fait rédiger le compte rendu par l’assistant. Votre version n’est pas jointe à la réunion."]},
+		{"act":"ACTE II — L’ÉQUIPE SE RÉVEILLE", "title":"10:51 · Le message supprimé", "brief":"Léa commence à écrire : « On m’a demandé hier de ne pas désinstaller ORCHID avant la fin du test… » Le message disparaît, puis elle envoie : « Je préfère t’en parler de vive voix. »", "task":"Que faites-vous ?", "options":["Lui laisser choisir ce qu’elle veut partager.", "Insister pour qu’elle envoie immédiatement la preuve.", "Interpréter le message supprimé comme un aveu."], "results":["Léa vous propose un appel à midi. La confiance reste intacte et vous n’avez pas transformé un message hésitant en preuve.", "Léa se ferme et reporte la conversation. Vous avez peut-être gagné une réponse rapide, mais perdu sa confiance.", "Vous notez une hypothèse, pas une preuve. Le message supprimé ne permet pas de conclure qui a donné cette consigne."]},
+		{"act":"ACTE II — L’ÉQUIPE SE RÉVEILLE", "title":"11:12 · L’assistant demande une note", "brief":"Microslop AI ouvre une fenêtre : « Pour personnaliser votre expérience, décrivez ce qui vous a contrarié aujourd’hui. » Le champ est libre ; la politique d’utilisation des réponses n’est pas affichée.", "task":"Que saisissez-vous ?", "options":["« Notifications à 09:05 et 10:21 ; effets observés dans le compte rendu. »", "Raconter des informations personnelles sans rapport.", "Fermer le formulaire et continuer le rapport."], "results":["Votre note contient des observations vérifiables et peu de données inutiles. L’assistant répond : « Merci, votre retour a été classé comme engagement positif. »", "Le formulaire accepte le texte et propose de le transformer en profil de préférences. Vous ne savez pas qui pourra le consulter.", "Le formulaire se ferme. Vous gardez du temps pour le rapport, sans savoir comment la note aurait été utilisée."]},
+		{"act":"ACTE III — CE QUI RESTE ÉCRIT", "title":"11:34 · La version réécrite", "brief":"Le document de compte rendu a changé. « Deux interruptions ont masqué les commandes » devient « Des rappels contextuels ont été affichés ». L’historique indique qu’une version automatique a été proposée.", "task":"Quelle version gardez-vous ?", "options":["Restaurer les faits précis et conserver l’historique.", "Accepter la reformulation pour gagner du temps.", "Effacer toutes les versions pour repartir proprement."], "results":["Le rapport décrit l’impact concret et conserve la trace de la modification automatique.", "Le ton est neutre, mais le lecteur ne saura plus que les commandes étaient masquées.", "Vous perdez la comparaison entre les deux textes et ne pouvez plus expliquer ce qui a changé."]},
+		{"act":"ACTE III — CE QUI RESTE ÉCRIT", "title":"11:46 · Le mini-entretien", "brief":"Lors d’un appel, Léa confirme qu’on lui a demandé d’attendre avant de désinstaller ORCHID. Elle n’a pas le nom de la personne ni de document officiel. Elle vous demande de ne pas la citer directement.", "task":"Comment utilisez-vous son témoignage ?", "options":["Résumer son témoignage sans l’identifier et demander une trace officielle.", "La citer nommément pour rendre le rapport plus fort.", "Écrire qu’elle a prouvé l’existence d’un complot."], "results":["Vous protégez Léa et distinguez son témoignage des documents qui restent à obtenir.", "Léa vous demande de retirer son nom. Elle craint que le rapport soit transmis au mauvais groupe.", "Le rapport devient catégorique sans preuve suffisante. L’assistant signale que la conclusion dépasse les sources."]},
+		{"act":"ACTE III — CE QUI RESTE ÉCRIT", "title":"11:53 · Le bouton Envoyer", "brief":"Votre rapport tient sur une page : chronologie, deux captures, réponse du support, témoignage anonymisé et trois questions sans réponse. Deux boutons sont disponibles : « Envoyer au comité » et « Enregistrer une copie locale ».", "task":"Quelle est votre prochaine étape ?", "options":["Envoyer le rapport sourcé et conserver une copie.", "Conserver seulement une copie locale avant de décider.", "Envoyer le brouillon automatique sans le relire."], "results":["Le comité reçoit une version sourcée. Vous gardez une copie pour comparer la réponse à ce qui a réellement été envoyé.", "La copie locale est conservée. Vous pourrez encore vérifier les pièces avant toute transmission.", "Le brouillon est transmis avec la formulation adoucie. Le message de confirmation indique que la demande a été « simplifiée pour accélérer le traitement »."]},
+		{"act":"ACTE III — CE QUI RESTE ÉCRIT", "title":"12:02 · La réponse de Marc", "brief":"Marc revient avec un message bref : « J’ai lu la page. Je ne peux pas confirmer l’intention derrière ORCHID. Je peux demander qui a validé le canal et pourquoi les interruptions sont mesurées comme de l’engagement. »", "task":"Que lui demandez-vous ?", "options":["Demander les références d’approbation et les critères de mesure.", "Lui demander de désigner un responsable tout de suite.", "Accepter la réponse sans demander de suivi."], "results":["Marc crée deux questions de suivi et promet de joindre les références disponibles. Le dossier avance sans inventer de coupable.", "Marc refuse de nommer quelqu’un sans trace. La réunion se termine sur un désaccord, pas sur une réponse.", "La conversation se termine. Aucun suivi n’est planifié et les questions restent ouvertes."]},
+		{"act":"ÉPILOGUE — LE BUREAU VOUS APPARTIENT-IL ?", "title":"12:15 · Une pause réelle", "brief":"Le bureau est calme. La messagerie n’affiche plus de badge rouge. Une notification propose un « résumé personnalisé de votre matinée ». Vous pouvez reprendre le travail, faire une pause ou consulter l’archive ORCHID.", "task":"Comment terminez-vous cette journée de travail ?", "options":["Enregistrer le rapport, puis fermer la session.", "Continuer à traiter les suggestions jusqu’à ce qu’il n’y en ait plus.", "Ouvrir l’archive et préparer le prochain contrôle."], "results":["Le rapport et vos notes restent sauvegardés. Le bureau s’assombrit doucement ; la journée n’a pas résolu le problème, mais vous avez décidé quand vous arrêter.", "Les suggestions continuent de se renouveler. Une carte annonce « Encore 3 recommandations », puis en affiche cinq nouvelles.", "L’archive s’ouvre sur la liste des questions encore sans réponse. Cette fois, la prochaine étape est un contrôle précis, pas une chasse au coupable."]}
+	]
+
+
+func _render_orchid_workday_stage(app: Control, state: Dictionary) -> void:
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var old_child := content.get_child(0)
+		content.remove_child(old_child)
+		old_child.queue_free()
+	var tasks := _orchid_workday_tasks()
+	var stage := int(state.get("stage", 0))
+	var progress := ProgressBar.new()
+	progress.max_value = tasks.size()
+	progress.value = stage
+	progress.show_percentage = false
+	content.add_child(progress)
+	if stage >= tasks.size():
+		var ending := Label.new()
+		ending.text = "JOURNÉE TERMINÉE\n\nVous avez traversé quinze moments interactifs. Les décisions restent enregistrées et le bureau reprend la main. ORCHID n’est pas résolu par magie : vos notes, vos choix et les questions ouvertes constituent la suite du chapitre."
+		ending.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		ending.custom_minimum_size = Vector2(0, 150)
+		content.add_child(ending)
+		var archive_button := Button.new()
+		archive_button.text = "Ouvrir l’archive ORCHID"
+		archive_button.pressed.connect(_open_orchid_archive)
+		content.add_child(archive_button)
+		return
+	var task: Dictionary = tasks[stage]
+	var act := Label.new()
+	act.text = str(task["act"])
+	act.add_theme_font_size_override("font_size", 11)
+	act.add_theme_color_override("font_color", Color("5b6d89"))
+	content.add_child(act)
+	var title := Label.new()
+	title.text = str(task["title"])
+	title.add_theme_font_size_override("font_size", 25)
+	title.custom_minimum_size = Vector2(0, 38)
+	content.add_child(title)
+	var brief := Label.new()
+	brief.text = str(task["brief"])
+	brief.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	brief.custom_minimum_size = Vector2(0, 125)
+	content.add_child(brief)
+	var prompt := Label.new()
+	prompt.text = str(task["task"])
+	prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	prompt.add_theme_font_size_override("font_size", 16)
+	content.add_child(prompt)
+	var result := Label.new()
+	result.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	result.custom_minimum_size = Vector2(0, 82)
+	result.add_theme_color_override("font_color", Color("263247"))
+	var continue_button := Button.new()
+	continue_button.text = "Moment suivant →"
+	continue_button.custom_minimum_size = Vector2(0, 42)
+	continue_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	continue_button.disabled = true
+	var saved_choice := CampaignStore.load_case_answer("workday_choice_%02d" % stage)
+	var options: Array = task["options"]
+	var results: Array = task["results"]
+	if saved_choice >= 0 and saved_choice < options.size():
+		result.text = str(results[saved_choice])
+		continue_button.disabled = false
+	for i in range(options.size()):
+		var option_button := Button.new()
+		option_button.text = str(options[i])
+		option_button.custom_minimum_size = Vector2(0, 38)
+		option_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		option_button.pressed.connect(func():
+			CampaignStore.save_case_answer("workday_choice_%02d" % stage, i)
+			result.text = str(results[i])
+			continue_button.disabled = false
+			_show_notification("Choix enregistré", "Votre décision pour « %s » est conservée." % str(task["title"]))
+		)
+		content.add_child(option_button)
+	content.add_child(result)
+	continue_button.pressed.connect(func():
+		CampaignStore.save_evidence("workday_stage_%02d" % stage)
+		state["stage"] = stage + 1
+		var tween := create_tween()
+		tween.tween_property(app, "modulate:a", 0.7, 0.08)
+		tween.tween_property(app, "modulate:a", 1.0, 0.14)
+		_render_orchid_workday_stage(app, state)
+	)
+	content.add_child(continue_button)
+	var appear := create_tween()
+	app.modulate.a = 0.0
+	appear.tween_property(app, "modulate:a", 1.0, 0.16)
+
+
+func _open_orchid_workday_replay() -> void:
+	_open_orchid_workday()
 
 
 ## A longer, gated investigation: twelve decisions across three acts.
@@ -4090,6 +4222,7 @@ func _render_orchid_campaign_dashboard(summary: Label) -> void:
 		{"name":"Contrôles de conformité", "ids":["compliance_signature", "compliance_channel", "compliance_approval", "compliance_notice", "compliance_finding"]},
 		{"name":"Pièces annexes", "ids":["support_ticket", "survey_bias", "night_log_reconstructed", "incident_report"]},
 		{"name":"Séquence narrative (30 scènes)", "ids":["cinematic_scene_00", "cinematic_scene_01", "cinematic_scene_02", "cinematic_scene_03", "cinematic_scene_04", "cinematic_scene_05", "cinematic_scene_06", "cinematic_scene_07", "cinematic_scene_08", "cinematic_scene_09", "cinematic_scene_10", "cinematic_scene_11", "cinematic_scene_12", "cinematic_scene_13", "cinematic_scene_14", "cinematic_scene_15", "cinematic_scene_16", "cinematic_scene_17", "cinematic_scene_18", "cinematic_scene_19", "cinematic_scene_20", "cinematic_scene_21", "cinematic_scene_22", "cinematic_scene_23", "cinematic_scene_24", "cinematic_scene_25", "cinematic_scene_26", "cinematic_scene_27", "cinematic_scene_28", "cinematic_scene_29"]},
+		{"name":"Journée interactive (15 séquences)", "ids":["workday_stage_00", "workday_stage_01", "workday_stage_02", "workday_stage_03", "workday_stage_04", "workday_stage_05", "workday_stage_06", "workday_stage_07", "workday_stage_08", "workday_stage_09", "workday_stage_10", "workday_stage_11", "workday_stage_12", "workday_stage_13", "workday_stage_14"]},
 		{"name":"Enquête de terrain (12 défis)", "ids":["field_stage_00", "field_stage_01", "field_stage_02", "field_stage_03", "field_stage_04", "field_stage_05", "field_stage_06", "field_stage_07", "field_stage_08", "field_stage_09", "field_stage_10", "field_stage_11", "field_investigation_completed"]}
 	]
 	var lines := PackedStringArray(["DOSSIER ORCHID — SYNTHÈSE ACTUALISÉE", "Pièces enregistrées : %d" % evidence.size(), ""])
