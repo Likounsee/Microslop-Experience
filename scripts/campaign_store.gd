@@ -29,6 +29,8 @@ func load_progress() -> int:
 func save_progress(step: int) -> bool:
 	mission_step = clampi(step, MIN_MISSION_STEP, MAX_MISSION_STEP)
 	var config := ConfigFile.new()
+	# Load the existing file first so ending choices and future narrative flags survive progress saves.
+	config.load(SAVE_PATH)
 	config.set_value("campaign", "mission_step", mission_step)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
 	var error := config.save(SAVE_PATH)
