@@ -750,53 +750,60 @@ func _build_calendar_panel() -> void:
 
 	var today := Label.new()
 	today.text = _get_french_long_date()
-
 	today.add_theme_font_size_override("font_size", 25)
-
 	today.add_theme_color_override("font_color", Color("1d2a40"))
-
 	layout.add_child(today)
 
-
 	var divider := HSeparator.new()
-
 	layout.add_child(divider)
 
 	var agenda_heading := Label.new()
-
 	agenda_heading.text = "Aujourd’hui"
-
 	agenda_heading.add_theme_font_size_override("font_size", 14)
-
 	agenda_heading.add_theme_color_override("font_color", Color("24344d"))
-
 	layout.add_child(agenda_heading)
 
+	var agenda_card := PanelContainer.new()
+	agenda_card.add_theme_stylebox_override("panel", _flat_style(Color("e5edf8"), 12))
+	var agenda_margin := MarginContainer.new()
+	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+		agenda_margin.add_theme_constant_override(side, 12)
+	agenda_card.add_child(agenda_margin)
+	var agenda_layout := VBoxContainer.new()
+	agenda_layout.add_theme_constant_override("separation", 5)
+	agenda_margin.add_child(agenda_layout)
+
+	var agenda_icon := Label.new()
+	agenda_icon.text = "☼  Agenda"
+	agenda_icon.add_theme_font_size_override("font_size", 12)
+	agenda_icon.add_theme_color_override("font_color", Color("365b8d"))
+	agenda_layout.add_child(agenda_icon)
+
 	var agenda := Label.new()
-
 	agenda.text = "Aucun événement prévu.\nProfitez de ce moment sans réunion."
-
 	agenda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-
 	agenda.add_theme_color_override("font_color", Color("596780"))
+	agenda_layout.add_child(agenda)
+	layout.add_child(agenda_card)
 
-	layout.add_child(agenda)
+	var calendar_footer := HBoxContainer.new()
+	calendar_footer.add_theme_constant_override("separation", 8)
+	var date_label := Label.new()
+	date_label.text = _get_short_french_date()
+	date_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	date_label.add_theme_color_override("font_color", Color("596780"))
+	date_label.add_theme_font_size_override("font_size", 11)
+	calendar_footer.add_child(date_label)
 
 	var notifications_button := Button.new()
-
-	notifications_button.text = "Centre de notifications"
-
-	notifications_button.custom_minimum_size.y = 38
-
+	notifications_button.text = "Notifications  ›"
+	notifications_button.custom_minimum_size.y = 34
 	notifications_button.add_theme_color_override("font_color", Color("24344d"))
-
 	notifications_button.add_theme_stylebox_override("normal", _flat_style(Color("e1eaf7"), 9))
-
 	notifications_button.add_theme_stylebox_override("hover", _flat_style(Color("d1e2f7"), 9))
-
 	notifications_button.pressed.connect(_toggle_notification_center)
-
-	layout.add_child(notifications_button)
+	calendar_footer.add_child(notifications_button)
+	layout.add_child(calendar_footer)
 
 func _get_short_french_date() -> String:
 
