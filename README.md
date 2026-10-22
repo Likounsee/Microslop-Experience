@@ -26,6 +26,12 @@ Chapter 1 now includes a **30-scene narrative sequence**, “La mise à jour de 
 
 The story prioritizes character moments, escalation, humor and cinematic-style transitions over a chain of investigation quizzes. It uses in-game UI, scene titles, dialogue and animated transitions rather than pre-rendered video. Godot runtime verification is still pending. Chapter 2 remains separate DLC and is not part of this work.
 
+
+
+### Parcours jouable — « Une journée avec ORCHID »
+
+En complément des 30 scènes narratives, l’archive propose maintenant une journée interactive en **15 séquences** et trois actes. Le joueur doit réellement choisir quoi fermer, quoi enregistrer, quoi répondre à Léa, comment gérer les interruptions en réunion, quelle formulation garder dans le rapport et comment transmettre les éléments. Chaque décision affiche une conséquence immédiate et reste sauvegardée ; le parcours reprend à la première séquence non terminée. Les choix couvrent aussi les limites de ce que les preuves permettent d’affirmer : le récit évite de transformer une notification douteuse en preuve d’accès aux fichiers ou d’inventer un responsable. Ce parcours est du contenu narratif jouable supplémentaire, pas une promesse de durée mesurée ; il reste à valider dans une exécution réelle de Godot.
+
 ### Chapter 2 — Separate DLC: your home OS
 
 The second chapter is planned as a separately distributed DLC, not as a required continuation bundled into the base game. It will focus on the creator's own operating system, designed to replace Windows. Its name, interface, capabilities, lore, and missions will be defined only after the creator supplies the OS files and documentation; the project will not invent technical claims about it. The base game remains complete and playable without this DLC. The in-game teaser currently marks Chapter 2 as in preparation.
@@ -56,7 +62,7 @@ Keyboard shortcuts in the prototype:
 |---|---|---|
 | P0 | Project foundation, desktop shell, window system | In progress |
 | P1 | Fake OS applications and persistent display/audio/performance settings | Partly prototyped |
-| P2 | Campaign, missions, ads, update events and progression | ORCHID report, two saved endings, eight-piece evidence casebook, and three interactive analysis cases implemented; narrative QA and richer systemic interruptions remain |
+| P2 | Campaign, missions, ads, update events and progression | ORCHID report, two saved endings, eight-piece evidence casebook, 30-scene narrative sequence, and 15-stage interactive workday implemented; runtime QA, audio and systemic interruption polish remain |
 | P3 | Audio, animation, accessibility, saves and polish | Planned |
 | P4 | Steam store page, builds, QA and release | Planned |
 
