@@ -2570,39 +2570,71 @@ func _toggle_all_apps_view() -> void:
 func _add_all_apps_entry(glyph: String, caption: String, callback: Callable) -> void:
 
 	var button := Button.new()
-
-	button.text = "%s     %s" % [glyph, caption]
-
+	button.text = ""
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-
-	button.custom_minimum_size.y = 38
-
+	button.custom_minimum_size.y = 42
 	button.set_meta("app_name", caption.to_lower())
-
-	button.add_theme_font_size_override("font_size", 13)
-
 	button.add_theme_color_override("font_color", Color("263247"))
-
 	button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 7))
-
 	button.add_theme_stylebox_override("hover", _flat_style(Color("dce8f8"), 7))
-
 	button.add_theme_stylebox_override("pressed", _flat_style(Color("cddff7"), 7))
-
 	var app_entry_focus := _flat_style(Color("e8f1fc"), 7)
-
 	app_entry_focus.set_border_width_all(1)
-
 	app_entry_focus.border_color = Color("a9c9ee")
-
 	button.add_theme_stylebox_override("focus", app_entry_focus)
 
+	var padding := MarginContainer.new()
+	padding.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	padding.add_theme_constant_override("margin_left", 8)
+	padding.add_theme_constant_override("margin_right", 8)
+	padding.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	button.add_child(padding)
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	padding.add_child(row)
+
+	var icon_color := Color("2879d0")
+	match caption:
+		"Explorateur de fichiers", "Corbeille":
+			icon_color = Color("d5a32d") if caption == "Explorateur de fichiers" else Color("5a9fd8")
+		"Paramètres":
+			icon_color = Color("65758b")
+		"Microslop AI":
+			icon_color = Color("7868d8")
+		"Mise à jour":
+			icon_color = Color("2b9b73")
+
+	var icon_tile := PanelContainer.new()
+	icon_tile.custom_minimum_size = Vector2(28, 28)
+	icon_tile.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	icon_tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon_tile.add_theme_stylebox_override("panel", _flat_style(icon_color, 7))
+	row.add_child(icon_tile)
+
+	var icon_label := Label.new()
+	icon_label.text = glyph
+	icon_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	icon_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	icon_label.add_theme_font_size_override("font_size", 15)
+	icon_label.add_theme_color_override("font_color", Color.WHITE)
+	icon_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon_tile.add_child(icon_label)
+
+	var title_label := Label.new()
+	title_label.text = caption
+	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	title_label.add_theme_font_size_override("font_size", 13)
+	title_label.add_theme_color_override("font_color", Color("263247"))
+	title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(title_label)
+
 	button.pressed.connect(callback)
-
 	button.focus_mode = Control.FOCUS_NONE
-
 	_all_apps_entries.append(button)
-
 	_all_apps_list.add_child(button)
 
 func _show_account_menu(anchor: Control) -> void:
