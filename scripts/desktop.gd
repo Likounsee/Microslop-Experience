@@ -1473,6 +1473,7 @@ func _open_settings() -> void:
 	var content := body.get_child(0) as VBoxContainer
 	content.get_child(0).queue_free()
 
+	_add_settings_section(content, "Système", "Affichage et comportement de la fenêtre")
 	var display_label := Label.new()
 	display_label.text = "Mode d'affichage"
 	display_label.add_theme_color_override("font_color", Color("263247"))
@@ -1524,6 +1525,7 @@ func _open_settings() -> void:
 	)
 	content.add_child(vsync)
 
+	_add_settings_section(content, "Performances", "Ajustez la fluidité de l’expérience")
 	var fps_label := Label.new()
 	fps_label.text = "Limite d'images par seconde"
 	fps_label.add_theme_color_override("font_color", Color("263247"))
@@ -1544,6 +1546,7 @@ func _open_settings() -> void:
 	)
 	content.add_child(fps_limit)
 
+	_add_settings_section(content, "Audio", "Réglez le niveau sonore général")
 	var volume_label := Label.new()
 	volume_label.text = "Volume général"
 	volume_label.add_theme_color_override("font_color", Color("263247"))
@@ -1562,6 +1565,7 @@ func _open_settings() -> void:
 	)
 	content.add_child(volume)
 
+	_add_settings_section(content, "Préférences", "Personnalisez votre expérience")
 	var language_label := Label.new()
 	language_label.text = "Langue"
 	language_label.add_theme_color_override("font_color", Color("263247"))
@@ -1583,6 +1587,21 @@ func _open_settings() -> void:
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	note.add_theme_color_override("font_color", Color("596780"))
 	content.add_child(note)
+
+func _add_settings_section(parent: VBoxContainer, heading_text: String, subtitle_text: String) -> void:
+	var heading := Label.new()
+	heading.text = heading_text
+	heading.add_theme_font_size_override("font_size", 18)
+	heading.add_theme_color_override("font_color", Color("17243a"))
+	parent.add_child(heading)
+	var subtitle := Label.new()
+	subtitle.text = subtitle_text
+	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	subtitle.add_theme_font_size_override("font_size", 11)
+	subtitle.add_theme_color_override("font_color", Color("66758b"))
+	parent.add_child(subtitle)
+	var separator := HSeparator.new()
+	parent.add_child(separator)
 
 func _get_window_content(app: Control) -> VBoxContainer:
 	if app.get_child_count() == 0:
