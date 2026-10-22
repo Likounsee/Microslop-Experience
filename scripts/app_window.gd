@@ -125,9 +125,15 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	minimize_button.tooltip_text = "Réduire"
 	minimize_button.custom_minimum_size = Vector2(44, 34)
 	minimize_button.add_theme_color_override("font_color", Color("24344d"))
-	minimize_button.add_theme_stylebox_override("normal", _panel_style(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
-	minimize_button.add_theme_stylebox_override("hover", _panel_style(Color("dce6f4"), Color(0, 0, 0, 0)))
-	minimize_button.add_theme_stylebox_override("pressed", _panel_style(Color("c8d8ec"), Color(0, 0, 0, 0)))
+	var title_button_normal := _panel_style(Color(0, 0, 0, 0), Color(0, 0, 0, 0))
+	title_button_normal.set_corner_radius_all(5)
+	var title_button_hover := _panel_style(Color("dce6f4"), Color(0, 0, 0, 0))
+	title_button_hover.set_corner_radius_all(5)
+	var title_button_pressed := _panel_style(Color("c8d8ec"), Color(0, 0, 0, 0))
+	title_button_pressed.set_corner_radius_all(5)
+	minimize_button.add_theme_stylebox_override("normal", title_button_normal)
+	minimize_button.add_theme_stylebox_override("hover", title_button_hover)
+	minimize_button.add_theme_stylebox_override("pressed", title_button_pressed)
 	minimize_button.pressed.connect(_animate_minimize)
 	minimize_button.focus_mode = Control.FOCUS_NONE
 	title_row.add_child(minimize_button)
@@ -137,9 +143,9 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	maximize_button.tooltip_text = "Agrandir"
 	maximize_button.custom_minimum_size = Vector2(44, 34)
 	maximize_button.add_theme_color_override("font_color", Color("24344d"))
-	maximize_button.add_theme_stylebox_override("normal", _panel_style(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
-	maximize_button.add_theme_stylebox_override("hover", _panel_style(Color("dce6f4"), Color(0, 0, 0, 0)))
-	maximize_button.add_theme_stylebox_override("pressed", _panel_style(Color("c8d8ec"), Color(0, 0, 0, 0)))
+	maximize_button.add_theme_stylebox_override("normal", title_button_normal)
+	maximize_button.add_theme_stylebox_override("hover", title_button_hover)
+	maximize_button.add_theme_stylebox_override("pressed", title_button_pressed)
 	_maximize_button = maximize_button
 	maximize_button.pressed.connect(func():
 		_toggle_maximize(maximize_button)
@@ -156,8 +162,12 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	close_button.tooltip_text = "Fermer"
 	close_button.custom_minimum_size = Vector2(48, 34)
 	close_button.add_theme_color_override("font_color", Color("24344d"))
-	close_button.add_theme_stylebox_override("normal", _panel_style(Color(0, 0, 0, 0), Color(0, 0, 0, 0)))
-	close_button.add_theme_stylebox_override("pressed", _panel_style(Color("a91f14"), Color(0, 0, 0, 0)))
+	var close_normal := _panel_style(Color(0, 0, 0, 0), Color(0, 0, 0, 0))
+	close_normal.set_corner_radius_all(5)
+	var close_pressed := _panel_style(Color("a91f14"), Color(0, 0, 0, 0))
+	close_pressed.set_corner_radius_all(5)
+	close_button.add_theme_stylebox_override("normal", close_normal)
+	close_button.add_theme_stylebox_override("pressed", close_pressed)
 	var close_hover := _panel_style(Color("c42b1c"), Color(0, 0, 0, 0))
 	close_hover.set_corner_radius_all(5)
 	close_button.add_theme_stylebox_override("hover", close_hover)
@@ -419,9 +429,10 @@ func _toggle_maximize(button: Button = null) -> void:
 		size = get_viewport_rect().size
 		position = Vector2.ZERO
 		_is_maximized = true
-	if is_instance_valid(button):
-		button.text = "❐" if _is_maximized else "□"
-		button.tooltip_text = "Restaurer" if _is_maximized else "Agrandir"
+	var target_button := button if is_instance_valid(button) else _maximize_button
+	if is_instance_valid(target_button):
+		target_button.text = "❐" if _is_maximized else "□"
+		target_button.tooltip_text = "Restaurer" if _is_maximized else "Agrandir"
 
 func _on_titlebar_input(event: InputEvent, _titlebar: Control) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.double_click:
