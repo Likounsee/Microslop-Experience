@@ -4323,6 +4323,135 @@ func _open_search() -> void:
 
 	_open_window("Recherche Microslop", "Résultats pour : « ouvrir une application »\n\n1. Microslop Premium — SPONSORISÉ\n2. Microslop AI — recommandé\n3. L'application que vous recherchiez (peut-être).", Vector2(560, 300))
 
+## A five-stage playable sequence turns the suspicious update into a morning-long incident.
+func _open_orchid_morning_sequence() -> void:
+	var app := _open_window("Après le redémarrage — incident ORCHID", "SIMULATION LOCALE · PARCOURS EN 5 ÉTAPES", Vector2(760, 610))
+	var state := {"stage": 0, "choices": []}
+	_render_orchid_morning_stage(app, state, 0)
+
+
+func _render_orchid_morning_stage(app: Control, state: Dictionary, stage: int) -> void:
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var old_child := content.get_child(0)
+		content.remove_child(old_child)
+		old_child.queue_free()
+	var headings := [
+		"ÉTAPE 1/5 · LE REDÉMARRAGE",
+		"ÉTAPE 2/5 · LE PREMIER SIGNE",
+		"ÉTAPE 3/5 · LE DÉTOUR",
+		"ÉTAPE 4/5 · L’ASSISTANT",
+		"ÉTAPE 5/5 · LA TRACE À PRÉSERVER"
+	]
+	var stories := [
+		"07:56 — L’écran de redémarrage affiche un message rassurant : « Nous préparons votre espace pour une expérience plus fluide ». Le compteur reste à 99 % pendant plusieurs secondes. Une ligne brièvement visible indique « Notification Timing Preview : activé ». Vous ne savez pas si l’installation était accidentelle ou si quelqu’un l’a laissée continuer après l’erreur.",
+		"08:11 — Une notification prétend que 18 fichiers ont été analysés. L’explorateur ne montre pourtant aucun document. Le détail de la notification n’affiche ni nom ni chemin de fichier, seulement « Votre activité a été optimisée ». Le nombre ressemble davantage à un événement de test qu’à un résultat vérifiable.",
+		"08:17 — Vous ouvrez la recherche pour trouver comment désactiver les alertes. Le premier résultat est une page sponsorisée vantant les « notifications intelligentes ». Le lien officiel des paramètres est plus bas. Le classement ne prouve pas à lui seul une intention, mais il rend la sortie inutilement difficile.",
+		"08:23 — Microslop AI répond que les alertes sont « adaptées à votre rythme ». Quand vous demandez pourquoi elles ont commencé après la mise à jour, il explique que le composant est expérimental puis remplace sa réponse par une recommandation de productivité. La conversation reste locale à cette simulation.",
+		"08:31 — Un extrait du journal apparaît dans l’archive : le composant a été activé au premier démarrage après l’installation. Le journal confirme la séquence temporelle, mais ne nomme pas la personne qui a modifié le canal. Votre décision concerne maintenant la qualité de la preuve, pas la recherche d’un coupable facile."
+	]
+	var options := [
+		[["Lire les détails de redémarrage", "Conserver la note visible", "Passer à l’écran d’accueil"], ["morning_restart_details", "morning_restart_note", "morning_restart_skip"]],
+		[["Ouvrir l’historique de notification", "Vérifier le dossier Documents", "Accepter le résumé"], ["morning_notice_history", "morning_notice_files", "morning_notice_accept"]],
+		[["Ouvrir les paramètres malgré le classement", "Consulter la page sponsorisée", "Capturer la page de résultats"], ["morning_search_settings", "morning_search_sponsor", "morning_search_capture"]],
+		[["Demander les preuves techniques", "Accepter la réponse rassurante", "Sauvegarder la conversation"], ["morning_ai_logs", "morning_ai_accept", "morning_ai_save"]],
+		[["Joindre la chronologie au dossier", "Écrire une conclusion prudente", "Fermer sans conserver la trace"], ["morning_final_timeline", "morning_final_cautious", "morning_final_close"]]
+	]
+	var outcomes := [
+		["Le journal de redémarrage est ajouté au dossier. Vous relevez le nom du composant sans conclure encore à une intention.", "La note est conservée comme indice de première activation. Elle ne permet pas de savoir qui a déclenché le déploiement.", "Vous arrivez au bureau sans examiner la ligne. L’événement reste dans le journal, mais vous ne l’avez pas encore versé au dossier."],
+		["L’historique montre une première alerte après l’activation du composant. Le lien temporel est utile, mais n’établit pas à lui seul une causalité.", "Le dossier vide contredit l’affirmation visible. Vous ajoutez une preuve de divergence entre l’interface et ce qui peut être vérifié.", "Le résumé est accepté sans vérification. L’archive conservera cette action comme un choix, pas comme une preuve que l’analyse a réellement eu lieu."],
+		["Vous trouvez le réglage, mais seulement après avoir contourné le classement. La difficulté d’accès est notée comme un problème d’interface.", "La page sponsorisée présente la relance comme une aide. Vous ne trouvez aucun mécanisme de désactivation sur cette page.", "La capture permet de comparer l’ordre des résultats plus tard. Elle ne prouve pas que le sponsor a lui-même ordonné le classement."],
+		["L’assistant ne fournit pas de chemins de fichiers ni de référence d’approbation. Vous consignez cette absence plutôt que d’inventer ce qu’il ne montre pas.", "La réponse est rassurante, mais n’explique ni le canal interne ni l’approbation manquante. L’incertitude reste entière.", "La conversation est ajoutée au dossier. Elle documente le changement de sujet, mais ne prouve pas une intention individuelle."],
+		["La chronologie est conservée. Elle relie les événements sans identifier de responsable.", "Le rapport sépare les faits observés des hypothèses et demande un audit du canal et des approbations.", "Vous fermez la fenêtre sans créer de nouvelle pièce. Les preuves déjà collectées restent dans la sauvegarde."]
+	]
+	var heading := Label.new()
+	heading.text = headings[stage]
+	heading.add_theme_font_size_override("font_size", 17)
+	heading.add_theme_color_override("font_color", Color("24344d"))
+	content.add_child(heading)
+	var progress := Label.new()
+	progress.text = "Parcours : %d / 5 · choix précédent conservé automatiquement" % (stage + 1)
+	progress.add_theme_color_override("font_color", Color("53657d"))
+	content.add_child(progress)
+	var story := Label.new()
+	story.text = stories[stage]
+	story.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	story.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	story.custom_minimum_size = Vector2(0, 150)
+	story.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(story)
+	var consequence := Label.new()
+	consequence.text = "Votre choix modifiera la trace conservée dans le dossier."
+	consequence.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	consequence.custom_minimum_size = Vector2(0, 68)
+	consequence.add_theme_color_override("font_color", Color("53657d"))
+	content.add_child(consequence)
+	for index in range(options[stage].size()):
+		var option_button := Button.new()
+		option_button.text = str(options[stage][index][0])
+		option_button.custom_minimum_size = Vector2(0, 40)
+		option_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		option_button.pressed.connect(func():
+			var evidence_id := str(options[stage][index][1])
+			CampaignStore.save_evidence(evidence_id)
+			CampaignStore.save_case_answer("morning_stage_%d" % stage, index)
+			state["choices"].append(index)
+			consequence.text = str(outcomes[stage][index])
+			for child in content.get_children():
+				if child is Button:
+					child.disabled = true
+			var next := Button.new()
+			if stage < 4:
+				next.text = "Continuer vers l’étape %d/5" % (stage + 2)
+				next.pressed.connect(func(): _render_orchid_morning_stage(app, state, stage + 1))
+			else:
+				next.text = "Terminer et consulter le bilan"
+				next.pressed.connect(func(): _render_orchid_morning_summary(app, state))
+			content.add_child(next)
+		)
+		content.add_child(option_button)
+
+
+func _render_orchid_morning_summary(app: Control, state: Dictionary) -> void:
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var old_child := content.get_child(0)
+		content.remove_child(old_child)
+		old_child.queue_free()
+	var evidence: Array = CampaignStore.load_evidence()
+	var lines := PackedStringArray([
+		"BILAN DE LA MATINÉE",
+		"",
+		"Vous avez parcouru les cinq étapes du redémarrage. Les choix ont été enregistrés séparément : ils décrivent votre méthode d’enquête et ne changent pas les faits des journaux.",
+		"",
+		"Indices de cette séquence :"
+	])
+	for stage in range(5):
+		var answer := CampaignStore.load_case_answer("morning_stage_%d" % stage)
+		lines.append("Étape %d : %s" % [stage + 1, "choix enregistré (%d)" % (answer + 1) if answer >= 0 else "aucun choix retrouvé"])
+	lines.append("")
+	lines.append("Les traces conservées dans le dossier sont des éléments fictifs du jeu. La chronologie suggère une mise en production anormale et une stratégie de rétention ; elle ne permet pas encore d’attribuer la décision à une personne.")
+	var summary := Label.new()
+	summary.text = "\n".join(lines)
+	summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	summary.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	summary.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(summary)
+	var archive := Button.new()
+	archive.text = "Retourner à l’archive ORCHID"
+	archive.pressed.connect(_open_orchid_archive)
+	content.add_child(archive)
+	var history := Button.new()
+	history.text = "Revoir l’historique de déploiement"
+	history.pressed.connect(_open_orchid_deployment_history)
+	content.add_child(history)
+	CampaignStore.save_evidence("morning_sequence_completed")
+
+
 func _trigger_update() -> void:
 
 	if _mission_step == 2:
@@ -4351,6 +4480,16 @@ func _trigger_update() -> void:
 		history.text = "Enquêter sur l’origine de cette mise à jour"
 		history.pressed.connect(_open_orchid_deployment_history)
 		content.add_child(history)
+
+		var reboot_story := Button.new()
+		reboot_story.text = "Simuler le redémarrage et suivre la matinée (5 étapes)"
+		reboot_story.pressed.connect(_open_orchid_morning_sequence)
+		content.add_child(reboot_story)
+
+		var reboot_story := Button.new()
+		reboot_story.text = "Simuler le redémarrage et suivre la matinée (5 étapes)"
+		reboot_story.pressed.connect(_open_orchid_morning_sequence)
+		content.add_child(reboot_story)
 
 	_show_notification("Mise à jour en attente", "Redémarrage recommandé. Nous choisirons le moment.")
 
