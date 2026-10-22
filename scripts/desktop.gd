@@ -4105,15 +4105,18 @@ func _toggle_task_view() -> void:
 	_task_view_panel = PanelContainer.new()
 	_task_view_panel.name = "TaskViewPanel"
 	_task_view_panel.z_index = 120
-	_task_view_panel.custom_minimum_size = Vector2(560, 0)
+	var viewport_size := get_viewport_rect().size
+	var panel_width := minf(720.0, maxf(280.0, viewport_size.x - 24.0))
+	var panel_height := minf(440.0, maxf(220.0, viewport_size.y - 96.0))
+	_task_view_panel.custom_minimum_size = Vector2(panel_width, 0)
 	_task_view_panel.anchor_left = 0.5
 	_task_view_panel.anchor_right = 0.5
 	_task_view_panel.anchor_top = 0.5
 	_task_view_panel.anchor_bottom = 0.5
-	_task_view_panel.offset_left = -280
-	_task_view_panel.offset_right = 280
-	_task_view_panel.offset_top = -190
-	_task_view_panel.offset_bottom = 190
+	_task_view_panel.offset_left = -panel_width / 2.0
+	_task_view_panel.offset_right = panel_width / 2.0
+	_task_view_panel.offset_top = -panel_height / 2.0
+	_task_view_panel.offset_bottom = panel_height / 2.0
 	var panel_style := _flat_style(Color(0.94, 0.96, 0.99, 0.97), 16)
 	panel_style.border_color = Color("d5deeb")
 	panel_style.set_border_width_all(1)
@@ -4159,7 +4162,7 @@ func _toggle_task_view() -> void:
 	layout.add_child(subtitle)
 
 	var grid := GridContainer.new()
-	grid.columns = 2
+	grid.columns = 2 if viewport_size.x >= 620.0 else 1
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	layout.add_child(grid)
@@ -4173,14 +4176,17 @@ func _toggle_task_view() -> void:
 			var app_id := str(app_window.get_meta("app_id"))
 			var title := str(app_window.get_meta("window_title", "Application"))
 			var card := Button.new()
-			card.custom_minimum_size = Vector2(245, 92)
+			card.custom_minimum_size = Vector2(245 if grid.columns == 2 else panel_width - 44.0, 92)
 			card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			card.alignment = HORIZONTAL_ALIGNMENT_LEFT
-			card.text = "%s\n%s" % [_glyph_for_app_id(app_id), title]
+			card.text = "%s\n%s%s" % [_glyph_for_app_id(app_id), title, "  •  Fenêtre active" if app_id == _active_app_id else ""]
 			card.tooltip_text = title
 			card.add_theme_color_override("font_color", Color("24344d"))
 			card.add_theme_font_size_override("font_size", 14)
-			card.add_theme_stylebox_override("normal", _flat_style(Color("ffffff"), 10))
+			var card_normal := _flat_style(Color("eaf3ff") if app_id == _active_app_id else Color("ffffff"), 10)
+			card_normal.set_border_width_all(1)
+			card_normal.border_color = Color("6aa7ed") if app_id == _active_app_id else Color("dce4ef")
+			card.add_theme_stylebox_override("normal", card_normal)
 			card.add_theme_stylebox_override("hover", _flat_style(Color("e4efff"), 10))
 			card.add_theme_stylebox_override("pressed", _flat_style(Color("d5e5fb"), 10))
 			card.pressed.connect(_focus_task_view_app.bind(app_window))
