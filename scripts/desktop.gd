@@ -1407,10 +1407,13 @@ func _open_files() -> void:
 		nav_item.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		nav_item.custom_minimum_size.y = 32
 		nav_item.add_theme_font_size_override("font_size", 12)
+		nav_item.add_theme_color_override("font_color", Color("1f3048"))
+		nav_item.set_meta("explorer_path", caption.replace("🏠  ", "").replace("🖥  ", "").replace("⬇  ", "").replace("📄  ", "").replace("🖼  ", "").replace("🎵  ", "").replace("🎬  ", "").replace("💾  ", "").strip_edges())
 		nav_item.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 6))
 		nav_item.add_theme_stylebox_override("hover", _flat_style(Color("e5edf8"), 6))
 		nav_buttons.append(nav_item)
 		sidebar.add_child(nav_item)
+	address.set_meta("explorer_nav_buttons", nav_buttons)
 
 	var right_pane := VBoxContainer.new()
 	right_pane.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1556,6 +1559,13 @@ func _set_explorer_location(path: String, address: LineEdit, heading: Label, sta
 	heading.text = clean_path
 	status.text = "Aucun élément à afficher dans %s. Le contenu personnel reste inaccessible." % clean_path
 	_refresh_explorer_navigation_buttons(address)
+	var nav_buttons: Array = address.get_meta("explorer_nav_buttons", [])
+	for nav_item in nav_buttons:
+		if not is_instance_valid(nav_item):
+			continue
+		var selected := str(nav_item.get_meta("explorer_path", "")) == clean_path
+		nav_item.add_theme_stylebox_override("normal", _flat_style(Color("dce9f8") if selected else Color(0, 0, 0, 0), 6))
+		nav_item.add_theme_color_override("font_color", Color("075eb5") if selected else Color("1f3048"))
 	var grid := heading.get_parent().get_node_or_null("GridContainer") as GridContainer
 	if grid == null:
 		return
