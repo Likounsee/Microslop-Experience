@@ -12,9 +12,13 @@
 
 The game combines three elements:
 
-- **A fake desktop OS:** the supplied desktop wallpaper, translucent taskbar, centered Start menu, rounded draggable windows, simulated quick settings, files and settings.
-- **A campaign:** short missions that gradually introduce new interruptions and mechanics.
-- **A systemic comedy layer:** ads, update prompts, AI suggestions, and events that can interact.
+- **A fake desktop OS:** a convincing desktop shell that acts as the stage, not the main goal.
+- **A narrative campaign:** the player starts with ordinary setup tasks, notices suspicious update notes, discovers the internal ORCHID programme through the AI assistant, and finds evidence that interruptions are deliberately engineered to maximize engagement.
+- **A systemic comedy layer:** ads, update prompts, AI suggestions, and events that interrupt the player at increasingly revealing moments.
+
+### Story chapter 1 — ORCHID
+
+The opening chapter is a short investigation told through the desktop itself. The player follows five objectives: open Start, inspect files, review a suspicious update, question Microslop AI, then search for ORCHID in the browser. The clues build toward the reveal that interruptions are intentional product behaviour, not random bugs. The AI can explain the clue or try to distract the player with more recommendations. The update notes can also be inspected for an extra piece of evidence. Campaign progress is saved locally, and existing tutorial saves are migrated so returning players can reach the new chapter.
 
 ## Technology
 
@@ -40,7 +44,7 @@ Keyboard shortcuts in the prototype:
 |---|---|---|
 | P0 | Project foundation, desktop shell, window system | In progress |
 | P1 | Fake OS applications and persistent display/audio/performance settings | Partly prototyped |
-| P2 | Campaign, missions, ads, update events and progression | Initial tutorial and timed event prototypes |
+| P2 | Campaign, missions, ads, update events and progression | ORCHID chapter 1 playable as a mission chain; branching consequences and later chapters still planned |
 | P3 | Audio, animation, accessibility, saves and polish | Planned |
 | P4 | Steam store page, builds, QA and release | Planned |
 
