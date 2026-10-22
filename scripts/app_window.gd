@@ -28,11 +28,11 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	size = window_size
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var window_style := _panel_style(Color("f7f9fc"), Color("c8d2e2"))
-	window_style.set_corner_radius_all(12)
+	window_style.set_corner_radius_all(14)
 	window_style.border_color = Color("d5ddeb")
 	window_style.set_border_width_all(1)
 	window_style.shadow_color = Color(0.02, 0.04, 0.10, 0.28)
-	window_style.shadow_size = 18
+	window_style.shadow_size = 20
 	window_style.shadow_offset = Vector2(0, 4)
 	add_theme_stylebox_override("panel", window_style)
 	z_index = 30
@@ -58,11 +58,11 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	var titlebar_style := _panel_style(Color("eef3fa"), Color("d8e1ee"))
 	titlebar_style.set_border_width_all(1)
 	titlebar_style.border_width_bottom = 1
-	titlebar_style.set_corner_radius_all(12)
+	titlebar_style.set_corner_radius_all(14)
 	titlebar_style.corner_radius_bottom_left = 0
 	titlebar_style.corner_radius_bottom_right = 0
 	titlebar.add_theme_stylebox_override("panel", titlebar_style)
-	titlebar.custom_minimum_size.y = 42
+	titlebar.custom_minimum_size.y = 44
 	titlebar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	titlebar.mouse_filter = Control.MOUSE_FILTER_STOP
 	layout.add_child(titlebar)
@@ -177,8 +177,7 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 
 	var text := Label.new()
 	text.text = message
-	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	text.add_theme_color_override("font_color", Color("263247"))
+	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART	text.add_theme_color_override("font_color", Color("263247"))
 	content.add_child(text)
 
 	_add_resize_handle(EDGE_LEFT, Control.CURSOR_HSIZE, Vector2(0, 48), Vector2(6, -6))
@@ -357,8 +356,7 @@ func _apply_snap_layout(mode: String) -> void:
 	var full_width := viewport_size.x
 	var full_height := viewport_size.y
 	var left_width := full_width / 2.0
-	var third_width := full_width / 3.0
-	_restore_size = size
+	var third_width := full_width / 3.0	_restore_size = size
 	_restore_position = position
 	_is_maximized = false
 	_snap_mode = mode
