@@ -1477,6 +1477,7 @@ func _open_files() -> void:
 	address.text_changed.connect(func(path: String):
 		search.placeholder_text = "Rechercher dans %s" % (path if not path.strip_edges().is_empty() else "Accueil")
 	)
+	_set_explorer_location("Accueil", address, quick_title, empty_state, false)
 	var footer := Label.new()
 	footer.text = "4 dossiers   •   Cet explorateur utilise uniquement des données fictives"
 	footer.add_theme_font_size_override("font_size", 11)
