@@ -1161,20 +1161,37 @@ func _refresh_notification_center() -> void:
 		padding.add_child(content)
 
 		var heading_row := HBoxContainer.new()
-
 		heading_row.add_theme_constant_override("separation", 8)
 
+		var notification_title := str(item.get("title", "Notification"))
+		var app_glyph := "●"
+		if notification_title.to_lower().contains("paramètres"):
+			app_glyph = "⚙"
+		elif notification_title.to_lower().contains("fichier"):
+			app_glyph = "▤"
+		elif notification_title.to_lower().contains("mise à jour"):
+			app_glyph = "↻"
+		elif notification_title.to_lower().contains("mission"):
+			app_glyph = "✧"
+		elif notification_title.to_lower().contains("bienvenue"):
+			app_glyph = "▦"
+
 		var app_mark := PanelContainer.new()
-
-		app_mark.custom_minimum_size = Vector2(5, 5)
-
-		app_mark.add_theme_stylebox_override("panel", _flat_style(Color("2879d0"), 3))
-
+		app_mark.custom_minimum_size = Vector2(28, 28)
+		app_mark.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		app_mark.add_theme_stylebox_override("panel", _flat_style(Color("e5efff"), 7))
+		var app_mark_label := Label.new()
+		app_mark_label.text = app_glyph
+		app_mark_label.custom_minimum_size = Vector2(28, 28)
+		app_mark_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		app_mark_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		app_mark_label.add_theme_font_size_override("font_size", 14)
+		app_mark_label.add_theme_color_override("font_color", Color("2879d0"))
+		app_mark.add_child(app_mark_label)
 		heading_row.add_child(app_mark)
 
 		var heading := Label.new()
-
-		heading.text = str(item.get("title", "Notification"))
+		heading.text = notification_title
 
 		heading.add_theme_font_size_override("font_size", 13)
 
