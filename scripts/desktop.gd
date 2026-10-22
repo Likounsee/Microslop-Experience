@@ -3692,6 +3692,134 @@ func _open_browser() -> void:
 	content.add_child(archive)
 
 
+## Mini-jeu de tâches : les choix changent le score, les interruptions et le bilan.
+## Progression sauvegardée séparément du parcours narratif de 41 séquences.
+func _open_orchid_task_sprint() -> void:
+	var app := _open_window("Sprint de travail — ORCHID", "SIMULATION ACTIVE · 5 TÂCHES · SAUVEGARDE LOCALE", Vector2(760, 620))
+	var state := {
+		"stage": clampi(CampaignStore.load_case_answer("orchid_sprint_stage"), 0, 5),
+		"score": maxi(0, CampaignStore.load_case_answer("orchid_sprint_score")),
+		"interrupted": maxi(0, CampaignStore.load_case_answer("orchid_sprint_interruptions"))
+	}
+	_render_orchid_task_sprint(app, state)
+
+
+func _orchid_task_sprint_data() -> Array:
+	return [
+		{"title":"08:42 · Rendre le document","brief":"Le compte-rendu doit être envoyé avant la réunion. Le texte est presque terminé, mais une carte « améliorez votre productivité » recouvre le bouton Enregistrer.","prompt":"Quelle action vous rapproche vraiment de l’objectif ?","options":["Enregistrer le document, puis vérifier la pièce jointe.","Ouvrir la carte pour voir si elle aide.","Fermer toutes les fenêtres sans vérifier."],"scores":[2,-1,-2],"feedback":["Le fichier est enregistré et vous vérifiez que la bonne version est jointe.","La carte ouvre une recommandation générique et vole votre attention.","Vous perdez le contexte et devez retrouver la version correcte."]},
+		{"title":"08:47 · La sollicitation ORCHID","brief":"Une notification sponsorisée arrive au moment où vous relisez une phrase importante. Le centre de notifications permet de la retrouver plus tard.","prompt":"Comment gérez-vous cette interruption ?","options":["La repousser et terminer la phrase.","L’ouvrir maintenant ; elle est présentée comme urgente.","Activer le mode digest pour les promotions."],"scores":[2,-2,2],"feedback":["Vous terminez la phrase sans perdre le fil.","Le contenu n’est pas urgent. Le tableau de bord compte pourtant votre retour comme de l’engagement.","La promotion reste consultable sans prendre le premier plan."],"promo":[false,true,false]},
+		{"title":"09:00 · Réunion en cours","brief":"La réunion démarre. Vous devez transmettre le compte-rendu, mais un assistant propose de résumer la réunion avant même qu’elle ait commencé.","prompt":"Quelle priorité choisissez-vous ?","options":["Partager le document vérifié et rejoindre la discussion.","Lancer le résumé automatique et attendre son résultat.","Envoyer un brouillon non vérifié pour gagner du temps."],"scores":[2,-1,-2],"feedback":["Les participants disposent du document exact et peuvent commencer.","L’assistant produit une sortie plausible, mais aucune décision n’a encore été prise.","Le brouillon contient une ancienne date ; vous devrez corriger après la réunion."]},
+		{"title":"09:18 · Alerte rouge, contenu banal","brief":"Une bannière rouge annonce « Votre expérience nécessite votre attention ». Le détail indique simplement trois recommandations non consultées.","prompt":"Comment distinguer urgence et mise en scène ?","options":["Lire le détail, constater qu’il n’y a aucun incident et revenir à la tâche.","Cliquer immédiatement parce que la bannière est rouge.","Désactiver toutes les alertes, y compris les alertes système."],"scores":[2,-2,-1],"feedback":["Vous vérifiez le contenu : aucune action système n’est requise.","La couleur a créé une urgence qui n’existait pas.","Vous évitez la promotion, mais risquez aussi de manquer une vraie alerte."],"promo":[false,true,false]},
+		{"title":"09:30 · Fermer proprement la tâche","brief":"Le document est prêt, la réunion est passée et le rapport d’activité propose de compter chaque fenêtre ouverte comme une interaction réussie.","prompt":"Que consignez-vous dans le bilan ?","options":["La tâche terminée, les interruptions évitées et les limites des mesures.","Le nombre de clics : c’est le chiffre le plus élevé.","Ne rien consigner pour ne pas compliquer le tableau de bord."],"scores":[2,-1,-1],"feedback":["Le bilan mesure un résultat utile, pas seulement l’activité de l’écran.","Le rapport paraît performant, mais ne prouve pas que le travail est terminé.","Sans trace, l’équipe ne peut pas vérifier ce qui s’est passé."]}
+	]
+
+
+func _render_orchid_task_sprint(app: Control, state: Dictionary) -> void:
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var child := content.get_child(0)
+		content.remove_child(child)
+		child.queue_free()
+	var data := _orchid_task_sprint_data()
+	var stage := int(state.get("stage", 0))
+	var progress := ProgressBar.new()
+	progress.max_value = data.size()
+	progress.value = stage
+	progress.show_percentage = false
+	content.add_child(progress)
+	if stage >= data.size():
+		var score := int(state.get("score", 0))
+		var interrupted := int(state.get("interrupted", 0))
+		var ending := Label.new()
+		ending.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		ending.custom_minimum_size = Vector2(0, 170)
+		if score >= 6:
+			ending.text = "SPRINT TERMINÉ · OBJECTIF PROTÉGÉ\n\nScore de qualité : %d/10. Interruptions promotionnelles ouvertes : %d. Vous avez privilégié les tâches terminées et gardé les alertes distinctes des recommandations. Ce n’est pas une preuve scientifique, seulement le résultat de cette simulation." % [score, interrupted]
+		elif score >= 2:
+			ending.text = "SPRINT TERMINÉ · RÉSULTAT MITIGÉ\n\nScore de qualité : %d/10. Interruptions promotionnelles ouvertes : %d. Certaines décisions ont protégé le travail ; d’autres ont optimisé la réaction immédiate plutôt que le résultat." % [score, interrupted]
+		else:
+			ending.text = "SPRINT TERMINÉ · LE TABLEAU DE BORD A GAGNÉ\n\nScore de qualité : %d/10. Interruptions promotionnelles ouvertes : %d. Vous avez généré de l’activité, mais le parcours a rendu plus difficile la réalisation des tâches." % [score, interrupted]
+		content.add_child(ending)
+		var archive := Button.new()
+		archive.text = "Examiner les preuves du sprint"
+		archive.pressed.connect(_open_orchid_campaign_dashboard)
+		content.add_child(archive)
+		var replay := Button.new()
+		replay.text = "Recommencer le sprint"
+		replay.pressed.connect(func():
+			CampaignStore.save_case_answer("orchid_sprint_stage", 0)
+			CampaignStore.save_case_answer("orchid_sprint_score", 0)
+			CampaignStore.save_case_answer("orchid_sprint_interruptions", 0)
+			for i in range(data.size()):
+				CampaignStore.save_case_answer("orchid_sprint_choice_%02d" % i, -1)
+				CampaignStore.save_evidence("orchid_sprint_stage_%02d" % i)
+			state["stage"] = 0
+			state["score"] = 0
+			state["interrupted"] = 0
+			_render_orchid_task_sprint(app, state)
+		)
+		content.add_child(replay)
+		return
+	var task: Dictionary = data[stage]
+	var title := Label.new()
+	title.text = str(task["title"])
+	title.add_theme_font_size_override("font_size", 24)
+	content.add_child(title)
+	var brief := Label.new()
+	brief.text = str(task["brief"])
+	brief.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	brief.custom_minimum_size = Vector2(0, 90)
+	content.add_child(brief)
+	var prompt := Label.new()
+	prompt.text = str(task["prompt"])
+	prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content.add_child(prompt)
+	var feedback := Label.new()
+	feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	feedback.custom_minimum_size = Vector2(0, 70)
+	content.add_child(feedback)
+	var next := Button.new()
+	next.text = "Tâche suivante →"
+	next.disabled = true
+	content.add_child(next)
+	var saved := CampaignStore.load_case_answer("orchid_sprint_choice_%02d" % stage)
+	if saved >= 0 and saved < task["options"].size():
+		feedback.text = str(task["feedback"][saved])
+		next.disabled = false
+	for i in range(task["options"].size()):
+		var option := Button.new()
+		option.text = str(task["options"][i])
+		option.custom_minimum_size = Vector2(0, 38)
+		option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		option.disabled = saved >= 0 and saved < task["options"].size()
+		option.pressed.connect(func():
+			var score_delta := int(task["scores"][i])
+			CampaignStore.save_case_answer("orchid_sprint_choice_%02d" % stage, i)
+			state["score"] = int(state.get("score", 0)) + score_delta
+			CampaignStore.save_case_answer("orchid_sprint_score", int(state["score"]))
+			if task.has("promo") and bool(task["promo"][i]):
+				state["interrupted"] = int(state.get("interrupted", 0)) + 1
+				CampaignStore.save_case_answer("orchid_sprint_interruptions", int(state["interrupted"]))
+				_show_notification("Suggestion personnalisée", "Une recommandation sponsorisée réclame votre attention pendant une tâche. Le centre de contrôle ORCHID décide si elle apparaît.")
+			else:
+				_show_notification("Tâche enregistrée", "Votre action a été conservée dans la simulation de travail.")
+			CampaignStore.save_evidence("orchid_sprint_choice_%02d" % stage)
+			feedback.text = str(task["feedback"][i]) + "\n\nImpact sur le score de qualité : %+d. Score actuel : %d." % [score_delta, int(state["score"])]
+			for node in content.get_children():
+				if node is Button and node != next:
+					node.disabled = true
+			next.disabled = false
+		)
+		content.add_child(option)
+	next.pressed.connect(func():
+		state["stage"] = stage + 1
+		CampaignStore.save_case_answer("orchid_sprint_stage", stage + 1)
+		_render_orchid_task_sprint(app, state)
+	)
+
+
 func _open_orchid_archive() -> void:
 	var app := _open_window("Archive interne — ORCHID", "DOSSIER INTERNE · ACCÈS NON PRÉVU", Vector2(620, 460))
 	var content := _get_window_content(app)
@@ -3738,6 +3866,11 @@ func _open_orchid_archive() -> void:
 	simulator.text = "Simuler un test A/B ORCHID — comparer engagement et réussite"
 	simulator.pressed.connect(_open_orchid_experiment_simulator)
 	content.add_child(simulator)
+
+	var sprint := Button.new()
+	sprint.text = "Jouer le sprint de travail — 5 tâches, interruptions et conséquences"
+	sprint.pressed.connect(_open_orchid_task_sprint)
+	content.add_child(sprint)
 
 	var lab := Button.new()
 	lab.text = "Ouvrir le laboratoire de preuves (3 tests)"
