@@ -206,7 +206,7 @@ func _build_taskbar() -> void:
 	panel_style.shadow_size = 18
 	panel_style.shadow_offset = Vector2(0, 4)
 	panel_style.set_border_width_all(1)
-	panel_style.border_color = Color(1, 1, 1, 0.62)
+	panel_style.border_color = Color("d2dce9")
 	taskbar.add_theme_stylebox_override("panel", panel_style)
 	add_child(taskbar)
 
@@ -564,7 +564,7 @@ func _build_quick_settings() -> void:
 	panel_style.shadow_size = 22
 	panel_style.shadow_offset = Vector2(0, 5)
 	panel_style.set_border_width_all(1)
-	panel_style.border_color = Color(1, 1, 1, 0.70)
+	panel_style.border_color = Color("d3deec")
 	_quick_settings_panel.add_theme_stylebox_override("panel", panel_style)
 	add_child(_quick_settings_panel)
 
@@ -832,7 +832,7 @@ func _build_start_menu() -> void:
 	start_style.shadow_size = 24
 	start_style.shadow_offset = Vector2(0, 5)
 	start_style.set_border_width_all(1)
-	start_style.border_color = Color(1, 1, 1, 0.68)
+	start_style.border_color = Color("d3deec")
 	_start_menu.add_theme_stylebox_override("panel", start_style)
 	add_child(_start_menu)
 
@@ -880,6 +880,8 @@ func _build_start_menu() -> void:
 	all_apps.add_theme_color_override("font_color", Color("263247"))
 	all_apps.add_theme_stylebox_override("normal", _flat_style(Color("e5eaf3"), 7))
 	all_apps.add_theme_stylebox_override("hover", _flat_style(Color("d6e4f8"), 7))
+	all_apps.add_theme_stylebox_override("pressed", _flat_style(Color("c7dcf7"), 7))
+	all_apps.focus_mode = Control.FOCUS_NONE
 	all_apps.pressed.connect(_toggle_all_apps_view)
 	pinned_header.add_child(all_apps)
 
@@ -989,6 +991,8 @@ func _build_start_menu() -> void:
 	account.add_theme_color_override("font_color", Color("263247"))
 	account.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 8))
 	account.add_theme_stylebox_override("hover", _flat_style(Color("e1e9f5"), 8))
+	account.add_theme_stylebox_override("pressed", _flat_style(Color("d2e1f4"), 8))
+	account.focus_mode = Control.FOCUS_NONE
 	account.pressed.connect(func(): _show_account_menu(account))
 	profile_row.add_child(account)
 	var power := Button.new()
@@ -1049,7 +1053,9 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 	button.custom_minimum_size = Vector2(168, 76)
 	button.add_theme_color_override("font_color", Color("263247"))
 	button.add_theme_stylebox_override("normal", _flat_style(Color(1, 1, 1, 0.0), 10))
-	button.add_theme_stylebox_override("hover", _flat_style(Color(0.78, 0.86, 0.97, 0.78), 10))
+	button.add_theme_stylebox_override("hover", _flat_style(Color("e0ebfa"), 10))
+	button.add_theme_stylebox_override("pressed", _flat_style(Color("cddff7"), 10))
+	button.focus_mode = Control.FOCUS_NONE
 	var content := VBoxContainer.new()
 	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	content.add_theme_constant_override("separation", 5)
