@@ -50,7 +50,7 @@ Keyboard shortcuts in the prototype:
 |---|---|---|
 | P0 | Project foundation, desktop shell, window system | In progress |
 | P1 | Fake OS applications and persistent display/audio/performance settings | Partly prototyped |
-| P2 | Campaign, missions, ads, update events and progression | ORCHID report, two saved endings, and eight-piece evidence casebook implemented; narrative QA and richer systemic interruptions remain |
+| P2 | Campaign, missions, ads, update events and progression | ORCHID report, two saved endings, eight-piece evidence casebook, and three interactive analysis cases implemented; narrative QA and richer systemic interruptions remain |
 | P3 | Audio, animation, accessibility, saves and polish | Planned |
 | P4 | Steam store page, builds, QA and release | Planned |
 
