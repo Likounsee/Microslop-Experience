@@ -1244,7 +1244,130 @@ func _app_id_for_title(title: String) -> String:
 func _open_files() -> void:
 	if _mission_step == 1:
 		_advance_mission("Explorateur ouvert. Vos fichiers restent fictifs.")
-	_open_window("Explorateur de fichiers", "Accueil\n\nDocuments\nTéléchargements\nImages\n\nVos fichiers sont parfaitement simulés. Aucun fichier personnel n'est consulté.", Vector2(600, 360))
+	var app := _open_window("Explorateur de fichiers", "Accueil", Vector2(820, 540))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	for child in content.get_children():
+		child.queue_free()
+
+	var toolbar := HBoxContainer.new()
+	toolbar.add_theme_constant_override("separation", 6)
+	content.add_child(toolbar)
+	for caption in ["←", "→", "↑", "⟳"]:
+		var nav := Button.new()
+		nav.text = caption
+		nav.custom_minimum_size = Vector2(36, 34)
+		nav.add_theme_font_size_override("font_size", 17)
+		nav.add_theme_stylebox_override("normal", _flat_style(Color("edf2f8"), 8))
+		nav.add_theme_stylebox_override("hover", _flat_style(Color("dce8f7"), 8))
+		toolbar.add_child(nav)
+	var address := LineEdit.new()
+	address.text = "Accueil"
+	address.placeholder_text = "Chemin d’accès"
+	address.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	address.custom_minimum_size.y = 34
+	address.add_theme_stylebox_override("normal", _flat_style(Color("ffffff"), 8))
+	toolbar.add_child(address)
+	var search := LineEdit.new()
+	search.placeholder_text = "Rechercher dans Accueil"
+	search.custom_minimum_size = Vector2(190, 34)
+	search.add_theme_stylebox_override("normal", _flat_style(Color("ffffff"), 8))
+	toolbar.add_child(search)
+
+	var separator := HSeparator.new()
+	content.add_child(separator)
+	var main_row := HBoxContainer.new()
+	main_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	main_row.add_theme_constant_override("separation", 12)
+	content.add_child(main_row)
+
+	var sidebar := VBoxContainer.new()
+	sidebar.custom_minimum_size.x = 150
+	sidebar.add_theme_constant_override("separation", 5)
+	main_row.add_child(sidebar)
+	var nav_title := Label.new()
+	nav_title.text = "Accueil"
+	nav_title.add_theme_font_size_override("font_size", 14)
+	nav_title.add_theme_color_override("font_color", Color("1c2738"))
+	sidebar.add_child(nav_title)
+	for caption in ["🏠  Accueil", "🖥  Bureau", "⬇  Téléchargements", "📄  Documents", "🖼  Images", "🎵  Musique", "🎬  Vidéos", "💾  Ce PC"]:
+		var nav_item := Button.new()
+		nav_item.text = caption
+		nav_item.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		nav_item.custom_minimum_size.y = 32
+		nav_item.add_theme_font_size_override("font_size", 12)
+		nav_item.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 6))
+		nav_item.add_theme_stylebox_override("hover", _flat_style(Color("e5edf8"), 6))
+		sidebar.add_child(nav_item)
+
+	var right_pane := VBoxContainer.new()
+	right_pane.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right_pane.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right_pane.add_theme_constant_override("separation", 10)
+	main_row.add_child(right_pane)
+	var quick_title := Label.new()
+	quick_title.text = "Accès rapide"
+	quick_title.add_theme_font_size_override("font_size", 20)
+	quick_title.add_theme_color_override("font_color", Color("182235"))
+	right_pane.add_child(quick_title)
+	var quick_grid := GridContainer.new()
+	quick_grid.columns = 2
+	quick_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	quick_grid.add_theme_constant_override("h_separation", 10)
+	quick_grid.add_theme_constant_override("v_separation", 8)
+	right_pane.add_child(quick_grid)
+	var folders := [
+		{"name": "Bureau", "glyph": "🖥", "detail": "Raccourcis et éléments du bureau"},
+		{"name": "Téléchargements", "glyph": "⬇", "detail": "Aucun fichier pour le moment"},
+		{"name": "Documents", "glyph": "📄", "detail": "Vos documents simulés"},
+		{"name": "Images", "glyph": "🖼", "detail": "Aucune image pour le moment"}
+	]
+	for folder in folders:
+		var tile := Button.new()
+		tile.custom_minimum_size = Vector2(220, 72)
+		tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tile.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		tile.add_theme_stylebox_override("normal", _flat_style(Color("f5f8fc"), 9))
+		tile.add_theme_stylebox_override("hover", _flat_style(Color("e4eefb"), 9))
+		tile.add_theme_stylebox_override("pressed", _flat_style(Color("d5e5fa"), 9))
+		tile.text = "%s   %s\n       %s" % [str(folder["glyph"]), str(folder["name"]), str(folder["detail"])]
+		tile.add_theme_font_size_override("font_size", 12)
+		tile.add_theme_color_override("font_color", Color("243249"))
+		quick_grid.add_child(tile)
+	var recent_title := Label.new()
+	recent_title.text = "Fichiers récents"
+	recent_title.add_theme_font_size_override("font_size", 16)
+	recent_title.add_theme_color_override("font_color", Color("182235"))
+	right_pane.add_child(recent_title)
+	var empty_state := Label.new()
+	empty_state.text = "Aucun fichier récent. Les fichiers personnels ne sont pas consultés."
+	empty_state.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	empty_state.add_theme_color_override("font_color", Color("66758b"))
+	right_pane.add_child(empty_state)
+	var footer := Label.new()
+	footer.text = "4 dossiers   •   Cet explorateur utilise uniquement des données fictives"
+	footer.add_theme_font_size_override("font_size", 11)
+	footer.add_theme_color_override("font_color", Color("718096"))
+	content.add_child(footer)
+
+	search.text_changed.connect(func(query: String):
+		var normalized := query.strip_edges().to_lower()
+		for index in range(quick_grid.get_child_count()):
+			var tile := quick_grid.get_child(index) as Button
+			tile.visible = normalized.is_empty() or tile.text.to_lower().contains(normalized)
+		empty_state.visible = normalized.is_empty() or quick_grid.get_child_count() == 0
+		if not normalized.is_empty():
+			var any_visible := false
+			for child in quick_grid.get_children():
+				if child.visible:
+					any_visible = true
+			empty_state.visible = not any_visible
+			if not any_visible:
+				empty_state.text = "Aucun dossier ne correspond à « %s »." % query
+		else:
+			empty_state.text = "Aucun fichier récent. Les fichiers personnels ne sont pas consultés."
+	)
 
 func _open_browser() -> void:
 	var app := _open_window("Microslop Browser", "Votre navigateur nouvelle génération.", Vector2(680, 400))
