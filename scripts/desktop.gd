@@ -177,8 +177,7 @@ func _add_desktop_icon(parent: VBoxContainer, glyph: String, caption: String, ca
 	caption_label.add_theme_font_size_override("font_size", 11)
 	caption_label.add_theme_color_override("font_color", Color.WHITE)
 	caption_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
-	caption_label.add_theme_constant_override("shadow_offset_x", 1)
-	caption_label.add_theme_constant_override("shadow_offset_y", 1)
+	caption_label.add_theme_constant_override("shadow_offset_x", 1)	caption_label.add_theme_constant_override("shadow_offset_y", 1)
 	content.add_child(caption_label)
 	button.pressed.connect(func():
 		for sibling in parent.get_children():
@@ -213,12 +212,31 @@ func _build_taskbar() -> void:
 	taskbar.add_theme_stylebox_override("panel", panel_style)
 	add_child(taskbar)
 
+	# Split the taskbar into a genuinely centered app group and a separate
+	# right-aligned system tray, as in Windows 11. A single HBox shifts the
+	# Start/search/pinned group left because the tray occupies extra width.
+	var taskbar_content := Control.new()
+	taskbar_content.name = "TaskbarContent"
+	taskbar_content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	taskbar_content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	taskbar.add_child(taskbar_content)
+
+	var center_group := CenterContainer.new()
+	center_group.name = "CenteredAppGroup"
+	center_group.anchor_left = 0.5
+	center_group.anchor_right = 0.5
+	center_group.anchor_top = 0.0
+	center_group.anchor_bottom = 1.0
+	center_group.offset_left = -260
+	center_group.offset_right = 260
+	center_group.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	taskbar_content.add_child(center_group)
+
 	var row := HBoxContainer.new()
+	row.name = "CenteredTaskbarApps"
 	row.add_theme_constant_override("separation", 5)
-	taskbar.add_child(row)
-	var left_spacer := Control.new()
-	left_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(left_spacer)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	center_group.add_child(row)
 
 	var start_button := Button.new()
 	start_button.text = ""
@@ -269,9 +287,17 @@ func _build_taskbar() -> void:
 	_add_taskbar_app(row, "⚙", "Paramètres", _open_settings, "settings")
 	_add_taskbar_app(row, "↻", "Mise à jour", _trigger_update, "update")
 
-	var right_spacer := Control.new()
-	right_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(right_spacer)
+	var tray_row := HBoxContainer.new()
+	tray_row.name = "SystemTray"
+	tray_row.anchor_left = 1.0
+	tray_row.anchor_right = 1.0
+	tray_row.anchor_top = 0.0
+	tray_row.anchor_bottom = 1.0
+	tray_row.offset_left = -202
+	tray_row.offset_right = -4
+	tray_row.add_theme_constant_override("separation", 2)
+	tray_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	taskbar_content.add_child(tray_row)
 
 	_tray_button = Button.new()
 	_tray_button.text = "⌃  ◉  ◖  🔊"
@@ -283,7 +309,7 @@ func _build_taskbar() -> void:
 	_tray_button.add_theme_stylebox_override("hover", _flat_style(Color(0.78, 0.86, 0.96, 0.72), 9))
 	_tray_button.pressed.connect(_toggle_quick_settings)
 	_tray_button.focus_mode = Control.FOCUS_NONE
-	row.add_child(_tray_button)
+	tray_row.add_child(_tray_button)
 
 	_clock_button = Button.new()
 	_clock_button.text = "%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), _get_short_french_date()]
@@ -295,7 +321,7 @@ func _build_taskbar() -> void:
 	_clock_button.add_theme_stylebox_override("hover", _flat_style(Color(0.78, 0.86, 0.96, 0.72), 9))
 	_clock_button.pressed.connect(_toggle_calendar)
 	_clock_button.focus_mode = Control.FOCUS_NONE
-	row.add_child(_clock_button)
+	tray_row.add_child(_clock_button)
 
 	var show_desktop := Button.new()
 	show_desktop.name = "ShowDesktopButton"
@@ -306,7 +332,7 @@ func _build_taskbar() -> void:
 	show_desktop.add_theme_stylebox_override("pressed", _flat_style(Color("4389d5"), 2))
 	show_desktop.focus_mode = Control.FOCUS_NONE
 	show_desktop.pressed.connect(_toggle_show_desktop)
-	row.add_child(show_desktop)
+	tray_row.add_child(show_desktop)
 
 func _toggle_show_desktop() -> void:
 	if not is_instance_valid(_window_layer):
@@ -357,8 +383,7 @@ func _build_calendar_panel() -> void:
 	layout.add_theme_constant_override("separation", 12)
 	margin.add_child(layout)
 
-	var heading := Label.new()
-	heading.text = "Calendrier"
+	var heading := Label.new()	heading.text = "Calendrier"
 	heading.add_theme_font_size_override("font_size", 18)
 	heading.add_theme_color_override("font_color", Color("1d2a40"))
 	layout.add_child(heading)
@@ -537,8 +562,7 @@ func _refresh_notification_center() -> void:
 		heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		heading_row.add_child(heading)
 		var timestamp := Label.new()
-		timestamp.text = str(item.get("time", ""))
-		timestamp.add_theme_font_size_override("font_size", 10)
+		timestamp.text = str(item.get("time", ""))		timestamp.add_theme_font_size_override("font_size", 10)
 		timestamp.add_theme_color_override("font_color", Color("697991"))		heading_row.add_child(timestamp)
 		content.add_child(heading_row)
 		var body := Label.new()		body.text = str(item.get("message", ""))
@@ -717,8 +741,7 @@ func _add_quick_toggle(parent: GridContainer, caption: String, initially_on: boo
 	parent.add_child(toggle)
 
 func _toggle_quick_settings() -> void:
-	var should_open := not _quick_settings_panel.visible	if should_open:
-		_start_menu.visible = false
+	var should_open := not _quick_settings_panel.visible	if should_open:		_start_menu.visible = false
 		_start_open = false
 		_calendar_panel.visible = false	_animate_flyout(_quick_settings_panel, should_open, true)
 
@@ -897,8 +920,7 @@ func _build_start_menu() -> void:
 	_add_pinned_app(pinned, "◎", "Browser", _open_browser)
 	_add_pinned_app(pinned, "▤", "Fichiers", _open_files)	_add_pinned_app(pinned, "⚙", "Paramètres", _open_settings)
 	_add_pinned_app(pinned, "✧", "Microslop AI", _open_ai)
-	_add_pinned_app(pinned, "↻", "Mise à jour", _trigger_update)
-	_add_pinned_app(pinned, "▧", "Corbeille", _open_recycle_bin)
+	_add_pinned_app(pinned, "↻", "Mise à jour", _trigger_update)	_add_pinned_app(pinned, "▧", "Corbeille", _open_recycle_bin)
 	var all_apps_scroll := ScrollContainer.new()
 	all_apps_scroll.name = "AllAppsScroll"
 	all_apps_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -1077,8 +1099,7 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 		"Microslop AI":
 			icon_color = Color("7868d8")
 			icon_glyph = "✧"
-		"Mise à jour":
-			icon_color = Color("2b9b73")			icon_glyph = "↻"
+		"Mise à jour":			icon_color = Color("2b9b73")			icon_glyph = "↻"
 		"Corbeille":
 			icon_color = Color("5a9fd8")
 			icon_glyph = "▤"
@@ -1257,8 +1278,7 @@ func _animate_flyout(panel: Control, opening: bool, from_bottom: bool) -> void:
 		if panel == _start_menu:
 			_start_menu_tween = tween
 		elif panel == _quick_settings_panel:
-			_quick_settings_tween = tween		else:
-			_calendar_tween = tween
+			_quick_settings_tween = tween		else:			_calendar_tween = tween
 
 func _open_window(title: String, message: String, window_size := Vector2(520, 300)) -> Control:
 	_start_menu.visible = false
@@ -1437,8 +1457,7 @@ func _open_files() -> void:
 	quick_title = Label.new()
 	quick_title.name = "ExplorerHeading"
 	quick_title.text = "Accès rapide"	quick_title.add_theme_font_size_override("font_size", 20)
-	quick_title.add_theme_color_override("font_color", Color("182235"))
-	right_pane.add_child(quick_title)
+	quick_title.add_theme_color_override("font_color", Color("182235"))	right_pane.add_child(quick_title)
 	var quick_grid := GridContainer.new()
 	quick_grid.columns = 2
 	quick_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1617,8 +1636,7 @@ func _open_ai() -> void:
 		return
 	var response := Label.new()	response.text = "Vous vouliez ouvrir le Bloc-notes ? Je peux plutôt vous proposer un abonnement."
 	response.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	response.add_theme_color_override("font_color", Color("263247"))
-	content.add_child(response)
+	response.add_theme_color_override("font_color", Color("263247"))	content.add_child(response)
 	var suggestion := Button.new()
 	suggestion.text = "Générer une autre suggestion"
 	suggestion.pressed.connect(func():
@@ -1797,8 +1815,7 @@ func _get_window_content(app: Control) -> VBoxContainer:
 	if app.get_child_count() == 0:		return null
 	var layout := app.get_child(0) as VBoxContainer
 	if layout == null or layout.get_child_count() < 2:
-		return null
-	var body := layout.get_child(1) as MarginContainer
+		return null	var body := layout.get_child(1) as MarginContainer
 	if body == null or body.get_child_count() == 0:
 		return null
 	return body.get_child(0) as VBoxContainer
@@ -1977,8 +1994,7 @@ func _show_desktop_context_menu(pointer: Vector2) -> void:
 		)
 		_add_context_action(items, "Actualiser", func():
 			_show_notification("Bureau actualisé", "Le bureau est déjà à jour. Aucun changement nécessaire.")
-		)
-		var separator := HSeparator.new()
+		)		var separator := HSeparator.new()
 		items.add_child(separator)
 		_add_context_action(items, "Nouveau  ›", func():
 			_show_notification("Nouveau", "La création de fichiers sera disponible dans l’explorateur.")
