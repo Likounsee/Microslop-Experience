@@ -154,3 +154,17 @@ Chaque choix est enregistré par étape (`morning_stage_0` à `morning_stage_4`)
 Le parcours est lancé depuis la fenêtre **Microslop Update** par le bouton « Simuler le redémarrage et suivre la matinée (5 étapes) ». Il s’agit d’une séquence simulée dans le jeu, pas d’un redémarrage réel de l’ordinateur.
 
 **Validation restante :** cette séquence vient d’être ajoutée au code et doit encore être exécutée dans Godot. Vérifier notamment les callbacks des boutons dans les boucles, le rendu des fenêtres sur petit écran, le retour à l’archive et la persistance des cinq réponses après fermeture puis relance du jeu.
+
+
+## Tableau de synthèse et état réactif de l’enquête
+
+Le bouton **Ouvrir le tableau de synthèse de campagne** est accessible depuis l’archive. Il présente :
+
+- cinq familles de preuves avec les identifiants enregistrés dans la sauvegarde locale ;
+- l’état de chacune des cinq étapes de la matinée, en distinguant un choix enregistré d’une étape non examinée ;
+- la décision du comité et la conclusion de campagne, si elles existent ;
+- une évaluation prudente de la convergence des éléments, sans déduire l’identité de l’auteur à partir de la seule présence d’anomalies.
+
+Le bouton d’actualisation relit la sauvegarde à la demande. Le tableau propose également des raccourcis vers le carnet d’enquête, la revue de conformité et le comité. Les résultats de recherche tiennent compte des audits déjà réalisés et du constat de conformité ; Microslop AI adapte son discours à l’état du dossier et aux choix sauvegardés. L’objectif est que les scènes précédentes aient une conséquence perceptible au lieu de rester des fenêtres isolées.
+
+**Point de validation technique :** le changement a été poussé au dépôt, mais aucune exécution de Godot n’a été réalisée dans cette passe. Il faut notamment tester l’analyse GDScript, l’ouverture successive des fenêtres depuis les callbacks, le rendu des longs textes et le rafraîchissement du tableau après de nouvelles preuves. Le nombre de pièces affiché reflète les catégories suivies par le tableau, pas une mesure absolue de complétion du jeu.
