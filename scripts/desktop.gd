@@ -3736,6 +3736,17 @@ func _show_notification(title: String, message: String) -> void:
 
 		oldest.queue_free()
 
+	# Windows 11 toast notifications disappear after a short period unless
+	# the user opens the notification center to review the history.
+	var dismiss_tween := create_tween()
+	dismiss_tween.tween_interval(5.0)
+	dismiss_tween.tween_property(card, "modulate:a", 0.0, 0.24)
+	dismiss_tween.tween_callback(func():
+		if is_instance_valid(card) and is_instance_valid(card.get_parent()):
+			card.get_parent().remove_child(card)
+			card.queue_free()
+	)
+
 func _advance_mission(reason: String) -> void:
 
 	var previous_step := _mission_step
