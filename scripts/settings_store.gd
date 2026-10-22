@@ -59,6 +59,16 @@ func save_settings() -> void:
 		push_warning("Unable to save settings: %s" % error)
 
 func set_value_and_save(key: String, value: Variant) -> void:
+	# Validate writes as well as reads: UI callbacks or future features must not
+	# be able to persist unsupported values that break settings consumers.
+	if not values.has(key):
+		push_warning("Ignoring unknown setting: %s" % key)
+		return
+	if not _is_valid_setting(key, value):
+		push_warning("Ignoring invalid value for setting: %s" % key)
+		return
+	if values[key] == value:
+		return
 	values[key] = value
 	save_settings()
 
