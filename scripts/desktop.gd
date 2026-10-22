@@ -21,6 +21,7 @@ var _clock_refresh_elapsed := 0.0
 var _start_menu_tween: Tween
 var _quick_settings_tween: Tween
 var _calendar_tween: Tween
+var _notification_tween: Tween
 var _wallpaper: TextureRect
 var _desktop_icons: VBoxContainer
 var _desktop_context_menu: PanelContainer
@@ -780,6 +781,8 @@ func _toggle_calendar() -> void:
 		_start_open = false
 
 		_quick_settings_panel.visible = false
+		if is_instance_valid(_notification_center):
+			_animate_flyout(_notification_center, false, true)
 
 	_animate_flyout(_calendar_panel, should_open, true)
 
@@ -1391,6 +1394,8 @@ func _toggle_quick_settings() -> void:
 		_start_open = false
 
 		_calendar_panel.visible = false
+		if is_instance_valid(_notification_center):
+			_animate_flyout(_notification_center, false, true)
 	_animate_flyout(_quick_settings_panel, should_open, true)
 
 func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, callback: Callable, app_id: String) -> void:
@@ -2359,6 +2364,8 @@ func _toggle_start_menu() -> void:
 		_quick_settings_panel.visible = false
 
 		_calendar_panel.visible = false
+		if is_instance_valid(_notification_center):
+			_animate_flyout(_notification_center, false, true)
 
 		# Win+Start opens the launcher ready for immediate keyboard search.
 		if is_instance_valid(_start_search):
@@ -2374,7 +2381,15 @@ func _animate_flyout(panel: Control, opening: bool, from_bottom: bool) -> void:
 
 		return
 
-	var active_tween: Tween = _start_menu_tween if panel == _start_menu else (_quick_settings_tween if panel == _quick_settings_panel else _calendar_tween)
+	var active_tween: Tween
+	if panel == _start_menu:
+		active_tween = _start_menu_tween
+	elif panel == _quick_settings_panel:
+		active_tween = _quick_settings_tween
+	elif panel == _notification_center:
+		active_tween = _notification_tween
+	else:
+		active_tween = _calendar_tween
 
 	if active_tween and active_tween.is_running():
 
@@ -2414,6 +2429,10 @@ func _animate_flyout(panel: Control, opening: bool, from_bottom: bool) -> void:
 
 			_quick_settings_tween = tween
 
+		elif panel == _notification_center:
+
+			_notification_tween = tween
+
 		else:
 
 			_calendar_tween = tween
@@ -2446,6 +2465,8 @@ func _animate_flyout(panel: Control, opening: bool, from_bottom: bool) -> void:
 		elif panel == _quick_settings_panel:
 
 			_quick_settings_tween = tween
+		elif panel == _notification_center:
+			_notification_tween = tween
 		else:
 			_calendar_tween = tween
 
