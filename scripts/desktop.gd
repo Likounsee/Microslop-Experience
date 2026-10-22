@@ -99,6 +99,7 @@ func _layout_shell_for_viewport() -> void:
 			var compact_tray := viewport_size.x < 440.0
 			if is_instance_valid(tray_button):
 				tray_button.custom_minimum_size.x = 48.0 if compact_tray else 66.0
+				tray_button.text = "⌃  🔊" if compact_tray else "⌃  ◉  ◖  🔊"
 			if is_instance_valid(clock_button):
 				clock_button.custom_minimum_size.x = 76.0 if compact_tray else 92.0
 			var show_desktop_button := tray_row.find_child("ShowDesktopButton", true, false) as Button
@@ -543,6 +544,26 @@ func _build_taskbar() -> void:
 		windows_logo.add_child(pane)
 
 	start_button.add_child(windows_logo)
+
+	start_button.mouse_entered.connect(func():
+
+		var logo_tween := create_tween()
+
+		logo_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+		logo_tween.tween_property(windows_logo, "scale", Vector2(1.10, 1.10), 0.12)
+
+	)
+
+	start_button.mouse_exited.connect(func():
+
+		var logo_tween := create_tween()
+
+		logo_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+		logo_tween.tween_property(windows_logo, "scale", Vector2.ONE, 0.14)
+
+	)
 
 	row.add_child(start_button)
 
@@ -4533,7 +4554,13 @@ func _process(delta: float) -> void:
 
 		if is_instance_valid(_clock_button):
 
-			_clock_button.text = "%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), _get_short_french_date()]
+			var current_time := Time.get_time_string_from_system().substr(0, 5)
+
+			var current_date := _get_short_french_date()
+
+			_clock_button.text = "%s\n%s" % [current_time, current_date]
+
+			_clock_button.tooltip_text = "Calendrier et notifications — %s, %s" % [current_date, current_time]
 
 		if is_instance_valid(_calendar_panel) and _calendar_panel.visible:
 
