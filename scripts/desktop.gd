@@ -16,6 +16,8 @@ var _tray_button: Button
 var _clock_button: Button
 var _calendar_panel: PanelContainer
 var _quick_settings_panel: PanelContainer
+var _quick_status_label: Label
+var _quick_toggle_states: Dictionary = {"Wi-Fi": true, "Bluetooth": true, "Mode avion": false, "Éclairage nocturne": false}
 var _start_open := false
 var _mission_label: Label
 var _mission_step := 0
@@ -135,7 +137,7 @@ func _layout_shell_for_viewport() -> void:
 
 		var panel_width := minf(336.0, maxf(260.0, viewport_size.x - 24.0))
 
-		var panel_height := minf(400.0, maxf(300.0, viewport_size.y - 96.0))
+		var panel_height := minf(420.0, maxf(300.0, viewport_size.y - 96.0))
 
 		_quick_settings_panel.offset_left = -panel_width - 12.0
 
@@ -144,6 +146,12 @@ func _layout_shell_for_viewport() -> void:
 		_quick_settings_panel.offset_top = -(panel_height + 76.0)
 
 		_quick_settings_panel.offset_bottom = -76.0
+		var quick_tiles := _quick_settings_panel.find_child("QuickSettingsTiles", true, false) as GridContainer
+		if is_instance_valid(quick_tiles):
+			var tile_width := maxf(100.0, (panel_width - 48.0) / 2.0)
+			for quick_tile in quick_tiles.get_children():
+				if quick_tile is Control:
+					quick_tile.custom_minimum_size.x = tile_width
 
 	if is_instance_valid(_task_view_panel):
 		var task_view_width := minf(720.0, maxf(280.0, viewport_size.x - 24.0))
@@ -1197,6 +1205,7 @@ func _build_quick_settings() -> void:
 
 
 	var tiles := GridContainer.new()
+	tiles.name = "QuickSettingsTiles"
 
 	tiles.columns = 2
 
@@ -1333,8 +1342,8 @@ func _build_quick_settings() -> void:
 
 	var status := Label.new()
 
-	status.text = "MicroslopNet · Batterie 100 %"
-
+	status.name = "QuickSettingsStatus"
+	status.text = "Wi-Fi connecté · Bluetooth activé"
 	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	status.add_theme_font_size_override("font_size", 11)
@@ -1342,6 +1351,8 @@ func _build_quick_settings() -> void:
 	status.add_theme_color_override("font_color", Color("596780"))
 
 	footer.add_child(status)
+	_quick_status_label = status
+	_update_quick_settings_status()
 
 	var settings_button := Button.new()
 
@@ -1370,8 +1381,9 @@ func _add_quick_toggle(parent: GridContainer, caption: String, initially_on: boo
 	toggle.toggle_mode = true
 
 	toggle.button_pressed = initially_on
+	_quick_toggle_states[feature_name] = initially_on
 
-	toggle.custom_minimum_size = Vector2(148, 54)
+	toggle.custom_minimum_size = Vector2(136, 54)
 
 	toggle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
@@ -1418,12 +1430,25 @@ func _add_quick_toggle(parent: GridContainer, caption: String, initially_on: boo
 		active_hover.border_color = Color("83b5ec")
 
 		toggle.add_theme_stylebox_override("hover", active_hover)
+		_quick_toggle_states[feature_name] = enabled
+		_update_quick_settings_status()
 
 		_show_notification(feature_name, "%s : %s." % [feature_name, "activé" if enabled else "désactivé"])
 
 	)
 
 	parent.add_child(toggle)
+
+func _update_quick_settings_status() -> void:
+	if not is_instance_valid(_quick_status_label):
+		return
+	if bool(_quick_toggle_states.get("Mode avion", false)):
+		_quick_status_label.text = "Mode avion activé · Réseau suspendu"
+	elif bool(_quick_toggle_states.get("Wi-Fi", false)):
+		var bluetooth_text := "Bluetooth activé" if bool(_quick_toggle_states.get("Bluetooth", false)) else "Bluetooth désactivé"
+		_quick_status_label.text = "Wi-Fi connecté · " + bluetooth_text
+	else:
+		_quick_status_label.text = "Wi-Fi désactivé · Aucun réseau"
 
 func _toggle_quick_settings() -> void:
 
