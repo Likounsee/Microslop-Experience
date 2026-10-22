@@ -267,3 +267,10 @@ La fin des 39 scènes calcule maintenant un bilan à partir des décisions narra
 ### Épilogue cinématique — résultats, limites et reprise
 
 La séquence narrative compte désormais 39 scènes : trois scènes d’épilogue prolongent l’histoire après le correctif, sans transformer un premier résultat encourageant en résolution miraculeuse. Le joueur doit décider comment communiquer un échantillon incomplet, puis voit une conséquence narrative adaptée à son choix ; la dernière scène remet l’accent sur le refus explicite et la conservation des preuves. La reprise de progression et le tableau de campagne incluent les nouvelles scènes. Les choix et mesures restent fictifs. Validation statique uniquement : un lancement sous Godot est toujours nécessaire pour confirmer le parseur GDScript et le rendu.
+
+### Mise à jour — choix cinématiques avec effets sur le bureau
+
+Les choix de la séquence narrative appliquent maintenant des conséquences persistantes plutôt que de modifier uniquement le bilan final. Selon la scène, ils peuvent activer la pause des promotions ou le mode de notifications, enregistrer si le témoignage de Léa a été partagé, qualifier la solidité du signalement, définir un protocole d’échantillonnage, demander des critères de sortie ou marquer une annonce de réussite comme prématurée. Chaque branche écrit une preuve distincte dans l’archive ; les textes de retour expliquent aussi les limites de ce que la décision permet réellement de conclure.
+
+La dernière sollicitation de l’épilogue est également enregistrée comme refus ou test de l’interface. Ces effets sont locaux à la simulation et n’utilisent aucune télémétrie réelle. Vérification effectuée dans cette passe : contrôle statique du point d’insertion et des identifiants de sauvegarde. Le jeu n’a pas été lancé dans Godot ; le parseur et les interactions restent à confirmer à l’exécution.
+
