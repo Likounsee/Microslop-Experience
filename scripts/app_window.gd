@@ -172,7 +172,7 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	close_hover.set_corner_radius_all(5)
 	close_button.add_theme_stylebox_override("hover", close_hover)
 	close_button.add_theme_color_override("font_hover_color", Color.WHITE)
-	close_button.pressed.connect(queue_free)
+	close_button.pressed.connect(_animate_close)
 	close_button.focus_mode = Control.FOCUS_NONE
 	title_row.add_child(close_button)
 
@@ -202,6 +202,7 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	_add_resize_handle(EDGE_RIGHT | EDGE_TOP, Control.CURSOR_BDIAGSIZE, Vector2.ZERO, Vector2(14, 14))
 	_add_resize_handle(EDGE_LEFT | EDGE_BOTTOM, Control.CURSOR_BDIAGSIZE, Vector2.ZERO, Vector2(14, 14))
 	_add_resize_handle(EDGE_RIGHT | EDGE_BOTTOM, Control.CURSOR_FDIAGSIZE, Vector2(-14, -14), Vector2.ZERO)
+	call_deferred("_animate_entrance")
 
 func _add_resize_handle(edges: int, cursor_shape: Control.CursorShape, top_left: Vector2, bottom_right: Vector2) -> void:
 	var handle := Control.new()
@@ -509,6 +510,28 @@ func _snap_to_edge(pointer: Vector2) -> void:
 		_snap_mode = "left" if near_left else "right"
 	else:
 		_snap_mode = ""
+
+func _animate_entrance() -> void:
+	if not is_inside_tree():
+		return
+	modulate.a = 0.0
+	scale = Vector2(0.985, 0.985)
+	pivot_offset = size / 2.0
+	if _minimize_tween and _minimize_tween.is_running():
+		_minimize_tween.kill()
+	_minimize_tween = create_tween().set_parallel(true)
+	_minimize_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_minimize_tween.tween_property(self, "modulate:a", 1.0, 0.18)
+	_minimize_tween.tween_property(self, "scale", Vector2.ONE, 0.20)
+
+func _animate_close() -> void:
+	if _minimize_tween and _minimize_tween.is_running():
+		_minimize_tween.kill()
+	_minimize_tween = create_tween().set_parallel(true)
+	_minimize_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	_minimize_tween.tween_property(self, "modulate:a", 0.0, 0.10)
+	_minimize_tween.tween_property(self, "scale", Vector2(0.985, 0.985), 0.10)
+	_minimize_tween.chain().tween_callback(queue_free)
 
 func restore_from_taskbar() -> void:
 	if _minimize_tween and _minimize_tween.is_running():
