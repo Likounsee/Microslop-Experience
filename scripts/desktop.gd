@@ -1372,6 +1372,7 @@ func _open_files() -> void:
 	address.custom_minimum_size.y = 34
 	address.add_theme_stylebox_override("normal", _flat_style(Color("ffffff"), 8))
 	toolbar.add_child(address)
+	_refresh_explorer_navigation_buttons(address)
 	var search := LineEdit.new()
 	search.name = "ExplorerSearch"
 	search.placeholder_text = "Rechercher dans Accueil"
