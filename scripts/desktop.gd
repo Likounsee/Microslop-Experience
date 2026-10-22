@@ -15,6 +15,8 @@ var _clock_label: Label
 var _tray_button: Button
 var _clock_button: Button
 var _calendar_panel: PanelContainer
+var _calendar_today_label: Label
+var _calendar_short_date_label: Label
 var _quick_settings_panel: PanelContainer
 var _quick_status_label: Label
 var _quick_toggle_states: Dictionary = {"Wi-Fi": true, "Bluetooth": true, "Mode avion": false, "Éclairage nocturne": false}
@@ -748,11 +750,11 @@ func _build_calendar_panel() -> void:
 
 	layout.add_child(heading)
 
-	var today := Label.new()
-	today.text = _get_french_long_date()
-	today.add_theme_font_size_override("font_size", 25)
-	today.add_theme_color_override("font_color", Color("1d2a40"))
-	layout.add_child(today)
+	_calendar_today_label = Label.new()
+	_calendar_today_label.text = _get_french_long_date()
+	_calendar_today_label.add_theme_font_size_override("font_size", 25)
+	_calendar_today_label.add_theme_color_override("font_color", Color("1d2a40"))
+	layout.add_child(_calendar_today_label)
 
 	var divider := HSeparator.new()
 	layout.add_child(divider)
@@ -788,12 +790,12 @@ func _build_calendar_panel() -> void:
 
 	var calendar_footer := HBoxContainer.new()
 	calendar_footer.add_theme_constant_override("separation", 8)
-	var date_label := Label.new()
-	date_label.text = _get_short_french_date()
-	date_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	date_label.add_theme_color_override("font_color", Color("596780"))
-	date_label.add_theme_font_size_override("font_size", 11)
-	calendar_footer.add_child(date_label)
+	_calendar_short_date_label = Label.new()
+	_calendar_short_date_label.text = _get_short_french_date()
+	_calendar_short_date_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_calendar_short_date_label.add_theme_color_override("font_color", Color("596780"))
+	_calendar_short_date_label.add_theme_font_size_override("font_size", 11)
+	calendar_footer.add_child(_calendar_short_date_label)
 
 	var notifications_button := Button.new()
 	notifications_button.text = "Notifications  ›"
@@ -804,6 +806,17 @@ func _build_calendar_panel() -> void:
 	notifications_button.pressed.connect(_toggle_notification_center)
 	calendar_footer.add_child(notifications_button)
 	layout.add_child(calendar_footer)
+
+func _refresh_calendar_date() -> void:
+
+	if is_instance_valid(_calendar_today_label):
+
+		_calendar_today_label.text = _get_french_long_date()
+
+	if is_instance_valid(_calendar_short_date_label):
+
+		_calendar_short_date_label.text = _get_short_french_date()
+
 
 func _get_short_french_date() -> String:
 
@@ -830,6 +843,8 @@ func _toggle_calendar() -> void:
 	var should_open := not _calendar_panel.visible
 
 	if should_open:
+
+		_refresh_calendar_date()
 
 		_start_menu.visible = false
 
@@ -4436,6 +4451,10 @@ func _process(delta: float) -> void:
 		if is_instance_valid(_clock_button):
 
 			_clock_button.text = "%s\n%s" % [Time.get_time_string_from_system().substr(0, 5), _get_short_french_date()]
+
+		if is_instance_valid(_calendar_panel) and _calendar_panel.visible:
+
+			_refresh_calendar_date()
 
 		_update_taskbar_indicators()
 func _flat_style(color: Color, radius := 10) -> StyleBoxFlat:
