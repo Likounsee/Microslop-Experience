@@ -213,3 +213,16 @@ Accessible depuis l’archive ORCHID, l’enquête de terrain ajoute un parcours
 Chaque défi propose trois réponses. La réponse incorrecte fournit un indice sans faire progresser ; la bonne réponse révèle l’explication, enregistre un identifiant de preuve et déverrouille le bouton du défi suivant. La progression est reconstruite depuis les pièces field_stage_00 à field_stage_11, ce qui permet de reprendre au premier défi non validé après fermeture du jeu. Le tableau de synthèse inclut une catégorie dédiée à ces douze pièces.
 
 Le parcours est conçu pour demander lecture attentive, comparaison de traces et prise de décision. Il ne faut toutefois pas lui attribuer une durée fixe avant un test auprès d’un joueur : la durée dépend du rythme de lecture et du nombre de tentatives. **Validation technique restante :** exécuter Godot, vérifier l’analyse GDScript, les callbacks de réponses, la sauvegarde/reprise, les textes longs et l’affichage sur fenêtre réduite.
+
+
+## Sprint de travail interactif — 5 tâches
+
+Le menu de l’archive ORCHID contient désormais un sprint jouable distinct du parcours narratif de 41 séquences. Il propose cinq tâches concrètes : enregistrer un document, gérer une recommandation sponsorisée, préparer une réunion, vérifier une fausse alerte urgente et rédiger un bilan utile.
+
+- Chaque étape offre trois actions avec un retour propre à l’action et un impact chiffré sur le score de qualité.
+- Certaines décisions déclenchent réellement une notification de démonstration ; le centre de contrôle ORCHID déjà configuré décide si la promotion s’affiche, est bloquée ou reste dans l’historique.
+- La progression, les choix, le score et le nombre d’interruptions sont sauvegardés séparément du parcours principal.
+- Le bilan varie selon le score. Le sprint peut être rejoué depuis son écran final, sans effacer les décisions du parcours narratif.
+- Les scénarios et profils sont fictifs : le score est un indicateur de jeu, pas une mesure scientifique de productivité.
+
+Cette mécanique ajoute une boucle d’action-résultat distincte des scènes et des dialogues, tout en reliant les réglages de notification à une conséquence jouable.
