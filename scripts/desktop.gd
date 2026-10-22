@@ -2276,6 +2276,14 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 
 	button.add_theme_stylebox_override("pressed", _flat_style(Color("cddff7"), 10))
 
+	var pinned_focus_style := _flat_style(Color("e8f1fc"), 10)
+
+	pinned_focus_style.set_border_width_all(1)
+
+	pinned_focus_style.border_color = Color("a9c9ee")
+
+	button.add_theme_stylebox_override("focus", pinned_focus_style)
+
 	button.focus_mode = Control.FOCUS_NONE
 
 	var content := VBoxContainer.new()
@@ -2339,9 +2347,35 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 
 	icon_tile_style.set_border_width_all(1)
 
-	icon_tile_style.border_color = Color(1, 1, 1, 0.38)
+	icon_tile_style.border_color = Color(1, 1, 1, 0.48)
+
+	icon_tile_style.shadow_color = Color(0.05, 0.10, 0.18, 0.16)
+
+	icon_tile_style.shadow_size = 4
+
+	icon_tile_style.shadow_offset = Vector2(0, 2)
 
 	icon_tile.add_theme_stylebox_override("panel", icon_tile_style)
+
+	button.mouse_entered.connect(func():
+
+		var tile_tween := create_tween()
+
+		tile_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+		tile_tween.tween_property(icon_tile, "scale", Vector2(1.06, 1.06), 0.10)
+
+	)
+
+	button.mouse_exited.connect(func():
+
+		var tile_tween := create_tween()
+
+		tile_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+		tile_tween.tween_property(icon_tile, "scale", Vector2.ONE, 0.12)
+
+	)
 
 	content.add_child(icon_tile)
 
@@ -2486,6 +2520,14 @@ func _add_all_apps_entry(glyph: String, caption: String, callback: Callable) -> 
 	button.add_theme_stylebox_override("hover", _flat_style(Color("dce8f8"), 7))
 
 	button.add_theme_stylebox_override("pressed", _flat_style(Color("cddff7"), 7))
+
+	var app_entry_focus := _flat_style(Color("e8f1fc"), 7)
+
+	app_entry_focus.set_border_width_all(1)
+
+	app_entry_focus.border_color = Color("a9c9ee")
+
+	button.add_theme_stylebox_override("focus", app_entry_focus)
 
 	button.pressed.connect(callback)
 
