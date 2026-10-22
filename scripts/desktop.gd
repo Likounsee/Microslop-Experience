@@ -20,6 +20,7 @@ var _calendar_short_date_label: Label
 var _quick_settings_panel: PanelContainer
 var _quick_status_label: Label
 var _quick_toggle_states: Dictionary = {"Wi-Fi": true, "Bluetooth": true, "Mode avion": false, "Éclairage nocturne": false}
+var _quick_toggle_buttons: Dictionary = {}
 var _start_open := false
 var _mission_label: Label
 var _mission_step := 0
@@ -1459,71 +1460,57 @@ func _build_quick_settings() -> void:
 
 	footer.add_child(settings_button)
 
+func _style_quick_toggle(toggle: Button, enabled: bool) -> void:
+	var normal_style := _flat_style(Color("cfe3ff") if enabled else Color("e8edf4"), 10)
+	normal_style.set_border_width_all(1)
+	normal_style.border_color = Color("a9c9f0") if enabled else Color("d5deea")
+	toggle.add_theme_stylebox_override("normal", normal_style)
+
+	var hover_style := _flat_style(Color("bdd8fb") if enabled else Color("dce4ef"), 10)
+	hover_style.set_border_width_all(1)
+	hover_style.border_color = Color("83b5ec")
+	toggle.add_theme_stylebox_override("hover", hover_style)
+
+
 func _add_quick_toggle(parent: GridContainer, caption: String, initially_on: bool, feature_name: String) -> void:
 
 	var toggle := Button.new()
-
 	toggle.text = caption
-
 	toggle.tooltip_text = feature_name
-
 	toggle.toggle_mode = true
-
 	toggle.button_pressed = initially_on
 	_quick_toggle_states[feature_name] = initially_on
-
+	_quick_toggle_buttons[feature_name] = toggle
 	toggle.custom_minimum_size = Vector2(136, 54)
-
 	toggle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
 	toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
-
 	toggle.add_theme_font_size_override("font_size", 12)
-
 	toggle.focus_mode = Control.FOCUS_NONE
-
 	toggle.add_theme_color_override("font_color", Color("1d2a40"))
-
-	var toggle_normal := _flat_style(Color("cfe3ff") if initially_on else Color("e8edf4"), 10)
-
-	toggle_normal.set_border_width_all(1)
-
-	toggle_normal.border_color = Color("a9c9f0") if initially_on else Color("d5deea")
-
-	toggle.add_theme_stylebox_override("normal", toggle_normal)
-
-	var toggle_hover := _flat_style(Color("bdd8fb") if initially_on else Color("dce4ef"), 10)
-
-	toggle_hover.set_border_width_all(1)
-
-	toggle_hover.border_color = Color("83b5ec")
-
-	toggle.add_theme_stylebox_override("hover", toggle_hover)
-
+	_style_quick_toggle(toggle, initially_on)
 	toggle.add_theme_stylebox_override("pressed", _flat_style(Color("80b8f5"), 10))
 
 	toggle.toggled.connect(func(enabled: bool):
-
-		var active_style := _flat_style(Color("cfe3ff") if enabled else Color("e8edf4"), 10)
-
-		active_style.set_border_width_all(1)
-
-		active_style.border_color = Color("a9c9f0") if enabled else Color("d5deea")
-
-		toggle.add_theme_stylebox_override("normal", active_style)
-
-		var active_hover := _flat_style(Color("bdd8fb") if enabled else Color("dce4ef"), 10)
-
-		active_hover.set_border_width_all(1)
-
-		active_hover.border_color = Color("83b5ec")
-
-		toggle.add_theme_stylebox_override("hover", active_hover)
 		_quick_toggle_states[feature_name] = enabled
+
+		# Airplane mode suspends wireless radios; re-enabling either radio exits it.
+		if feature_name == "Mode avion" and enabled:
+			for radio_name in ["Wi-Fi", "Bluetooth"]:
+				_quick_toggle_states[radio_name] = false
+				var radio_button = _quick_toggle_buttons.get(radio_name)
+				if is_instance_valid(radio_button):
+					radio_button.set_pressed_no_signal(false)
+					_style_quick_toggle(radio_button, false)
+		elif (feature_name == "Wi-Fi" or feature_name == "Bluetooth") and enabled:
+			_quick_toggle_states["Mode avion"] = false
+			var airplane_button = _quick_toggle_buttons.get("Mode avion")
+			if is_instance_valid(airplane_button):
+				airplane_button.set_pressed_no_signal(false)
+				_style_quick_toggle(airplane_button, false)
+
+		_style_quick_toggle(toggle, enabled)
 		_update_quick_settings_status()
-
 		_show_notification(feature_name, "%s : %s." % [feature_name, "activé" if enabled else "désactivé"])
-
 	)
 
 	parent.add_child(toggle)
@@ -1532,12 +1519,13 @@ func _update_quick_settings_status() -> void:
 	if not is_instance_valid(_quick_status_label):
 		return
 	if bool(_quick_toggle_states.get("Mode avion", false)):
-		_quick_status_label.text = "Mode avion activé · Réseau suspendu"
+		_quick_status_label.text = "Mode avion activé · Radios désactivées"
 	elif bool(_quick_toggle_states.get("Wi-Fi", false)):
 		var bluetooth_text := "Bluetooth activé" if bool(_quick_toggle_states.get("Bluetooth", false)) else "Bluetooth désactivé"
 		_quick_status_label.text = "Wi-Fi connecté · " + bluetooth_text
 	else:
-		_quick_status_label.text = "Wi-Fi désactivé · Aucun réseau"
+		var bluetooth_text := "Bluetooth activé" if bool(_quick_toggle_states.get("Bluetooth", false)) else "Bluetooth désactivé"
+		_quick_status_label.text = "Wi-Fi désactivé · " + bluetooth_text
 
 func _toggle_quick_settings() -> void:
 
