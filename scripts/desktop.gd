@@ -5012,7 +5012,7 @@ func _render_orchid_campaign_dashboard(summary: Label) -> void:
 	lines.append("BILAN NARRATIF")
 	if evidence.has("cinematic_outcome_calculated"):
 		lines.append("Score des décisions : %d. Le bilan est issu des choix de la séquence et ne constitue pas une preuve technique." % cinematic_score)
-		lines.append("Choix prudents : %d · Choix précipités : %d" % [int(maxi(0, cinematic_score)), int(maxi(0, -cinematic_score))])
+		lines.append("Balance prudence / rapidité : %s%d" % ["+" if cinematic_score > 0 else "", cinematic_score])
 	else:
 		lines.append("Séquence non terminée : le bilan des 36 scènes apparaîtra après la dernière scène.")
 	lines.append("")
