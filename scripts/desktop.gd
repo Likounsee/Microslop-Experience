@@ -3828,6 +3828,148 @@ func _render_orchid_task_sprint(app: Control, state: Dictionary) -> void:
 	)
 
 
+## Tabletop de crise : décisions séquentielles, sauvegarde et conclusions conditionnelles.
+func _open_orchid_crisis_tabletop() -> void:
+	var app := _open_window("Tabletop de crise — ORCHID", "EXERCICE D’INCIDENT · 12 DÉCISIONS · MODE LOCAL", Vector2(790, 650))
+	var state := {
+		"stage": clampi(CampaignStore.load_case_answer("orchid_crisis_stage"), 0, 12),
+		"score": CampaignStore.load_case_answer("orchid_crisis_score")
+	}
+	if int(state["score"]) < -30 or int(state["score"]) > 30:
+		state["score"] = 0
+	_render_orchid_crisis_tabletop(app, state)
+
+
+func _orchid_crisis_scenarios() -> Array:
+	return [
+		{"act":"PHASE 1 · CONFINER SANS PANIQUER","title":"08:11 · Première alerte","brief":"Trois employés signalent la même notification après la mise à jour. Le support la classe comme « expérience personnalisée ». Aucun journal système n’a encore été préservé.","prompt":"Quelle est la première action de l’équipe d’incident ?","options":["Préserver les journaux, noter les versions et ouvrir un incident traçable.","Publier immédiatement que les données personnelles ont été volées.","Fermer les tickets similaires pour éviter les doublons."],"delta":[2,-2,-2],"feedback":["Une chronologie reproductible existe avant toute modification.","La conclusion dépasse les preuves disponibles et risque de décrédibiliser l’enquête.","Les signalements liés sont masqués au lieu d’être corrélés."]},
+		{"act":"PHASE 1 · CONFINER SANS PANIQUER","title":"08:19 · La mesure provisoire","brief":"Les notifications promotionnelles peuvent être mises en digest sans désactiver les alertes de sécurité. L’équipe hésite à modifier un réglage en pleine enquête.","prompt":"Quel confinement est proportionné ?","options":["Passer les promotions en digest, tester les alertes critiques et consigner l’heure.","Désactiver absolument toutes les notifications sans test.","Ne rien changer avant d’avoir identifié une personne responsable."],"delta":[2,-2,-1],"feedback":["Le risque d’interruption baisse et le comportement des alertes critiques est vérifié.","Une alerte de sécurité pourrait être masquée avec les promotions.","L’absence de nom ne justifie pas de laisser le comportement perturbateur continuer."]},
+		{"act":"PHASE 2 · ÉTABLIR LES FAITS","title":"08:32 · Les horodatages divergent","brief":"Un poste affiche 08:11, le serveur 06:11 UTC et le ticket 08:14. Les fuseaux et les délais de remontée n’ont pas été documentés.","prompt":"Comment rapprocher ces données ?","options":["Normaliser les fuseaux, conserver les valeurs brutes et documenter l’incertitude.","Choisir l’heure la plus simple et supprimer les autres.","Conclure que les journaux ont été falsifiés."],"delta":[2,-2,-2],"feedback":["La chronologie distingue les faits bruts des conversions et retards possibles.","La piste est simplifiée au prix d’une information importante.","Une divergence d’horloge n’est pas à elle seule une preuve de falsification."]},
+		{"act":"PHASE 2 · ÉTABLIR LES FAITS","title":"08:46 · Le ticket support","brief":"Le modèle de réponse affirme que « tout fonctionne comme prévu », mais il ne cite ni version du produit ni test. Léa dispose d’une capture et de trois heures exactes.","prompt":"Quelle demande envoyez-vous au support ?","options":["Demander la version du modèle, la règle appliquée et le test qui soutient la réponse.","Répondre que le support ment forcément.","Copier le modèle et fermer l’incident."],"delta":[2,-2,-2],"feedback":["La demande devient vérifiable et permet de comparer les réponses à la règle réellement appliquée.","L’intention n’est pas établie ; l’accusation ne fait pas avancer l’analyse.","Le ticket est fermé sans répondre à la question technique."]},
+		{"act":"PHASE 3 · TESTER LES HYPOTHÈSES","title":"09:05 · Hypothèse A/B","brief":"L’équipe peut reproduire le comportement avec un profil de test fictif. Il faut distinguer les notifications promotionnelles des alertes système et éviter toute donnée réelle.","prompt":"Quel protocole est le plus fiable ?","options":["Comparer les modes sur profils fictifs, garder les mêmes tâches et mesurer leur achèvement.","Changer cinq réglages à la fois puis attribuer le résultat à un seul.","Tester sur le compte personnel d’un collègue sans le prévenir."],"delta":[2,-2,-2],"feedback":["Le test est reproductible et les résultats peuvent être comparés.","Les variables confondues rendent l’interprétation fragile.","Le consentement et la séparation des données de test sont ignorés."]},
+		{"act":"PHASE 3 · TESTER LES HYPOTHÈSES","title":"09:21 · Un chiffre séduisant","brief":"L’engagement monte de 32 %, mais les tâches achevées baissent de 8 % et les refus sont comptés comme des retours après relance.","prompt":"Quelle conclusion transmettez-vous ?","options":["Le chiffre d’engagement ne prouve pas l’utilité ; analyser tâches, refus et abandons.","Présenter +32 % comme preuve de réussite générale.","Retirer la mesure des tâches du rapport parce qu’elle brouille le message."],"delta":[2,-2,-2],"feedback":["Le rapport distingue activité, réussite et respect du choix de l’utilisateur.","La métrique récompense peut-être les interruptions plutôt que l’aide réelle.","La mesure contradictoire est masquée au lieu d’être expliquée."]},
+		{"act":"PHASE 4 · DÉCIDER ET COMMUNIQUER","title":"09:40 · La direction veut un nom","brief":"Le registre de déploiement identifie une équipe, mais la chaîne d’approbation est absente. La direction demande un responsable individuel avant le comité.","prompt":"Que contient votre note provisoire ?","options":["Décrire le rôle établi, la pièce manquante et le propriétaire de la prochaine vérification.","Nommer la personne qui a répondu au ticket.","Retirer toute question de gouvernance du rapport."],"delta":[2,-2,-1],"feedback":["La responsabilité de suivi est claire sans inventer une attribution individuelle.","L’auteur du ticket n’est pas nécessairement l’autorisateur du déploiement.","Le rapport devient incomplet sur un point essentiel."]},
+		{"act":"PHASE 4 · DÉCIDER ET COMMUNIQUER","title":"09:52 · Communiquer aux employés","brief":"Les employés demandent si leurs fichiers ont été lus. Les éléments consultés montrent une alerte de fichiers analysés, pas le contenu ni la lecture de dix-huit fichiers.","prompt":"Quelle réponse est honnête ?","options":["Expliquer ce qui est observé, ce qui ne l’est pas et quand une mise à jour arrivera.","Garantir qu’aucun fichier n’a été consulté sans vérifier les journaux.","Affirmer que dix-huit fichiers ont été lus pour montrer la gravité."],"delta":[2,-2,-2],"feedback":["La réponse est précise sur les limites et prévoit un prochain point d’information.","Une absence de preuve n’est pas une garantie d’absence d’événement.","L’alerte est transformée en accusation sans preuve."]},
+		{"act":"PHASE 5 · CORRIGER ET PRÉVENIR","title":"10:10 · Le correctif","brief":"Un correctif peut retirer les promotions des moments de concentration, mais l’équipe veut aussi empêcher une régression dans la prochaine version.","prompt":"Quel plan choisissez-vous ?","options":["Déployer progressivement, tester alertes critiques et refus, puis surveiller des critères de sortie.","Masquer la bannière uniquement pendant la démonstration.","Déployer partout et regarder seulement le taux de clic."],"delta":[2,-2,-2],"feedback":["Le changement est contrôlé avec des critères de sortie et des tests de non-régression.","Le problème reste présent en dehors de la démonstration.","Le déploiement n’a ni garde-fou ni mesure de réussite des tâches."]},
+		{"act":"PHASE 5 · CORRIGER ET PRÉVENIR","title":"10:24 · Les critères de sortie","brief":"Le comité demande quand réactiver la fonctionnalité. Une baisse des tickets seule ne suffit pas si les utilisateurs ne savent plus comment signaler le problème.","prompt":"Quel critère de sortie est défendable ?","options":["Valider l’achèvement des tâches, les refus respectés, les alertes critiques et le canal de signalement.","Réactiver dès que le volume de tickets baisse.","Réactiver à une date fixe même si les tests échouent."],"delta":[2,-2,-2],"feedback":["La décision repose sur plusieurs contrôles observables, pas sur un seul indicateur.","Une baisse des tickets peut aussi venir d’un signalement devenu difficile.","Le calendrier remplace les preuves de correction."]},
+		{"act":"PHASE 6 · TRANSMETTRE","title":"10:41 · Le rapport au comité","brief":"Vous avez une chronologie, des résultats de test, une limite d’attribution et un correctif proposé. Le comité attend une décision, pas un roman sans action.","prompt":"Quelle structure est la plus utile ?","options":["Faits, impact, incertitudes, confinement, décision demandée et propriétaire avec échéance.","Une accusation catégorique suivie de captures choisies.","Une longue chronologie sans recommandation ni responsable."],"delta":[2,-2,-1],"feedback":["Le comité sait ce qui est établi, ce qui reste à faire et qui doit le faire.","Le ton affirmatif ne remplace pas la chaîne de preuve.","L’information existe mais ne conduit à aucune décision exécutable."]},
+		{"act":"PHASE 6 · TRANSMETTRE","title":"10:55 · La dernière vérification","brief":"Avant de clore, il faut s’assurer que les preuves sont conservées, que le réglage actif est connu et que le suivi ne dépend pas d’une seule personne.","prompt":"Que faites-vous avant de quitter le comité ?","options":["Vérifier la sauvegarde des preuves, l’état du contrôle et le prochain rendez-vous de revue.","Fermer toutes les fenêtres et considérer le dossier terminé.","Garder les captures uniquement sur votre bureau personnel."],"delta":[2,-2,-2],"feedback":["Les éléments restent consultables et la prochaine revue a un propriétaire.","La fermeture de l’interface ne signifie pas que l’incident est résolu.","La conservation est fragile et le partage dépend d’un seul poste."]}
+	]
+
+
+func _render_orchid_crisis_tabletop(app: Control, state: Dictionary) -> void:
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var child := content.get_child(0)
+		content.remove_child(child)
+		child.queue_free()
+	var scenarios := _orchid_crisis_scenarios()
+	var stage := int(state.get("stage", 0))
+	var progress := ProgressBar.new()
+	progress.max_value = scenarios.size()
+	progress.value = stage
+	progress.show_percentage = false
+	content.add_child(progress)
+	var score := int(state.get("score", 0))
+	if stage >= scenarios.size():
+		var summary := Label.new()
+		summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		summary.custom_minimum_size = Vector2(0, 200)
+		var ending := "INCIDENT MAÎTRISÉ — DÉCISION TRAÇABLE"
+		if score < 8:
+			ending = "INCIDENT ENCORE FRAGILE — CONTRÔLES À REPRENDRE"
+		elif score < 18:
+			ending = "INCIDENT CONTENU — SUIVI RENFORCÉ NÉCESSAIRE"
+		summary.text = "%s\n\nScore de décision : %d/24. Vous avez traité 12 décisions de crise. Le résultat résume la qualité des choix dans cet exercice fictif, pas un audit réel. Les éléments manquants et les décisions restent dans les preuves ORCHID." % [ending, score]
+		content.add_child(summary)
+		var replay := Button.new()
+		replay.text = "Rejouer l’exercice de crise"
+		replay.pressed.connect(func():
+			CampaignStore.save_case_answer("orchid_crisis_stage", 0)
+			CampaignStore.save_case_answer("orchid_crisis_score", 0)
+			for i in range(scenarios.size()):
+				CampaignStore.save_case_answer("orchid_crisis_choice_%02d" % i, -1)
+			state["stage"] = 0
+			state["score"] = 0
+			_render_orchid_crisis_tabletop(app, state)
+		)
+		content.add_child(replay)
+		var dashboard := Button.new()
+		dashboard.text = "Consulter la synthèse ORCHID"
+		dashboard.pressed.connect(_open_orchid_campaign_dashboard)
+		content.add_child(dashboard)
+		return
+	var scenario: Dictionary = scenarios[stage]
+	var act := Label.new()
+	act.text = str(scenario["act"])
+	act.add_theme_font_size_override("font_size", 11)
+	act.add_theme_color_override("font_color", Color("5b6d89"))
+	content.add_child(act)
+	var title := Label.new()
+	title.text = str(scenario["title"])
+	title.add_theme_font_size_override("font_size", 24)
+	content.add_child(title)
+	var brief := Label.new()
+	brief.text = str(scenario["brief"])
+	brief.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	brief.custom_minimum_size = Vector2(0, 105)
+	content.add_child(brief)
+	var prompt := Label.new()
+	prompt.text = str(scenario["prompt"])
+	prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content.add_child(prompt)
+	var feedback := Label.new()
+	feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	feedback.custom_minimum_size = Vector2(0, 70)
+	content.add_child(feedback)
+	var next := Button.new()
+	next.text = "Décision suivante →"
+	next.disabled = true
+	content.add_child(next)
+	var saved := CampaignStore.load_case_answer("orchid_crisis_choice_%02d" % stage)
+	if saved >= 0 and saved < 3:
+		feedback.text = str(scenario["feedback"][saved])
+		next.disabled = false
+	for i in range(3):
+		var option := Button.new()
+		option.text = str(scenario["options"][i])
+		option.custom_minimum_size = Vector2(0, 38)
+		option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		option.disabled = saved >= 0 and saved < 3
+		option.pressed.connect(func():
+			var delta := int(scenario["delta"][i])
+			var updated_score := int(state.get("score", 0)) + delta
+			CampaignStore.save_case_answer("orchid_crisis_choice_%02d" % stage, i)
+			CampaignStore.save_case_answer("orchid_crisis_score", updated_score)
+			CampaignStore.save_case_answer("orchid_crisis_stage", stage)
+			CampaignStore.save_evidence("orchid_crisis_decision_%02d" % stage)
+			state["score"] = updated_score
+			feedback.text = str(scenario["feedback"][i]) + "\n\nImpact : %+d · Score cumulé : %d/24." % [delta, updated_score]
+			if stage == 1 and i == 0:
+				CampaignStore.save_case_answer("orchid_notification_mode", 2)
+				CampaignStore.save_evidence("crisis_digest_policy_applied")
+				_show_notification("ORCHID en mode digest", "Les promotions restent dans l’historique pendant que les alertes système continuent de passer.")
+			elif stage == 1 and i == 1:
+				CampaignStore.save_case_answer("orchid_notification_mode", 1)
+				CampaignStore.save_evidence("crisis_promo_block_policy_applied")
+				_show_notification("Contrôle ORCHID renforcé", "Les notifications promotionnelles sont bloquées ; les alertes système restent autorisées.")
+			else:
+				_show_notification("Décision de crise enregistrée", "La décision %02d est conservée dans le dossier ORCHID." % (stage + 1))
+			for node in content.get_children():
+				if node is Button and node != next:
+					node.disabled = true
+			next.disabled = false
+		)
+		content.add_child(option)
+	next.pressed.connect(func():
+		state["stage"] = stage + 1
+		CampaignStore.save_case_answer("orchid_crisis_stage", stage + 1)
+		_render_orchid_crisis_tabletop(app, state)
+	)
+
+
 func _open_orchid_archive() -> void:
 	var app := _open_window("Archive interne — ORCHID", "DOSSIER INTERNE · ACCÈS NON PRÉVU", Vector2(620, 460))
 	var content := _get_window_content(app)
@@ -3874,6 +4016,11 @@ func _open_orchid_archive() -> void:
 	simulator.text = "Simuler un test A/B ORCHID — comparer engagement et réussite"
 	simulator.pressed.connect(_open_orchid_experiment_simulator)
 	content.add_child(simulator)
+
+	var crisis := Button.new()
+	crisis.text = "Exercice de crise ORCHID — 12 décisions, confinement et comité"
+	crisis.pressed.connect(_open_orchid_crisis_tabletop)
+	content.add_child(crisis)
 
 	var sprint := Button.new()
 	sprint.text = "Jouer le sprint de travail — 13 tâches, interruptions et conséquences"
