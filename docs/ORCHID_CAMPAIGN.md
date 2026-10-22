@@ -233,3 +233,15 @@ Cette mécanique ajoute une boucle d’action-résultat distincte des scènes et
 L’archive ORCHID inclut désormais un exercice de réponse à incident en douze décisions réparties en six phases : confinement, établissement des faits, test des hypothèses, communication, correction et transmission au comité. Chaque étape présente un contexte, trois réponses, un retour spécifique et un impact sur un score de décision. La progression, le choix de chaque étape et le score sont sauvegardés afin de reprendre l’exercice après fermeture de la fenêtre.
 
 Deux décisions de confinement modifient également le réglage réel du centre de notifications simulé : mode digest ou blocage des promotions. Les alertes système restent autorisées par la logique du centre. Le bilan final dépend du score et propose de rejouer l’exercice ou de consulter le tableau de synthèse. Les événements, employés et mesures sont fictifs ; le score ne constitue pas un audit de sécurité réel.
+
+## Dossier transversal — 10 étapes jouables
+
+Un nouveau parcours relie le signalement initial à la passation au comité, sans remplacer les 41 séquences narratives ni l’exercice de crise. Il comprend dix décisions distinctes : triage, confinement des interruptions, collecte des traces, reproduction en environnement fictif, lecture des métriques, recueil d’un témoignage, attribution des responsabilités, communication prudente, remédiation et passation.
+
+- Chaque étape propose trois actions avec conséquences expliquées et un impact sur un score de simulation.
+- Les décisions et la progression sont sauvegardées ; une fermeture de la fenêtre ne remet pas le dossier à zéro.
+- Les choix de confinement agissent sur la politique du centre de notifications et génèrent des preuves dédiées.
+- Chaque étape archive une trace consultable depuis l’archive ORCHID ; le bilan final varie selon le score et permet de recommencer.
+- Le scénario, les personnes et les données sont fictifs. Le score ne constitue ni une certification ni un audit réel.
+
+Validation technique encore nécessaire : lancer le projet dans Godot, vérifier l’analyse GDScript, le rendu sur fenêtre réduite et la reprise après redémarrage.
