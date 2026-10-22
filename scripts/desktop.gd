@@ -3973,6 +3973,14 @@ func _input(event: InputEvent) -> void:
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_dismiss_flyouts_on_outside_click(event.position)
+		# A desktop context menu should close as soon as the user clicks elsewhere,
+		# just like the native Windows shell. Keep it open when interacting inside it.
+		if is_instance_valid(_desktop_context_menu) and _desktop_context_menu.visible:
+			if not _desktop_context_menu.get_global_rect().has_point(event.position):
+				_desktop_context_menu.hide()
+		# Clicking empty desktop space clears the icon selection.
+		if is_instance_valid(_desktop_icons) and not _is_pointer_over_desktop_icon(event.position):
+			_clear_desktop_icon_selection()
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 
@@ -4187,6 +4195,21 @@ func _is_pointer_over_window(pointer: Vector2) -> bool:
 			return true
 
 	return false
+
+func _is_pointer_over_desktop_icon(pointer: Vector2) -> bool:
+	if not is_instance_valid(_desktop_icons):
+		return false
+	for child in _desktop_icons.get_children():
+		if child is Control and child.visible and child.get_global_rect().has_point(pointer):
+			return true
+	return false
+
+func _clear_desktop_icon_selection() -> void:
+	if not is_instance_valid(_desktop_icons):
+		return
+	for child in _desktop_icons.get_children():
+		if child is Button:
+			child.add_theme_stylebox_override("normal", _flat_style(Color(0.1, 0.2, 0.38, 0.0), 7))
 
 func _show_desktop_context_menu(pointer: Vector2) -> void:
 
