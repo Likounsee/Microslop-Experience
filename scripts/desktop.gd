@@ -1451,21 +1451,6 @@ func _open_files() -> void:
 		nav_buttons[index].pressed.connect(_set_explorer_location.bind(nav_captions[index], address, quick_title, empty_state))
 	for index in range(folder_tiles.size()):
 		folder_tiles[index].pressed.connect(_set_explorer_location.bind(str(folders[index]["name"]), address, quick_title, empty_state))
-	search.text_changed.connect(func(query: String):
-		var normalized_query := query.strip_edges().to_lower()
-		var has_result := false
-		for tile in folder_tiles:
-			if not is_instance_valid(tile):
-				continue
-			tile.visible = normalized_query.is_empty() or tile.text.to_lower().contains(normalized_query)
-			if tile.visible:
-				has_result = true
-		empty_state.visible = not normalized_query.is_empty() and not has_result
-		if not normalized_query.is_empty() and empty_state.visible:
-			empty_state.text = "Aucun résultat pour « %s »" % query
-		elif normalized_query.is_empty():
-			empty_state.text = "Aucun élément à afficher dans %s. Le contenu personnel reste inaccessible." % address.text
-	)
 	address.text_submitted.connect(func(path: String):
 		var normalized_path := path.strip_edges()
 		if not normalized_path.is_empty():
