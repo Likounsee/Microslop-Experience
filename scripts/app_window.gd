@@ -429,7 +429,29 @@ func _on_titlebar_input(event: InputEvent, _titlebar: Control) -> void:
 func _snap_to_edge(pointer: Vector2) -> void:
 	var viewport_size := get_viewport_rect().size
 	const SNAP_MARGIN := 14.0
-	if pointer.y <= SNAP_MARGIN:
+	var near_left := pointer.x <= SNAP_MARGIN
+	var near_right := pointer.x >= viewport_size.x - SNAP_MARGIN
+	var near_top := pointer.y <= SNAP_MARGIN
+	var near_bottom := pointer.y >= viewport_size.y - SNAP_MARGIN
+	if near_top and (near_left or near_right):
+		if not _is_maximized and _snap_mode == "":
+			_restore_size = size
+			_restore_position = position
+		size = viewport_size / 2.0
+		position = Vector2.ZERO if near_left else Vector2(viewport_size.x / 2.0, 0.0)
+		if not near_left:
+			position.x = viewport_size.x / 2.0
+		_is_maximized = false
+		_snap_mode = "top_left" if near_left else "top_right"
+	elif near_bottom and (near_left or near_right):
+		if not _is_maximized and _snap_mode == "":
+			_restore_size = size
+			_restore_position = position
+		size = viewport_size / 2.0
+		position = Vector2(0.0, viewport_size.y / 2.0) if near_left else Vector2(viewport_size.x / 2.0, viewport_size.y / 2.0)
+		_is_maximized = false
+		_snap_mode = "bottom_left" if near_left else "bottom_right"
+	elif near_top:
 		if not _is_maximized and _snap_mode == "":
 			_restore_size = size
 			_restore_position = position
@@ -437,14 +459,14 @@ func _snap_to_edge(pointer: Vector2) -> void:
 		position = Vector2.ZERO
 		_is_maximized = true
 		_snap_mode = "maximized"
-	elif pointer.x <= SNAP_MARGIN or pointer.x >= viewport_size.x - SNAP_MARGIN:
+	elif near_left or near_right:
 		if not _is_maximized and _snap_mode == "":
 			_restore_size = size
 			_restore_position = position
 		size = Vector2(viewport_size.x / 2.0, viewport_size.y)
-		position = Vector2.ZERO if pointer.x <= SNAP_MARGIN else Vector2(viewport_size.x / 2.0, 0.0)
+		position = Vector2.ZERO if near_left else Vector2(viewport_size.x / 2.0, 0.0)
 		_is_maximized = false
-		_snap_mode = "left" if pointer.x <= SNAP_MARGIN else "right"
+		_snap_mode = "left" if near_left else "right"
 	else:
 		_snap_mode = ""
 
