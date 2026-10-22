@@ -3724,6 +3724,96 @@ func _open_orchid_archive() -> void:
 	)
 	content.add_child(keep)
 
+	var casebook := Button.new()
+	casebook.text = "Ouvrir le carnet d’enquête (8 pièces à examiner)"
+	casebook.pressed.connect(_open_orchid_casebook)
+	content.add_child(casebook)
+
+
+func _open_orchid_casebook() -> void:
+	var app := _open_window("Carnet d’enquête — ORCHID", "DOSSIER PERSONNEL · LES PIÈCES SONT FICTIVES", Vector2(760, 560))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	for child in content.get_children():
+		child.queue_free()
+
+	var intro := Label.new()
+	intro.text = "Ne vous contentez pas du rapport final. Comparez les traces laissées par plusieurs applications. Certaines pièces semblent innocentes isolément ; ensemble, elles racontent autre chose."
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	intro.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(intro)
+
+	var status := Label.new()
+	status.name = "EvidenceProgress"
+	status.add_theme_color_override("font_color", Color("356b47"))
+	content.add_child(status)
+
+	var split := HSplitContainer.new()
+	split.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	content.add_child(split)
+	var list_panel := VBoxContainer.new()
+	list_panel.custom_minimum_size.x = 235
+	list_panel.add_theme_constant_override("separation", 5)
+	split.add_child(list_panel)
+	var detail_scroll := ScrollContainer.new()
+	detail_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	detail_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	split.add_child(detail_scroll)
+	var detail := Label.new()
+	detail.name = "EvidenceDetail"
+	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	detail.add_theme_color_override("font_color", Color("263247"))
+	detail_scroll.add_child(detail)
+
+	var entries: Array[Dictionary] = [
+		{"id":"notification_18","title":"01 · Les 18 fichiers","body":"SOURCE : Centre de notifications\nHEURE : 09:12:04\n\n« Analyse de 18 éléments terminée. Vos recommandations sont prêtes. »\n\nLe message ne donne ni chemin, ni nom de fichier, ni résultat d’analyse. L’Explorateur, lui, montre un dossier Documents vide.\n\nPISTE : une vraie opération devrait laisser une trace vérifiable. Cette notification ressemble davantage à un message conçu pour faire croire que le système travaille en arrière-plan."},
+		{"id":"explorer_index","title":"02 · Indexation locale","body":"SOURCE : Explorateur de fichiers · État d’indexation\n\n« L’index est à jour. Dernière activité : 09:12:04. Éléments traités : 18. »\n\nLe compteur est identique à celui de la notification, à la seconde près. Pourtant, aucun élément indexé n’est listé et l’historique ne contient aucun chemin.\n\nPISTE : deux surfaces différentes répètent le même chiffre, mais aucune ne fournit de preuve indépendante. Il pourrait s’agir d’un seul événement marketing réutilisé partout."},
+		{"id":"update_public","title":"03 · Résumé public","body":"SOURCE : Microslop Update · Résumé visible\n\n« Version 1.0.99 : amélioration de la stabilité, pertinence accrue des recommandations et confort renforcé. »\n\nAucune mention de notification, de suivi du temps ou de comportement utilisateur. Le pourcentage reste à 99 % même après plusieurs minutes.\n\nPISTE : comparez ce texte avec la note interne. Le langage public décrit une amélioration ; le langage interne parle d’interruptions et d’engagement."},
+		{"id":"update_internal","title":"04 · Note interne","body":"SOURCE : Microslop Update · Annexe QA-17\n\n« ORCHID — optimiser les interruptions pour maintenir l’engagement. Ne pas afficher dans le résumé public. Déclencher les sollicitations au début d’une période de concentration estimée. »\n\nUne ligne plus bas : « En cas de question, présenter le mécanisme comme une recommandation contextuelle. »\n\nPISTE : ce n’est plus seulement un compteur suspect. La note associe explicitement les interruptions à un objectif mesuré et demande de cacher cet objectif."},
+		{"id":"assistant_script","title":"05 · Réponse de l’assistant","body":"SOURCE : Microslop AI · Aide contextuelle\n\nPremière réponse : « ORCHID est probablement un projet interne sans incidence sur votre expérience. » Après une demande d’explication, l’assistant parle d’un objectif de rétention et de « fenêtres d’opportunité » avant la fin d’une tâche.\n\nIl ne sait pas qui a validé le programme et plaisante nerveusement sur le fait de ne signaler la conversation à personne.\n\nPISTE : l’assistant n’est pas nécessairement le concepteur. Son discours ressemble à un script qui minimise le sujet jusqu’à ce qu’une question précise le force à en dire plus."},
+		{"id":"browser_sponsor","title":"06 · Résultat sponsorisé","body":"SOURCE : Microslop Browser · Recherche « désactiver les notifications »\n\nLe premier résultat propose Microslop Premium pour « une expérience plus sereine ». L’archive interne apparaît plus bas ; un résultat critique est signalé comme retiré par le programme de qualité, sans nom de responsable ni explication consultable.\n\nPISTE : le navigateur ne supprime pas toute information. Il la noie sous des recommandations commerciales et rend la source la plus utile plus difficile à trouver."},
+		{"id":"quality_survey","title":"07 · Enquête de satisfaction","body":"SOURCE : Équipe Expérience · Brouillon de questionnaire\n\nQuestion 1 : « Avez-vous apprécié l’interruption qui vous a aidé à découvrir cette enquête ? »\nQuestion 2 : « Souhaitez-vous davantage de conseils pour mieux gérer votre temps ? »\nQuestion 3 : « Si non, quel contenu pourrait vous convaincre de rester ? »\n\nAucune option ne permet de répondre simplement : « Je ne veux plus être interrompu. »\n\nPISTE : même le mécanisme de retour utilisateur est biaisé. Le questionnaire transforme un refus en occasion de proposer davantage de contenu."},
+		{"id":"experiment_04","title":"08 · Résultat d’expérience","body":"SOURCE : Équipe Expérience · Test A/B 04-B\n\nGroupe A reçoit une notification au début d’une tâche longue. Groupe B reçoit la même notification juste après l’avoir terminée. Le rapport indique davantage de retours vers l’application pour le groupe A, puis recommande de généraliser cette variante.\n\nUne note précise : « Ne pas confondre retour dans l’application et satisfaction déclarée. Le premier indicateur est plus stable. »\n\nPISTE : l’équipe connaît la différence entre garder quelqu’un actif et l’aider réellement. Le choix de la métrique est lui-même une décision morale."}
+	]
+
+	for entry in entries:
+		var evidence_button := Button.new()
+		evidence_button.text = str(entry["title"])
+		evidence_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		evidence_button.custom_minimum_size.y = 38
+		evidence_button.add_theme_color_override("font_color", Color("263247"))
+		evidence_button.add_theme_stylebox_override("normal", _flat_style(Color("f1f5fa"), 7))
+		evidence_button.add_theme_stylebox_override("hover", _flat_style(Color("dce8f8"), 7))
+		evidence_button.pressed.connect(_select_orchid_evidence.bind(entry, detail, status, entries.size()))
+		list_panel.add_child(evidence_button)
+
+	_refresh_orchid_evidence_status(status, entries.size())
+	detail.text = "Sélectionnez une pièce à gauche.\n\nVotre objectif : vérifier si les traces se confirment mutuellement ou si elles proviennent toutes de la même source."
+	var theory := Button.new()
+	theory.text = "Reconstituer la chaîne des événements"
+	theory.pressed.connect(func():
+		var found := CampaignStore.load_evidence().size()
+		if found < 4:
+			detail.text = "La reconstitution est prématurée : examinez au moins quatre pièces.\n\nPour l’instant, vous avez %d pièce(s) enregistrée(s)." % found
+		else:
+			detail.text = "RECONSTITUTION PROVISOIRE\n\n1. Une notification affirme que 18 fichiers ont été analysés.\n2. L’index reprend exactement le même nombre et la même heure, sans fournir de chemins : les deux traces ne sont pas indépendantes.\n3. La mise à jour masque publiquement un objectif d’engagement.\n4. L’assistant tente d’abord de banaliser ORCHID, puis révèle le vocabulaire de la rétention.\n5. Le navigateur favorise une offre commerciale et dégrade la visibilité des critiques.\n6. Les tests internes optimisent le retour dans l’application, pas la satisfaction.\n\nCONCLUSION : les preuves soutiennent l’hypothèse d’un système d’interruptions intentionnelles et d’une présentation trompeuse. Elles ne prouvent pas qui, individuellement, a donné l’ordre. Conservez cette distinction dans votre rapport."
+	)
+	)
+	content.add_child(theory)
+
+
+func _select_orchid_evidence(entry: Dictionary, detail: Label, status: Label, total: int) -> void:
+	CampaignStore.save_evidence(str(entry["id"]))
+	detail.text = str(entry["body"])
+	_refresh_orchid_evidence_status(status, total)
+
+
+func _refresh_orchid_evidence_status(status: Label, total: int) -> void:
+	var found := CampaignStore.load_evidence().size()
+	status.text = "PIÈCES EXAMINÉES : %d / %d — progression sauvegardée" % [mini(found, total), total]
+
 
 func _open_recycle_bin() -> void:
 
