@@ -78,3 +78,8 @@ The Start menu now has a Windows 11-inspired pinned-app header, a distinct recom
 ### Version du moteur
 
 Le projet et la CI ciblent Godot **4.7.2-stable**, dernière version stable au moment de cette mise à jour. Godot 4.8 étant encore en bêta, il n'est pas utilisé sur la branche de production. La CI importe/vérifie le projet et lance la scène principale en mode headless.
+
+
+### Enquêtes ORCHID approfondies
+
+L’archive de campagne comprend maintenant des enquêtes interactives supplémentaires : journal chronologique du déploiement, ticket d’assistance interne avec choix de réponse, enquête de satisfaction dont le tableau de bord révèle le biais de mesure, et banc d’essai comparant trois recommandations à l’intention initiale de l’utilisateur. Les éléments examinés sont ajoutés au dossier de preuves via la sauvegarde de campagne. Ces scènes restent à valider dans une exécution réelle de Godot ; leur présence dans le dépôt ne signifie pas que le parcours a déjà passé les tests en jeu.
