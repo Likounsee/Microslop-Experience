@@ -4285,6 +4285,17 @@ func _show_desktop_context_menu(pointer: Vector2) -> void:
 
 	)
 
+	# Windows 11 context menus appear with a subtle fade and scale, rather than
+	# popping into place. Restart the entrance cleanly whenever the menu opens.
+	_desktop_context_menu.pivot_offset = menu_size / 2.0
+	_desktop_context_menu.scale = Vector2(0.97, 0.97)
+	_desktop_context_menu.modulate.a = 0.0
+	var menu_tween := create_tween()
+	menu_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	menu_tween.set_parallel(true)
+	menu_tween.tween_property(_desktop_context_menu, "scale", Vector2.ONE, 0.15)
+	menu_tween.tween_property(_desktop_context_menu, "modulate:a", 1.0, 0.13)
+
 func _add_context_action(parent: VBoxContainer, caption: String, callback: Callable) -> void:
 
 	var button := Button.new()
@@ -4293,13 +4304,15 @@ func _add_context_action(parent: VBoxContainer, caption: String, callback: Calla
 
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 
-	button.custom_minimum_size = Vector2(210, 34)
+	button.custom_minimum_size = Vector2(232, 36)
 
 	button.add_theme_color_override("font_color", Color("24344d"))
+	button.add_theme_font_size_override("font_size", 12)
 
 	button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 6))
 
 	button.add_theme_stylebox_override("hover", _flat_style(Color("dce8f8"), 6))
+	button.add_theme_stylebox_override("pressed", _flat_style(Color("cbdcf3"), 6))
 
 	button.focus_mode = Control.FOCUS_NONE
 
@@ -4429,9 +4442,13 @@ func _toggle_task_view() -> void:
 		layout.add_child(empty_label)
 
 	add_child(_task_view_panel)
+	_task_view_panel.pivot_offset = Vector2(panel_width / 2.0, panel_height / 2.0)
+	_task_view_panel.scale = Vector2(0.985, 0.985)
 	_task_view_panel.modulate.a = 0.0
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.set_parallel(true)
+	tween.tween_property(_task_view_panel, "scale", Vector2.ONE, 0.18)
 	tween.tween_property(_task_view_panel, "modulate:a", 1.0, 0.16)
 
 
