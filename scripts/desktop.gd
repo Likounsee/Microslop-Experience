@@ -2,7 +2,9 @@ extends Control
 ## First playable shell for Microslop Experience.
 ## All windows and system behaviour are simulated inside the game.
 
-const AppWindow = preload("res://scripts/app_window.gd")
+# Load the simulated window script at runtime so a missing/corrupt local
+# copy does not prevent the desktop shell itself from starting.
+const APP_WINDOW_SCRIPT_PATH := "res://scripts/app_window.gd"
 const TASKBAR_HEIGHT := 54
 
 var _window_layer: Control
@@ -2633,7 +2635,17 @@ func _open_window(title: String, message: String, window_size := Vector2(520, 30
 
 		oldest_window.queue_free()
 
-	var app: Control = AppWindow.new()
+	var app_script := load(APP_WINDOW_SCRIPT_PATH) as GDScript
+	if app_script == null:
+		push_error("Impossible de charger %s. Vérifiez que le fichier existe et que le dépôt est complet." % APP_WINDOW_SCRIPT_PATH)
+		_show_notification("Fichier manquant", "Impossible d’ouvrir une fenêtre : scripts/app_window.gd est absent ou contient une erreur.")
+		return
+
+	var app_instance := app_script.new()
+	if not app_instance is Control:
+		push_error("%s doit hériter de Control." % APP_WINDOW_SCRIPT_PATH)
+		return
+	var app := app_instance as Control
 
 	_window_layer.add_child(app)
 
