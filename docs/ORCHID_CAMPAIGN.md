@@ -259,6 +259,11 @@ La reprise du sprint accepte désormais la plage complète des treize tâches sa
 
 ### Séquence narrative — bilan déterminé par les choix
 
-La fin des 36 scènes calcule maintenant un bilan à partir des décisions narratives enregistrées : choix prudents et documentés d’un côté, décisions précipitées de l’autre. Le texte final varie selon le résultat, sans présenter ce score fictif comme une vérité absolue ni prétendre que l’incident est résolu. Chaque décision produit aussi une preuve locale dédiée. Le bilan et son score sont sauvegardés pour être repris par les outils de synthèse.
+La fin des 39 scènes calcule maintenant un bilan à partir des décisions narratives enregistrées : choix prudents et documentés d’un côté, décisions précipitées de l’autre. Le texte final varie selon le résultat, sans présenter ce score fictif comme une vérité absolue ni prétendre que l’incident est résolu. Chaque décision produit aussi une preuve locale dédiée. Le bilan et son score sont sauvegardés pour être repris par les outils de synthèse.
 
-À vérifier en lancement Godot : progression et reprise des 36 scènes, affichage du bilan final avec une sauvegarde vierge puis avec plusieurs profils de choix, absence d’erreurs GDScript et rendu sur fenêtre redimensionnée. Aucune validation d’exécution Godot n’a été effectuée dans cette passe.
+À vérifier en lancement Godot : progression et reprise des 39 scènes, affichage du bilan final avec une sauvegarde vierge puis avec plusieurs profils de choix, absence d’erreurs GDScript et rendu sur fenêtre redimensionnée. Aucune validation d’exécution Godot n’a été effectuée dans cette passe.
+
+
+### Épilogue cinématique — résultats, limites et reprise
+
+La séquence narrative compte désormais 39 scènes : trois scènes d’épilogue prolongent l’histoire après le correctif, sans transformer un premier résultat encourageant en résolution miraculeuse. Le joueur doit décider comment communiquer un échantillon incomplet, puis voit une conséquence narrative adaptée à son choix ; la dernière scène remet l’accent sur le refus explicite et la conservation des preuves. La reprise de progression et le tableau de campagne incluent les nouvelles scènes. Les choix et mesures restent fictifs. Validation statique uniquement : un lancement sous Godot est toujours nécessaire pour confirmer le parseur GDScript et le rendu.
