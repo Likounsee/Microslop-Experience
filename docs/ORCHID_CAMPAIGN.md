@@ -168,3 +168,16 @@ Le bouton **Ouvrir le tableau de synthèse de campagne** est accessible depuis l
 Le bouton d’actualisation relit la sauvegarde à la demande. Le tableau propose également des raccourcis vers le carnet d’enquête, la revue de conformité et le comité. Les résultats de recherche tiennent compte des audits déjà réalisés et du constat de conformité ; Microslop AI adapte son discours à l’état du dossier et aux choix sauvegardés. L’objectif est que les scènes précédentes aient une conséquence perceptible au lieu de rester des fenêtres isolées.
 
 **Point de validation technique :** le changement a été poussé au dépôt, mais aucune exécution de Godot n’a été réalisée dans cette passe. Il faut notamment tester l’analyse GDScript, l’ouverture successive des fenêtres depuis les callbacks, le rendu des longs textes et le rafraîchissement du tableau après de nouvelles preuves. Le nombre de pièces affiché reflète les catégories suivies par le tableau, pas une mesure absolue de complétion du jeu.
+
+
+## Enquête de terrain : trois actes et douze défis
+
+Accessible depuis l’archive ORCHID, l’enquête de terrain ajoute un parcours de résolution plutôt qu’une simple série de rapports. Les trois actes sont :
+
+1. **Reconstituer la nuit** — ordonner les événements, repérer l’écart de canal, évaluer l’alerte des 18 fichiers et choisir la prochaine vérification.
+2. **Tester le comportement** — comparer l’intention de recherche aux résultats, distinguer engagement et utilité, relier les trois exemples de rétention et concevoir un test équitable.
+3. **Établir les responsabilités** — interpréter la signature, chercher les traces utiles dans le support, rédiger une conclusion proportionnée aux preuves et choisir une suite prudente.
+
+Chaque défi propose trois réponses. La réponse incorrecte fournit un indice sans faire progresser ; la bonne réponse révèle l’explication, enregistre un identifiant de preuve et déverrouille le bouton du défi suivant. La progression est reconstruite depuis les pièces field_stage_00 à field_stage_11, ce qui permet de reprendre au premier défi non validé après fermeture du jeu. Le tableau de synthèse inclut une catégorie dédiée à ces douze pièces.
+
+Le parcours est conçu pour demander lecture attentive, comparaison de traces et prise de décision. Il ne faut toutefois pas lui attribuer une durée fixe avant un test auprès d’un joueur : la durée dépend du rythme de lecture et du nombre de tentatives. **Validation technique restante :** exécuter Godot, vérifier l’analyse GDScript, les callbacks de réponses, la sauvegarde/reprise, les textes longs et l’affichage sur fenêtre réduite.
