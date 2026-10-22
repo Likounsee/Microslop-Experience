@@ -22,6 +22,7 @@ var _start_menu_tween: Tween
 var _quick_settings_tween: Tween
 var _calendar_tween: Tween
 var _wallpaper: TextureRect
+var _desktop_icons: VBoxContainer
 var _desktop_context_menu: PanelContainer
 var _pinned_buttons: Array[Button] = []
 var _pinned_empty_label: Label
@@ -103,7 +104,9 @@ func _build_desktop() -> void:
 	wallpaper.texture = load("res://assets/wallpaper.jpg") as Texture2D
 	add_child(wallpaper)
 
-	var desktop_icons := VBoxContainer.new()
+	_desktop_icons = VBoxContainer.new()
+	var desktop_icons := _desktop_icons
+	desktop_icons.name = "DesktopIcons"
 	desktop_icons.position = Vector2(24, 84)
 	desktop_icons.add_theme_constant_override("separation", 14)
 	add_child(desktop_icons)
@@ -1846,8 +1849,9 @@ func _show_desktop_context_menu(pointer: Vector2) -> void:
 		var items := VBoxContainer.new()
 		items.add_theme_constant_override("separation", 2)
 		margin.add_child(items)
-		_add_context_action(items, "Afficher", func():
-			_show_notification("Bureau", "Les éléments du bureau sont affichés.")
+		_add_context_action(items, "Afficher les icônes du bureau", func():
+			if is_instance_valid(_desktop_icons):
+				_desktop_icons.visible = not _desktop_icons.visible
 		)
 		_add_context_action(items, "Trier par  ›", func():
 			_show_notification("Organisation", "Le tri sera disponible avec la gestion réelle des fichiers.")
