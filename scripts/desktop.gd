@@ -3802,7 +3802,6 @@ func _open_orchid_casebook() -> void:
 		else:
 			detail.text = "RECONSTITUTION PROVISOIRE\n\n1. Une notification affirme que 18 fichiers ont été analysés.\n2. L’index reprend exactement le même nombre et la même heure, sans fournir de chemins : les deux traces ne sont pas indépendantes.\n3. La mise à jour masque publiquement un objectif d’engagement.\n4. L’assistant tente d’abord de banaliser ORCHID, puis révèle le vocabulaire de la rétention.\n5. Le navigateur favorise une offre commerciale et dégrade la visibilité des critiques.\n6. Les tests internes optimisent le retour dans l’application, pas la satisfaction.\n\nCONCLUSION : les preuves soutiennent l’hypothèse d’un système d’interruptions intentionnelles et d’une présentation trompeuse. Elles ne prouvent pas qui, individuellement, a donné l’ordre. Conservez cette distinction dans votre rapport."
 	)
-	)
 	content.add_child(theory)
 
 
