@@ -2265,7 +2265,7 @@ func _build_start_menu() -> void:
 
 	reopen_button.custom_minimum_size = Vector2(108, 34)
 
-	reopen_button.add_theme_font_size_override("font_size", 12)
+	reopen_button.add_theme_font_size_override("font_size", 13)
 
 	reopen_button.add_theme_color_override("font_color", Color("263247"))
 
@@ -4420,25 +4420,23 @@ func _show_desktop_icon_context_menu(pointer: Vector2, icon_button: Button) -> v
 	icon_button.add_theme_stylebox_override("normal", _flat_style(Color(0.35, 0.55, 0.88, 0.36), 7))
 	if is_instance_valid(_desktop_context_menu):
 		_desktop_context_menu.hide()
-	if is_instance_valid(_desktop_context_menu):
-		_desktop_context_menu.hide()
 	if not is_instance_valid(_desktop_icon_context_menu):
 		_desktop_icon_context_menu = PanelContainer.new()
 		_desktop_icon_context_menu.name = "DesktopIconContextMenu"
 		_desktop_icon_context_menu.z_index = 101
-		var menu_style := _flat_style(Color(0.96, 0.97, 0.99, 0.98), 10)
+		var menu_style := _flat_style(Color(0.96, 0.97, 0.99, 0.985), 12)
 		menu_style.shadow_color = Color(0.02, 0.04, 0.10, 0.30)
-		menu_style.shadow_size = 18
+		menu_style.shadow_size = 20
 		menu_style.shadow_offset = Vector2(0, 4)
 		menu_style.set_border_width_all(1)
 		menu_style.border_color = Color(1, 1, 1, 0.78)
 		_desktop_icon_context_menu.add_theme_stylebox_override("panel", menu_style)
 		var margin := MarginContainer.new()
 		for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
-			margin.add_theme_constant_override(side, 5)
+			margin.add_theme_constant_override(side, 6)
 		_desktop_icon_context_menu.add_child(margin)
 		var items := VBoxContainer.new()
-		items.add_theme_constant_override("separation", 2)
+		items.add_theme_constant_override("separation", 3)
 		margin.add_child(items)
 		_add_context_action(items, "Ouvrir", func():
 			if is_instance_valid(_context_desktop_icon):
@@ -4613,15 +4611,15 @@ func _add_context_action(parent: VBoxContainer, caption: String, callback: Calla
 
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 
-	button.custom_minimum_size = Vector2(232, 36)
+	button.custom_minimum_size = Vector2(244, 38)
 
 	button.add_theme_color_override("font_color", Color("24344d"))
 	button.add_theme_font_size_override("font_size", 12)
 
-	button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 6))
+	button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 8))
 
-	button.add_theme_stylebox_override("hover", _flat_style(Color("dce8f8"), 6))
-	button.add_theme_stylebox_override("pressed", _flat_style(Color("cbdcf3"), 6))
+	button.add_theme_stylebox_override("hover", _flat_style(Color("dce8f8"), 8))
+	button.add_theme_stylebox_override("pressed", _flat_style(Color("cbdcf3"), 8))
 
 	button.focus_mode = Control.FOCUS_NONE
 
