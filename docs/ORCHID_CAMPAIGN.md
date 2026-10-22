@@ -226,3 +226,10 @@ Le menu de l’archive ORCHID contient désormais un sprint jouable distinct du 
 - Les scénarios et profils sont fictifs : le score est un indicateur de jeu, pas une mesure scientifique de productivité.
 
 Cette mécanique ajoute une boucle d’action-résultat distincte des scènes et des dialogues, tout en reliant les réglages de notification à une conséquence jouable.
+
+
+## Exercice de crise interactif — 12 décisions
+
+L’archive ORCHID inclut désormais un exercice de réponse à incident en douze décisions réparties en six phases : confinement, établissement des faits, test des hypothèses, communication, correction et transmission au comité. Chaque étape présente un contexte, trois réponses, un retour spécifique et un impact sur un score de décision. La progression, le choix de chaque étape et le score sont sauvegardés afin de reprendre l’exercice après fermeture de la fenêtre.
+
+Deux décisions de confinement modifient également le réglage réel du centre de notifications simulé : mode digest ou blocage des promotions. Les alertes système restent autorisées par la logique du centre. Le bilan final dépend du score et propose de rejouer l’exercice ou de consulter le tableau de synthèse. Les événements, employés et mesures sont fictifs ; le score ne constitue pas un audit de sécurité réel.
