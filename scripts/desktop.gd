@@ -3829,6 +3829,150 @@ func _render_orchid_task_sprint(app: Control, state: Dictionary) -> void:
 
 
 ## Tabletop de crise : décisions séquentielles, sauvegarde et conclusions conditionnelles.
+## Parcours transversal : une affaire passe de l’alerte à la décision documentée.
+## Les dix étapes réutilisent les preuves, le centre de notifications et le tableau de campagne.
+func _open_orchid_workflow_board() -> void:
+	var app := _open_window("Dossier transversal — ORCHID", "FIL DE TRAVAIL · 10 ÉTAPES · ÉTAT PERSISTANT", Vector2(780, 650))
+	var state := {
+		"stage": clampi(CampaignStore.load_case_answer("orchid_workflow_stage"), 0, 10),
+		"score": CampaignStore.load_case_answer("orchid_workflow_score")
+	}
+	_render_orchid_workflow_board(app, state)
+
+
+func _orchid_workflow_data() -> Array:
+	return [
+		{"phase":"01 · TRIAGE","title":"Une alerte sans source","brief":"À 08:41, un message annonce que le nouveau panneau ORCHID collecte les documents privés. Aucun lien de ticket ni capture complète n’est joint.","prompt":"Quelle première action rend le dossier vérifiable ?","options":["Conserver le message, noter l’heure et chercher la source","Transférer l’alerte à toute l’entreprise","Supprimer le message pour éviter la panique"],"delta":[2,-1,-2],"feedback":["Bonne base : une trace datée permet de séparer l’allégation de la preuve.","La diffusion élargit la rumeur sans établir les faits.","La suppression détruit potentiellement un élément utile."]},
+		{"phase":"02 · CONFINEMENT","title":"Le panneau insiste","brief":"Une carte promotionnelle apparaît par-dessus le ticket. Les alertes système doivent rester visibles, même pendant l’enquête.","prompt":"Quel réglage limite l’interruption sans masquer les alertes critiques ?","options":["Passer les promotions en digest","Tout couper, y compris les alertes système","Laisser tout affiché et continuer"],"delta":[2,-2,-1],"feedback":["Le digest conserve la trace promotionnelle sans imposer un toast.","Couper indistinctement les alertes crée un risque opérationnel.","Le problème d’interruption reste actif."],"effect":["digest","unsafe","none"]},
+		{"phase":"03 · COLLECTE","title":"Deux versions du même écran","brief":"Un collègue fournit une capture recadrée ; une autre capture montre un bouton différent. Les horodatages ne sont pas identiques.","prompt":"Comment éviter de conclure trop vite ?","options":["Conserver les deux captures et comparer leurs métadonnées","Choisir la capture qui confirme l’alerte","Publier une conclusion immédiate"],"delta":[2,-2,-1],"feedback":["Les versions et leurs dates restent comparables.","Le biais de confirmation transforme une hypothèse en certitude.","Une conclusion publique précède la vérification."]},
+		{"phase":"04 · REPRODUCTION","title":"Rejouer le parcours","brief":"Sur un poste de test, l’équipe peut reproduire le parcours sans utiliser de documents réels.","prompt":"Quel test est le plus propre ?","options":["Rejouer les étapes avec un compte et des fichiers fictifs","Tester directement sur les dossiers d’un collègue","Se fier uniquement à une vidéo ancienne"],"delta":[2,-2,-1],"feedback":["Le test isolé limite l’exposition et permet une reproduction.","Les données réelles ne sont pas nécessaires à cette vérification.","La vidéo peut décrire une version différente."]},
+		{"phase":"05 · HYPOTHÈSE","title":"La mesure trompeuse","brief":"Le tableau indique plus de clics après le changement, mais davantage de tâches abandonnées.","prompt":"Quelle lecture doit guider la décision ?","options":["Comparer les clics à l’achèvement et aux refus respectés","Déclarer le changement gagnant grâce aux clics","Ignorer les abandons comme du bruit"],"delta":[2,-2,-1],"feedback":["Un indicateur d’attention ne remplace pas la réussite de la tâche.","Le clic ne prouve ni utilité ni consentement.","Les abandons peuvent révéler un dommage réel."]},
+		{"phase":"06 · TÉMOIGNAGES","title":"Le message de Lina","brief":"Lina dit avoir fermé trois fois la même promotion. Elle craint que son retour soit attribué à son compte.","prompt":"Comment recueillir son retour ?","options":["Demander son accord et minimiser les détails identifiants","Exiger son nom et transmettre le message complet","Écarter son retour faute de métrique"],"delta":[2,-2,-1],"feedback":["Le consentement et la minimisation renforcent la qualité du témoignage.","La collecte dépasse ce qui est nécessaire.","Un témoignage contextualisé peut révéler une friction invisible dans les métriques."]},
+		{"phase":"07 · RESPONSABILITÉ","title":"Qui peut décider ?","brief":"L’équipe produit veut publier un correctif ; l’équipe support demande une explication claire et la conformité réclame une trace de validation.","prompt":"Quelle gouvernance est la plus robuste ?","options":["Nommer un responsable, un valideur et une échéance","Laisser la décision dans un fil de discussion","Attendre qu’une équipe prenne spontanément le sujet"],"delta":[2,-1,-1],"feedback":["La responsabilité et l’échéance rendent le suivi vérifiable.","Un fil seul ne garantit ni arbitrage ni clôture.","L’absence de responsable entretient le risque."]},
+		{"phase":"08 · COMMUNICATION","title":"Le message aux employés","brief":"La cause n’est pas encore confirmée. Un message doit calmer la situation sans annoncer une certitude prématurée.","prompt":"Que communiquer maintenant ?","options":["Dire ce qui est connu, inconnu et quand reviendra la prochaine mise à jour","Affirmer qu’aucune donnée n’a été exposée","Ne rien dire jusqu’à la fin de l’enquête"],"delta":[2,-2,-1],"feedback":["Une communication bornée et datée évite les promesses non étayées.","L’absence de preuve n’est pas une preuve d’absence.","Le silence laisse les rumeurs remplir le vide."]},
+		{"phase":"09 · REMÉDIATION","title":"Corriger sans masquer","brief":"Le test confirme que la carte peut recouvrir le bouton principal dans une fenêtre étroite. L’équipe propose aussi de mesurer les échecs de fermeture.","prompt":"Quel correctif est le plus complet ?","options":["Corriger le recouvrement, tester plusieurs tailles et suivre les échecs","Changer uniquement la couleur de la carte","Désactiver les retours d’échec pour améliorer le tableau"],"delta":[2,-1,-2],"feedback":["Le correctif traite la cause et vérifie les cas limites.","Le problème est structurel, pas simplement chromatique.","Masquer les échecs rend le produit moins observable."]},
+		{"phase":"10 · PASSATION","title":"Clore le dossier proprement","brief":"Le comité demande une conclusion, les limites du test, les preuves conservées et le nom du responsable du suivi.","prompt":"Que doit contenir la passation ?","options":["Décision, preuves, incertitudes, responsable et date de réexamen","Un score final sans explication","Une conclusion définitive sans limites ni pièces jointes"],"delta":[2,-1,-2],"feedback":["Une passation utile permet à une autre équipe de reprendre le dossier.","Un score seul n’explique pas le raisonnement.","La certitude affichée dépasse les éléments disponibles."]}
+	]
+
+
+func _render_orchid_workflow_board(app: Control, state: Dictionary) -> void:
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var child := content.get_child(0)
+		content.remove_child(child)
+		child.queue_free()
+	var steps := _orchid_workflow_data()
+	var stage := int(state.get("stage", 0))
+	var score := int(state.get("score", 0))
+	var progress := ProgressBar.new()
+	progress.max_value = steps.size()
+	progress.value = stage
+	progress.show_percentage = false
+	content.add_child(progress)
+	var status := Label.new()
+	status.text = "Dossier transversal · Étape %d/%d · Score %d/%d" % [mini(stage + 1, steps.size()), steps.size(), score, steps.size() * 2]
+	status.add_theme_color_override("font_color", Color("526784"))
+	content.add_child(status)
+	if stage >= steps.size():
+		var summary := Label.new()
+		summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		summary.custom_minimum_size = Vector2(0, 150)
+		var verdict := "DOSSIER À REPRENDRE"
+		if score >= 14:
+			verdict = "DOSSIER DOCUMENTÉ"
+		elif score >= 8:
+			verdict = "DOSSIER TRANSMISSIBLE AVEC RÉSERVES"
+		summary.text = "%s\n\nRésultat : %d/20. Vous avez traversé les dix étapes, du triage à la passation. Ce score reflète uniquement les choix de cette simulation fictive ; il ne constitue pas une certification ni un audit réel. Les preuves sont consultables dans l’archive ORCHID." % [verdict, score]
+		content.add_child(summary)
+		var replay := Button.new()
+		replay.text = "Recommencer le dossier transversal"
+		replay.pressed.connect(func():
+			CampaignStore.save_case_answer("orchid_workflow_stage", 0)
+			CampaignStore.save_case_answer("orchid_workflow_score", 0)
+			for i in range(steps.size()):
+				CampaignStore.save_case_answer("orchid_workflow_choice_%02d" % i, -1)
+			state["stage"] = 0
+			state["score"] = 0
+			_render_orchid_workflow_board(app, state)
+		)
+		content.add_child(replay)
+		var archive := Button.new()
+		archive.text = "Retourner à l’archive ORCHID"
+		archive.pressed.connect(_open_orchid_archive)
+		content.add_child(archive)
+		return
+	var step: Dictionary = steps[stage]
+	var phase := Label.new()
+	phase.text = str(step["phase"])
+	phase.add_theme_font_size_override("font_size", 11)
+	phase.add_theme_color_override("font_color", Color("5b6d89"))
+	content.add_child(phase)
+	var title := Label.new()
+	title.text = str(step["title"])
+	title.add_theme_font_size_override("font_size", 23)
+	content.add_child(title)
+	var brief := Label.new()
+	brief.text = str(step["brief"])
+	brief.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	brief.custom_minimum_size = Vector2(0, 100)
+	content.add_child(brief)
+	var prompt := Label.new()
+	prompt.text = str(step["prompt"])
+	prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content.add_child(prompt)
+	var feedback := Label.new()
+	feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	feedback.custom_minimum_size = Vector2(0, 68)
+	content.add_child(feedback)
+	var next := Button.new()
+	next.text = "Étape suivante →"
+	next.disabled = true
+	content.add_child(next)
+	var saved := CampaignStore.load_case_answer("orchid_workflow_choice_%02d" % stage)
+	if saved >= 0 and saved < 3:
+		feedback.text = str(step["feedback"][saved])
+		next.disabled = false
+	for i in range(3):
+		var option := Button.new()
+		option.text = str(step["options"][i])
+		option.custom_minimum_size = Vector2(0, 38)
+		option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		option.disabled = saved >= 0 and saved < 3
+		option.pressed.connect(func():
+			var delta := int(step["delta"][i])
+			var new_score := score + delta
+			CampaignStore.save_case_answer("orchid_workflow_choice_%02d" % stage, i)
+			CampaignStore.save_case_answer("orchid_workflow_score", new_score)
+			CampaignStore.save_case_answer("orchid_workflow_stage", stage)
+			CampaignStore.save_evidence("orchid_workflow_step_%02d" % stage)
+			state["score"] = new_score
+			feedback.text = str(step["feedback"][i]) + "\n\nImpact : %+d · Score cumulé : %d/20." % [delta, new_score]
+			var effect := str(step.get("effect", ["none","none","none"])[i])
+			if effect == "digest":
+				CampaignStore.save_case_answer("orchid_notification_mode", 2)
+				CampaignStore.save_evidence("workflow_digest_policy_applied")
+				_show_notification("ORCHID · mode digest", "Les promotions restent dans l’historique ; les alertes système restent autorisées.")
+			elif effect == "unsafe":
+				CampaignStore.save_case_answer("orchid_notification_mode", 0)
+				CampaignStore.save_evidence("workflow_full_notifications_retained")
+				_show_notification("ORCHID · réglage inchangé", "Les notifications continuent selon la politique standard.")
+			else:
+				_show_notification("Dossier ORCHID mis à jour", "Étape %02d enregistrée dans les preuves du dossier." % (stage + 1))
+			for node in content.get_children():
+				if node is Button and node != next:
+					node.disabled = true
+			next.disabled = false
+		)
+		content.add_child(option)
+	next.pressed.connect(func():
+		state["stage"] = stage + 1
+		CampaignStore.save_case_answer("orchid_workflow_stage", stage + 1)
+		_render_orchid_workflow_board(app, state)
+	)
+
+
 func _open_orchid_crisis_tabletop() -> void:
 	var app := _open_window("Tabletop de crise — ORCHID", "EXERCICE D’INCIDENT · 12 DÉCISIONS · MODE LOCAL", Vector2(790, 650))
 	var state := {
@@ -4018,6 +4162,11 @@ func _open_orchid_archive() -> void:
 	simulator.text = "Simuler un test A/B ORCHID — comparer engagement et réussite"
 	simulator.pressed.connect(_open_orchid_experiment_simulator)
 	content.add_child(simulator)
+
+	var workflow := Button.new()
+	workflow.text = "Dossier transversal ORCHID — 10 étapes, du signal à la passation"
+	workflow.pressed.connect(_open_orchid_workflow_board)
+	content.add_child(workflow)
 
 	var crisis := Button.new()
 	crisis.text = "Exercice de crise ORCHID — 12 décisions, confinement et comité"
