@@ -65,15 +65,22 @@ L'archive révèle que le problème est une décision de produit, pas un bug iso
 
 Les deux choix concluent le chapitre 1 et ne bloquent pas le contenu du jeu de base. Ils ne prétendent pas modifier le vrai système ou envoyer des données à l'extérieur. La satire finale est que Microslop transforme même la découverte de sa manipulation en nouvelle occasion de mesurer l'engagement.
 
-## Indices secondaires à développer
-- Comparer la notification « 18 fichiers analysés » au contenu vide de Documents.
-- Réexaminer la mise à jour après avoir parlé à l'assistant : les formulations « confort » et « engagement » décrivent la même mécanique.
-- Rechercher un terme générique comme « désactiver les notifications » pour voir le navigateur prioriser les recommandations.
-- Remarquer la formulation passive « résultat retiré » : aucun responsable n'est nommé.
-- Revenir à l'archive après avoir fait un choix : la sauvegarde doit conserver la fin sélectionnée.
+## Carnet d'enquête — huit pièces optionnelles implémentées
+Le carnet est accessible depuis l'archive ORCHID. Chaque pièce peut être examinée indépendamment ; son identifiant est enregistré dans la sauvegarde, sans remplacer la progression ni la fin. Après au moins quatre pièces, le joueur peut demander une reconstitution provisoire de la chaîne des événements.
+
+1. **Les 18 fichiers** — notification sans noms ni chemins.
+2. **Indexation locale** — même compteur et même horodatage, mais aucune trace indépendante.
+3. **Résumé public** — langage de stabilité et de confort.
+4. **Note interne** — objectif d'engagement et instruction de dissimulation.
+5. **Réponse de l'assistant** — déni initial, puis vocabulaire de rétention.
+6. **Résultat sponsorisé** — offre commerciale prioritaire et critique déclassée.
+7. **Enquête de satisfaction** — questionnaire qui ne propose pas un refus simple.
+8. **Résultat d'expérience A/B** — l'équipe privilégie les retours dans l'application plutôt que la satisfaction déclarée.
+
+La reconstitution distingue les éléments étayés des questions non résolues : elle ne désigne pas un responsable individuel sans preuve. La prochaine étape de contenu est d'ajouter des interruptions scénarisées et des conséquences persistantes aux choix intermédiaires, plutôt que de multiplier seulement les textes.
 
 ## Sauvegarde et compatibilité
-La progression historique `mission_step` reste dans `user://campaign.cfg`. La version de campagne est conservée pour migrer les sauvegardes du tutoriel antérieur. La fin est enregistrée séparément dans la même section sous la clé `ending` (`published` ou `preserved`), afin de ne pas réinitialiser les anciennes sauvegardes. Les choix de dialogue et les indices secondaires devraient être stockés dans des clés supplémentaires, sans modifier ni supprimer les clés historiques.
+La progression historique `mission_step` reste dans `user://campaign.cfg`. La version de campagne est conservée pour migrer les sauvegardes du tutoriel antérieur. La fin est enregistrée séparément dans la même section sous la clé `ending` (`published` ou `preserved`), afin de ne pas réinitialiser les anciennes sauvegardes. Les indices du carnet sont stockés dans la clé `evidence` sous forme de liste d’identifiants. L’enregistrement des indices et de la fin recharge d’abord la configuration existante pour préserver la progression et les autres choix.
 
 ## État d'implémentation vérifié dans le dépôt
 - **Implémenté :** cinq objectifs principaux, applications simulées, note interne de mise à jour, assistant avec deux actions de réponse, recherche ORCHID, archive complète, deux choix de conclusion et persistance de la fin.
