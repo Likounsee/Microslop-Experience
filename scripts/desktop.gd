@@ -3729,6 +3729,11 @@ func _open_orchid_archive() -> void:
 	casebook.pressed.connect(_open_orchid_casebook)
 	content.add_child(casebook)
 
+	var lab := Button.new()
+	lab.text = "Ouvrir le laboratoire de preuves (3 tests)"
+	lab.pressed.connect(_open_orchid_lab)
+	content.add_child(lab)
+
 
 func _open_orchid_casebook() -> void:
 	var app := _open_window("Carnet d’enquête — ORCHID", "DOSSIER PERSONNEL · LES PIÈCES SONT FICTIVES", Vector2(760, 560))
@@ -3803,6 +3808,102 @@ func _open_orchid_casebook() -> void:
 			detail.text = "RECONSTITUTION PROVISOIRE\n\n1. Une notification affirme que 18 fichiers ont été analysés.\n2. L’index reprend exactement le même nombre et la même heure, sans fournir de chemins : les deux traces ne sont pas indépendantes.\n3. La mise à jour masque publiquement un objectif d’engagement.\n4. L’assistant tente d’abord de banaliser ORCHID, puis révèle le vocabulaire de la rétention.\n5. Le navigateur favorise une offre commerciale et dégrade la visibilité des critiques.\n6. Les tests internes optimisent le retour dans l’application, pas la satisfaction.\n\nCONCLUSION : les preuves soutiennent l’hypothèse d’un système d’interruptions intentionnelles et d’une présentation trompeuse. Elles ne prouvent pas qui, individuellement, a donné l’ordre. Conservez cette distinction dans votre rapport."
 	)
 	content.add_child(theory)
+
+
+func _open_orchid_lab() -> void:
+	var app := _open_window("Laboratoire de preuves — ORCHID", "LABORATOIRE QA · SIMULATION FICTIVE", Vector2(760, 590))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var old_child := content.get_child(0)
+		content.remove_child(old_child)
+		old_child.queue_free()
+
+	var intro := Label.new()
+	intro.text = "Trois mini-enquêtes attendent votre analyse. Choisissez une conclusion pour chaque dossier. Une mauvaise réponse ne bloque rien : relisez les éléments et réessayez."
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	intro.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(intro)
+
+	var progress := Label.new()
+	progress.add_theme_color_override("font_color", Color("356b47"))
+	content.add_child(progress)
+
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	content.add_child(scroll)
+	var cases := VBoxContainer.new()
+	cases.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	cases.add_theme_constant_override("separation", 12)
+	scroll.add_child(cases)
+
+	var puzzles: Array[Dictionary] = [
+		{"id":"qa_clock","title":"TEST 1 · Deux traces, une seule source ?","brief":"À 09:12:04, la notification et l’index affichent tous deux « 18 éléments ». Aucun chemin, nom ou journal de fichier n’est disponible. Quelle conclusion est la plus rigoureuse ?","options":["La preuve que 18 fichiers privés ont été lus.","Les deux compteurs peuvent provenir du même événement ; il manque une trace indépendante.","L’IA a forcément supprimé les fichiers."],"correct":1,"explain":"Exact. L’égalité des chiffres et de l’heure est une corrélation, pas une preuve de lecture de fichiers. Le dossier établit surtout qu’une même information est répétée sans justificatif indépendant."},
+		{"id":"qa_metric","title":"TEST 2 · Quelle métrique compte vraiment ?","brief":"Le test A/B montre plus de retours vers l’application quand la notification arrive au début d’une tâche. La satisfaction déclarée ne progresse pas. Quelle interprétation suit les données ?","options":["La variante est forcément meilleure pour l’utilisateur.","Les retours augmentent, mais cela ne démontre pas une meilleure expérience.","La satisfaction n’a aucune importance parce que le test est statistiquement stable."],"correct":1,"explain":"Exact. Le retour dans l’application mesure un comportement, pas le bien-être. Le rapport recommande pourtant la variante qui maximise le retour, ce qui révèle la priorité de l’équipe."},
+		{"id":"qa_accountability","title":"TEST 3 · Qui a donné l’ordre ?","brief":"La note est signée « Équipe Expérience ». Elle demande de masquer ORCHID dans le résumé public, mais ne cite aucun responsable individuel. Que peut-on affirmer ?","options":["Une personne précise est coupable, même sans signature.","Aucune conclusion n’est possible, donc les autres preuves ne valent rien.","Les documents indiquent une décision organisationnelle, mais ne permettent pas d’identifier qui l’a autorisée."],"correct":2,"explain":"Exact. Les pièces soutiennent l’existence d’une stratégie et d’une dissimulation, mais ne permettent pas d’accuser une personne précise. Une enquête solide distingue les faits établis des inconnues."}
+	]
+
+	for puzzle in puzzles:
+		var panel := PanelContainer.new()
+		panel.add_theme_stylebox_override("panel", _flat_style(Color("f1f5fa"), 9))
+		cases.add_child(panel)
+		var stack := VBoxContainer.new()
+		stack.add_theme_constant_override("separation", 6)
+		panel.add_child(stack)
+		var heading := Label.new()
+		heading.text = str(puzzle["title"])
+		heading.add_theme_color_override("font_color", Color("1f3654"))
+		heading.add_theme_font_size_override("font_size", 16)
+		stack.add_child(heading)
+		var brief := Label.new()
+		brief.text = str(puzzle["brief"])
+		brief.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		brief.add_theme_color_override("font_color", Color("263247"))
+		stack.add_child(brief)
+		var feedback := Label.new()
+		feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		feedback.add_theme_color_override("font_color", Color("356b47"))
+		stack.add_child(feedback)
+		var saved_answer := CampaignStore.load_case_answer(str(puzzle["id"]))
+		if saved_answer == int(puzzle["correct"]):
+			feedback.text = "DOSSIER VALIDÉ — " + str(puzzle["explain"])
+		elif saved_answer >= 0:
+			feedback.text = "Réponse précédente : " + str(puzzle["options"][saved_answer]) + "\nVous pouvez revoir votre conclusion."
+		for option_index in range(puzzle["options"].size()):
+			var choice := Button.new()
+			choice.text = str(puzzle["options"][option_index])
+			choice.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			choice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			choice.custom_minimum_size.y = 42
+			choice.add_theme_color_override("font_color", Color("263247"))
+			choice.pressed.connect(_answer_orchid_lab.bind(puzzle, option_index, feedback, progress, puzzles.size()))
+			stack.add_child(choice)
+
+	_refresh_orchid_lab_progress(progress, puzzles)
+
+
+func _answer_orchid_lab(puzzle: Dictionary, answer: int, feedback: Label, progress: Label, total: int) -> void:
+	CampaignStore.save_case_answer(str(puzzle["id"]), answer)
+	if answer == int(puzzle["correct"]):
+		CampaignStore.save_evidence("lab_" + str(puzzle["id"]))
+		feedback.text = "DOSSIER VALIDÉ — " + str(puzzle["explain"])
+		_show_notification("Analyse validée", str(puzzle["title"]) + " : conclusion étayée.")
+	else:
+		feedback.text = "CONCLUSION À REVOIR — " + str(puzzle["explain"])
+	_refresh_orchid_lab_progress(progress, [
+		{"id":"qa_clock","correct":1},
+		{"id":"qa_metric","correct":1},
+		{"id":"qa_accountability","correct":2}
+	])
+
+
+func _refresh_orchid_lab_progress(progress: Label, puzzles: Array) -> void:
+	var completed := 0
+	for puzzle in puzzles:
+		if CampaignStore.load_case_answer(str(puzzle["id"])) == int(puzzle["correct"]):
+			completed += 1
+	progress.text = "ANALYSES CORRECTES : %d / %d" % [completed, puzzles.size()]
 
 
 func _select_orchid_evidence(entry: Dictionary, detail: Label, status: Label, total: int) -> void:
