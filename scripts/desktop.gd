@@ -37,6 +37,7 @@ var _quick_link_menu: PanelContainer
 var _task_view_panel: PanelContainer
 var _taskbar_preview: PanelContainer
 var _taskbar_preview_tween: Tween
+var _taskbar_marker_tweens: Dictionary = {}
 var _pinned_buttons: Array[Button] = []
 var _pinned_empty_label: Label
 var _pinned_heading_label: Label
@@ -1828,12 +1829,18 @@ func _update_taskbar_indicators() -> void:
 		if is_instance_valid(marker):
 
 			# Windows 11 uses a small dot for running apps and a longer pill
-			# for the focused window. Animate the change instead of snapping.
+			# for the focused window. Cancel an in-flight transition before
+			# starting another so rapid focus changes never stack competing tweens.
 			marker.visible = running
+			var previous_tween = _taskbar_marker_tweens.get(str(app_id))
+			if previous_tween is Tween and previous_tween.is_running():
+				previous_tween.kill()
+
 			var target_left := -9.0 if active else -3.0
 			var target_right := 9.0 if active else 3.0
 			var target_top := -3.0 if active else -2.0
 			var marker_tween := create_tween()
+			_taskbar_marker_tweens[str(app_id)] = marker_tween
 			marker_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 			marker_tween.tween_property(marker, "offset_left", target_left, 0.12)
 			marker_tween.parallel().tween_property(marker, "offset_right", target_right, 0.12)
