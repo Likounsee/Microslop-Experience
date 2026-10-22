@@ -1165,28 +1165,40 @@ func _refresh_notification_center() -> void:
 
 		var notification_title := str(item.get("title", "Notification"))
 		var app_glyph := "●"
+		var app_mark_background := Color("e5efff")
+		var app_mark_foreground := Color("2879d0")
 		if notification_title.to_lower().contains("paramètres"):
 			app_glyph = "⚙"
+			app_mark_background = Color("e8edf3")
+			app_mark_foreground = Color("65758b")
 		elif notification_title.to_lower().contains("fichier"):
 			app_glyph = "▤"
+			app_mark_background = Color("fff1cf")
+			app_mark_foreground = Color("a97810")
 		elif notification_title.to_lower().contains("mise à jour"):
 			app_glyph = "↻"
+			app_mark_background = Color("dff6e9")
+			app_mark_foreground = Color("21875d")
 		elif notification_title.to_lower().contains("mission"):
 			app_glyph = "✧"
+			app_mark_background = Color("eee8ff")
+			app_mark_foreground = Color("7860c8")
 		elif notification_title.to_lower().contains("bienvenue"):
 			app_glyph = "▦"
+			app_mark_background = Color("e5efff")
+			app_mark_foreground = Color("2879d0")
 
 		var app_mark := PanelContainer.new()
 		app_mark.custom_minimum_size = Vector2(28, 28)
 		app_mark.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		app_mark.add_theme_stylebox_override("panel", _flat_style(Color("e5efff"), 7))
+		app_mark.add_theme_stylebox_override("panel", _flat_style(app_mark_background, 7))
 		var app_mark_label := Label.new()
 		app_mark_label.text = app_glyph
 		app_mark_label.custom_minimum_size = Vector2(28, 28)
 		app_mark_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		app_mark_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		app_mark_label.add_theme_font_size_override("font_size", 14)
-		app_mark_label.add_theme_color_override("font_color", Color("2879d0"))
+		app_mark_label.add_theme_color_override("font_color", app_mark_foreground)
 		app_mark.add_child(app_mark_label)
 		heading_row.add_child(app_mark)
 
