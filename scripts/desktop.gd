@@ -1358,8 +1358,12 @@ func _open_files() -> void:
 		nav.text = caption
 		nav.custom_minimum_size = Vector2(36, 34)
 		nav.add_theme_font_size_override("font_size", 17)
+		nav.tooltip_text = {"←": "Précédent", "→": "Suivant", "↑": "Remonter", "⟳": "Actualiser"}[caption]
+		nav.focus_mode = Control.FOCUS_NONE
 		nav.add_theme_stylebox_override("normal", _flat_style(Color("edf2f8"), 8))
 		nav.add_theme_stylebox_override("hover", _flat_style(Color("dce8f7"), 8))
+		nav.add_theme_stylebox_override("disabled", _flat_style(Color("f5f7fa"), 8))
+		nav.add_theme_color_override("font_disabled_color", Color("aab5c4"))
 		nav.pressed.connect(_explorer_toolbar_action.bind(caption, content))
 		toolbar.add_child(nav)
 	var address := LineEdit.new()
@@ -1368,6 +1372,7 @@ func _open_files() -> void:
 	address.set_meta("explorer_history", ["Accueil"])
 	address.set_meta("explorer_history_index", 0)
 	address.placeholder_text = "Chemin d’accès"
+	address.clear_button_enabled = true
 	address.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	address.custom_minimum_size.y = 34
 	address.add_theme_stylebox_override("normal", _flat_style(Color("ffffff"), 8))
@@ -1376,6 +1381,7 @@ func _open_files() -> void:
 	var search := LineEdit.new()
 	search.name = "ExplorerSearch"
 	search.placeholder_text = "Rechercher dans Accueil"
+	search.clear_button_enabled = true
 	search.custom_minimum_size = Vector2(190, 34)
 	search.add_theme_stylebox_override("normal", _flat_style(Color("ffffff"), 8))
 	toolbar.add_child(search)
@@ -1411,6 +1417,8 @@ func _open_files() -> void:
 		nav_item.set_meta("explorer_path", caption.replace("🏠  ", "").replace("🖥  ", "").replace("⬇  ", "").replace("📄  ", "").replace("🖼  ", "").replace("🎵  ", "").replace("🎬  ", "").replace("💾  ", "").strip_edges())
 		nav_item.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 6))
 		nav_item.add_theme_stylebox_override("hover", _flat_style(Color("e5edf8"), 6))
+		nav_item.add_theme_stylebox_override("pressed", _flat_style(Color("d2e3f8"), 6))
+		nav_item.focus_mode = Control.FOCUS_NONE
 		nav_buttons.append(nav_item)
 		sidebar.add_child(nav_item)
 	address.set_meta("explorer_nav_buttons", nav_buttons)
