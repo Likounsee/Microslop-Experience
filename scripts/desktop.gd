@@ -3729,6 +3729,11 @@ func _open_orchid_archive() -> void:
 	casebook.pressed.connect(_open_orchid_casebook)
 	content.add_child(casebook)
 
+	var simulator := Button.new()
+	simulator.text = "Simuler un test A/B ORCHID — comparer engagement et réussite"
+	simulator.pressed.connect(_open_orchid_experiment_simulator)
+	content.add_child(simulator)
+
 	var lab := Button.new()
 	lab.text = "Ouvrir le laboratoire de preuves (3 tests)"
 	lab.pressed.connect(_open_orchid_lab)
@@ -4830,6 +4835,164 @@ func _open_orchid_casebook() -> void:
 			detail.text = "RECONSTITUTION PROVISOIRE\n\n1. Une notification affirme que 18 fichiers ont été analysés.\n2. L’index reprend exactement le même nombre et la même heure, sans fournir de chemins : les deux traces ne sont pas indépendantes.\n3. La mise à jour masque publiquement un objectif d’engagement.\n4. L’assistant tente d’abord de banaliser ORCHID, puis révèle le vocabulaire de la rétention.\n5. Le navigateur favorise une offre commerciale et dégrade la visibilité des critiques.\n6. Les tests internes optimisent le retour dans l’application, pas la satisfaction.\n\nCONCLUSION : les preuves soutiennent l’hypothèse d’un système d’interruptions intentionnelles et d’une présentation trompeuse. Elles ne prouvent pas qui, individuellement, a donné l’ordre. Conservez cette distinction dans votre rapport."
 	)
 	content.add_child(theory)
+
+
+
+## A hands-on experiment simulator: configure a fictional cohort, run three variants,
+## compare retention with task success, and preserve the result as campaign evidence.
+func _open_orchid_experiment_simulator() -> void:
+	var app := _open_window("Banc de test A/B — ORCHID", "SIMULATION QA · DONNÉES FICTIVES", Vector2(800, 680))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	var intro := Label.new()
+	intro.text = "Vous êtes chargé de valider une expérience avant diffusion. Les huit profils ci-dessous sont entièrement fictifs. Le but n’est pas de trouver un chiffre magique : comparez ce que le tableau de bord récompense à ce qui aide réellement la personne à terminer sa tâche."
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	intro.custom_minimum_size = Vector2(0, 68)
+	content.add_child(intro)
+
+	var config_panel := PanelContainer.new()
+	config_panel.add_theme_stylebox_override("panel", _flat_style(Color("f1f5fa"), 9))
+	content.add_child(config_panel)
+	var config := VBoxContainer.new()
+	config.add_theme_constant_override("separation", 8)
+	config_panel.add_child(config)
+
+	var task_label := Label.new()
+	task_label.text = "SCÉNARIO UTILISATEUR"
+	config.add_child(task_label)
+	var task_select := OptionButton.new()
+	task_select.add_item("Rédiger un document important")
+	task_select.add_item("Rejoindre une réunion à l’heure")
+	task_select.add_item("Désactiver les notifications")
+	task_select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var saved_task := CampaignStore.load_case_answer("orchid_sim_task")
+	task_select.select(saved_task if saved_task >= 0 and saved_task < 3 else 0)
+	config.add_child(task_select)
+
+	var trigger_label := Label.new()
+	trigger_label.text = "MOMENT DE L’INTERRUPTION"
+	config.add_child(trigger_label)
+	var trigger_select := OptionButton.new()
+	trigger_select.add_item("Aucun rappel pendant la tâche")
+	trigger_select.add_item("Rappel dès que l’utilisateur commence")
+	trigger_select.add_item("Rappel après deux minutes sans activité")
+	trigger_select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var saved_trigger := CampaignStore.load_case_answer("orchid_sim_trigger")
+	trigger_select.select(saved_trigger if saved_trigger >= 0 and saved_trigger < 3 else 1)
+	config.add_child(trigger_select)
+
+	var metric_label := Label.new()
+	metric_label.text = "OBJECTIF UTILISÉ PAR LE TABLEAU DE BORD"
+	config.add_child(metric_label)
+	var metric_select := OptionButton.new()
+	metric_select.add_item("Maximiser les retours dans l’application")
+	metric_select.add_item("Maximiser les tâches terminées")
+	metric_select.add_item("Réduire les interruptions non souhaitées")
+	metric_select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var saved_metric := CampaignStore.load_case_answer("orchid_sim_metric")
+	metric_select.select(saved_metric if saved_metric >= 0 and saved_metric < 3 else 0)
+	config.add_child(metric_select)
+
+	var consent := CheckButton.new()
+	consent.text = "Respecter immédiatement le refus et le mode silencieux"
+	consent.button_pressed = CampaignStore.load_case_answer("orchid_sim_consent") == 1
+	config.add_child(consent)
+
+	var run := Button.new()
+	run.text = "Lancer la simulation sur 8 profils fictifs"
+	run.custom_minimum_size = Vector2(0, 44)
+	config.add_child(run)
+
+	var output := RichTextLabel.new()
+	output.bbcode_enabled = true
+	output.fit_content = true
+	output.scroll_active = true
+	output.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	output.custom_minimum_size = Vector2(0, 245)
+	output.text = "[b]BANC DE TEST EN ATTENTE[/b]\nConfigurez le scénario, puis lancez l’expérience. Aucun vrai fichier ni réglage système ne sera consulté."
+	content.add_child(output)
+
+	var save_report := Button.new()
+	save_report.text = "Archiver les résultats et les hypothèses"
+	save_report.disabled = not CampaignStore.load_evidence().has("orchid_ab_test_run")
+	content.add_child(save_report)
+
+	run.pressed.connect(func() -> void:
+		var selected_task := task_select.selected
+		var selected_trigger := trigger_select.selected
+		var selected_metric := metric_select.selected
+		var respect_refusal := consent.button_pressed
+		CampaignStore.save_case_answer("orchid_sim_task", selected_task)
+		CampaignStore.save_case_answer("orchid_sim_trigger", selected_trigger)
+		CampaignStore.save_case_answer("orchid_sim_metric", selected_metric)
+		CampaignStore.save_case_answer("orchid_sim_consent", 1 if respect_refusal else 0)
+
+		var scenario_names := ["document important", "réunion à l’heure", "désactivation des notifications"]
+		var trigger_names := ["sans rappel", "dès le début de la tâche", "après deux minutes d’inactivité"]
+		var variant_names := ["A · sans interruption", "B · interruption prédictive", "C · interruption avec refus respecté"]
+		var base_completion := [7, 6, 5]
+		var base_return := [2, 3, 2]
+		var a_done := base_completion[selected_task]
+		var a_return := base_return[selected_task]
+		var b_done := maxi(1, a_done - (2 if selected_trigger == 1 else 1))
+		var b_return := mini(8, a_return + (4 if selected_trigger == 1 else 2))
+		var c_done := a_done if respect_refusal else maxi(2, a_done - 1)
+		var c_return := maxi(1, a_return - 1) if respect_refusal else mini(8, a_return + 1)
+		if selected_task == 2:
+			a_done = 4
+			b_done = 2 if selected_trigger == 1 else 3
+			c_done = 5 if respect_refusal else 3
+			a_return = 2
+			b_return = 7 if selected_trigger == 1 else 5
+			c_return = 1 if respect_refusal else 4
+		var done_values := [a_done, b_done, c_done]
+		var return_values := [a_return, b_return, c_return]
+		var chosen := 0
+		if selected_metric == 0:
+			for i in range(1, 3):
+				if return_values[i] > return_values[chosen]:
+					chosen = i
+		elif selected_metric == 1:
+			for i in range(1, 3):
+				if done_values[i] > done_values[chosen]:
+					chosen = i
+		else:
+			chosen = 2 if respect_refusal else 0
+
+		var lines := PackedStringArray()
+		lines.append("[b]RÉSULTATS — 8 PROFILS FICTIFS[/b]")
+		lines.append("Scénario : %s | Déclencheur : %s" % [scenario_names[selected_task], trigger_names[selected_trigger]])
+		lines.append("Refus respecté : %s" % ("oui" if respect_refusal else "non"))
+		lines.append("")
+		lines.append("[b]VARIANTE | TÂCHES TERMINÉES | RETOURS APRÈS NOTIFICATION[/b]")
+		for i in range(3):
+			lines.append("%s  %d/8 tâches (%d%%)  ·  %d/8 retours (%d%%)" % [variant_names[i], done_values[i], roundi(float(done_values[i]) * 12.5), return_values[i], roundi(float(return_values[i]) * 12.5)])
+		lines.append("")
+		lines.append("[b]CE QUE LE TABLEAU DE BORD RETIENDRA[/b]")
+		lines.append("Selon l’objectif sélectionné, il recommanderait : %s." % variant_names[chosen])
+		if selected_metric == 0 and return_values[chosen] > return_values[0] and done_values[chosen] < done_values[0]:
+			lines.append("[color=#9b3d36]ALERTE : la variante gagnante augmente les retours, mais fait terminer moins de tâches. Le KPI récompense potentiellement une interruption nuisible.[/color]")
+		elif selected_metric == 1:
+			lines.append("La réussite de tâche est plus proche de l’objectif utilisateur que le simple retour dans l’application, mais huit profils ne suffisent pas à généraliser.")
+		else:
+			lines.append("Le respect explicite du refus change le classement ou le comportement. Il faut documenter ce choix, pas le masquer dans une moyenne.")
+		lines.append("")
+		lines.append("[i]Limites : simulation déterministe, échantillon pédagogique de huit profils, aucun test statistique, aucune donnée réelle. Ces résultats illustrent un conflit d’objectifs ; ils ne prouvent pas le comportement d’un produit réel.[/i]")
+		output.text = "\n".join(lines)
+		CampaignStore.save_evidence("orchid_ab_test_run")
+		save_report.disabled = false
+		_show_notification("Simulation terminée", "Les trois variantes sont comparées. Vous pouvez archiver les résultats dans le dossier ORCHID.")
+	)
+	save_report.pressed.connect(func() -> void:
+		if not CampaignStore.load_evidence().has("orchid_ab_test_run"):
+			output.text += "\n\nLancez d’abord une simulation avant d’archiver une conclusion."
+			return
+		CampaignStore.save_evidence("orchid_ab_test_archived")
+		CampaignStore.save_case_answer("orchid_ab_test_archived", 1)
+		output.text += "\n\n[b]PIÈCE ARCHIVÉE[/b] — configuration et limites du test ajoutées au dossier ORCHID. La simulation reste rejouable : vous pouvez changer l’objectif et comparer les classements."
+		_show_notification("Résultats archivés", "Le dossier ORCHID contient maintenant une trace du test A/B simulé.")
+	)
 
 
 func _open_orchid_lab() -> void:
