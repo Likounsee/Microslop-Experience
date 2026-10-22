@@ -215,9 +215,9 @@ Chaque défi propose trois réponses. La réponse incorrecte fournit un indice s
 Le parcours est conçu pour demander lecture attentive, comparaison de traces et prise de décision. Il ne faut toutefois pas lui attribuer une durée fixe avant un test auprès d’un joueur : la durée dépend du rythme de lecture et du nombre de tentatives. **Validation technique restante :** exécuter Godot, vérifier l’analyse GDScript, les callbacks de réponses, la sauvegarde/reprise, les textes longs et l’affichage sur fenêtre réduite.
 
 
-## Sprint de travail interactif — 10 tâches
+## Sprint de travail interactif — 13 tâches
 
-Le menu de l’archive ORCHID contient désormais un sprint jouable distinct du parcours narratif de 41 séquences. Il propose dix tâches concrètes : enregistrer un document, gérer une recommandation sponsorisée, préparer une réunion, vérifier une fausse alerte urgente et rédiger un bilan utile.
+Le menu de l’archive ORCHID contient désormais un sprint jouable distinct du parcours narratif de 41 séquences. Il propose treize tâches concrètes : enregistrer un document, gérer une recommandation sponsorisée, préparer une réunion, vérifier une fausse alerte urgente et rédiger un bilan utile.
 
 - Chaque étape offre trois actions avec un retour propre à l’action et un impact chiffré sur le score de qualité.
 - Certaines décisions déclenchent réellement une notification de démonstration ; le centre de contrôle ORCHID déjà configuré décide si la promotion s’affiche, est bloquée ou reste dans l’historique.
