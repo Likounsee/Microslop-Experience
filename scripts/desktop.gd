@@ -3773,7 +3773,12 @@ func _open_orchid_recommendation_audit() -> void:
 	detail.custom_minimum_size = Vector2(0, 145)
 	content.add_child(detail)
 	var status := Label.new()
-	status.text = "Cas examinés : %d / 3" % int(CampaignStore.load_case_answer("recommendation_audit_count", 0))
+	var prior_evidence: Array = CampaignStore.load_evidence()
+	var prior_count := 0
+	for evidence_id in ["audit_wifi", "audit_exit", "audit_answer"]:
+		if prior_evidence.has(evidence_id):
+			prior_count += 1
+	status.text = "Cas examinés : %d / 3" % prior_count
 	content.add_child(status)
 	var cases := [
 		["Trouver le réglage Wi-Fi", "Le diagnostic réseau est relégué sous deux recommandations sponsorisées.", "Le classement récompense les sessions prolongées, même si la résolution est retardée.", "audit_wifi"],
@@ -3786,18 +3791,21 @@ func _open_orchid_recommendation_audit() -> void:
 		case_button.custom_minimum_size = Vector2(0, 38)
 		case_button.pressed.connect(func():
 			detail.text = "DEMANDE\n%s\n\nRÉSULTAT\n%s\n\nRÈGLE CACHÉE\n%s" % [item[0], item[1], item[2]]
-			CampaignStore.save_evidence(str(item[3]))
-			var count := int(CampaignStore.load_case_answer("recommendation_audit_count", 0))
-			if count < 3:
-				count += 1
-				CampaignStore.save_case_answer("recommendation_audit_count", count)
+			var evidence_id := str(item[3])
+			CampaignStore.save_evidence(evidence_id)
+			var evidence_now: Array = CampaignStore.load_evidence()
+			var count := 0
+			for required_id in ["audit_wifi", "audit_exit", "audit_answer"]:
+				if evidence_now.has(required_id):
+					count += 1
 			status.text = "Cas examinés : %d / 3 — pièce ajoutée" % count
 		)
 		content.add_child(case_button)
 	var conclusion := Button.new()
 	conclusion.text = "Comparer les trois règles"
 	conclusion.pressed.connect(func():
-		if int(CampaignStore.load_case_answer("recommendation_audit_count", 0)) >= 3:
+		var evidence_now: Array = CampaignStore.load_evidence()
+		if evidence_now.has("audit_wifi") and evidence_now.has("audit_exit") and evidence_now.has("audit_answer"):
 			detail.text = "CONCLUSION\n\nLes trois demandes différentes sont ramenées à la même métrique : provoquer une interaction supplémentaire. Résoudre, quitter et demander de l’aide deviennent des occasions de retenir la personne. La répétition suggère une règle commune de classement plutôt qu’une erreur isolée d’interface."
 			CampaignStore.save_evidence("audit_common_rule")
 			CampaignStore.save_case_answer("audit_common_rule", 1)
