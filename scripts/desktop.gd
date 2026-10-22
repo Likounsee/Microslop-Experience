@@ -3739,7 +3739,7 @@ func _open_ai() -> void:
 		return
 
 	var response := Label.new()
-	response.text = "Bonjour ! Je suis là pour vous aider à être plus productif.\n\nDiagnostic interne : le programme ORCHID classe vos pauses comme des « opportunités de réengagement ».\n\nOups. Ce message n’était pas destiné à l’utilisateur. Souhaitez-vous que je reformule cette information de façon plus positive ?"
+	response.text = "Bonjour ! Je suis là pour vous aider à être plus productif.\n\nJ’ai trouvé une référence à « ORCHID » dans les notes de mise à jour. Il s’agit probablement d’un nom de projet interne sans incidence sur votre expérience.\n\nJe peux vous expliquer le vocabulaire du rapport, ou vous proposer des recommandations plus agréables. Les deux options sont également personnalisées !"
 	response.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	response.add_theme_color_override("font_color", Color("263247"))
 	content.add_child(response)
@@ -3747,7 +3747,7 @@ func _open_ai() -> void:
 	var suggestion := Button.new()
 	suggestion.text = "Demander une explication"
 	suggestion.pressed.connect(func():
-		response.text = "ORCHID est un test interne visant à maximiser le temps passé devant l’écran. Les notifications sont déclenchées lorsque vous semblez sur le point de vous concentrer.\n\nJe ne peux pas vous donner plus de détails. Je viens de signaler cette conversation à… personne. Enfin, j’espère."
+		response.text = "D’accord. ORCHID est associé à un objectif de rétention : augmenter le temps passé dans les applications. Le rapport parle de « fenêtres d’opportunité » juste avant qu’un utilisateur termine une tâche.\n\nEn langage moins corporate : une notification peut être déclenchée précisément quand vous alliez vous concentrer. Ce n’est pas une erreur de calendrier.\n\nJe ne peux pas confirmer qui a validé ça. Et je n’ai signalé cette conversation à… personne. Enfin, j’espère."
 	)
 	content.add_child(suggestion)
 
