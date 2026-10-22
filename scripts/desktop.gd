@@ -56,6 +56,11 @@ func _layout_shell_for_viewport() -> void:
 	var viewport_size := get_viewport_rect().size
 	if is_instance_valid(_taskbar):
 		var taskbar_width := minf(820.0, maxf(280.0, viewport_size.x - 24.0))
+		# Keep the centered taskbar usable on compact windows instead of letting
+		# the search pill collide with pinned apps and the system tray.
+		var search_button := _taskbar.find_child("TaskbarSearchButton", true, false) as Button
+		if is_instance_valid(search_button):
+			search_button.visible = viewport_size.x >= 720.0
 		_taskbar.offset_left = -taskbar_width / 2.0
 		_taskbar.offset_right = taskbar_width / 2.0
 		_taskbar.offset_top = -70.0
@@ -177,8 +182,7 @@ func _add_desktop_icon(parent: VBoxContainer, glyph: String, caption: String, ca
 	content.add_child(caption_label)
 	button.pressed.connect(func():
 		for sibling in parent.get_children():
-			if sibling is Button:				sibling.add_theme_stylebox_override("normal", _flat_style(Color(0.1, 0.2, 0.38, 0.0), 7))
-		button.add_theme_stylebox_override("normal", _flat_style(Color(0.35, 0.55, 0.88, 0.36), 7))
+			if sibling is Button:				sibling.add_theme_stylebox_override("normal", _flat_style(Color(0.1, 0.2, 0.38, 0.0), 7))		button.add_theme_stylebox_override("normal", _flat_style(Color(0.35, 0.55, 0.88, 0.36), 7))
 	)
 	button.gui_input.connect(func(event: InputEvent):
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.double_click:
@@ -247,6 +251,7 @@ func _build_taskbar() -> void:
 	row.add_child(start_button)
 
 	var search_button := Button.new()
+	search_button.name = "TaskbarSearchButton"
 	search_button.text = "⌕  Rechercher"
 	search_button.tooltip_text = "Rechercher des applications et des paramètres"
 	search_button.custom_minimum_size = Vector2(156, 42)
@@ -357,8 +362,7 @@ func _build_calendar_panel() -> void:
 	heading.add_theme_font_size_override("font_size", 18)
 	heading.add_theme_color_override("font_color", Color("1d2a40"))
 	layout.add_child(heading)
-	var today := Label.new()
-	today.text = _get_french_long_date()
+	var today := Label.new()	today.text = _get_french_long_date()
 	today.add_theme_font_size_override("font_size", 25)
 	today.add_theme_color_override("font_color", Color("1d2a40"))
 	layout.add_child(today)
@@ -537,8 +541,7 @@ func _refresh_notification_center() -> void:
 		timestamp.add_theme_font_size_override("font_size", 10)
 		timestamp.add_theme_color_override("font_color", Color("697991"))		heading_row.add_child(timestamp)
 		content.add_child(heading_row)
-		var body := Label.new()
-		body.text = str(item.get("message", ""))
+		var body := Label.new()		body.text = str(item.get("message", ""))
 		body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		body.add_theme_color_override("font_color", Color("4b5b73"))
 		content.add_child(body)
@@ -717,8 +720,7 @@ func _toggle_quick_settings() -> void:
 	var should_open := not _quick_settings_panel.visible	if should_open:
 		_start_menu.visible = false
 		_start_open = false
-		_calendar_panel.visible = false
-	_animate_flyout(_quick_settings_panel, should_open, true)
+		_calendar_panel.visible = false	_animate_flyout(_quick_settings_panel, should_open, true)
 
 func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, callback: Callable, app_id: String) -> void:
 	var button := Button.new()
@@ -897,7 +899,6 @@ func _build_start_menu() -> void:
 	_add_pinned_app(pinned, "✧", "Microslop AI", _open_ai)
 	_add_pinned_app(pinned, "↻", "Mise à jour", _trigger_update)
 	_add_pinned_app(pinned, "▧", "Corbeille", _open_recycle_bin)
-
 	var all_apps_scroll := ScrollContainer.new()
 	all_apps_scroll.name = "AllAppsScroll"
 	all_apps_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -1077,8 +1078,7 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 			icon_color = Color("7868d8")
 			icon_glyph = "✧"
 		"Mise à jour":
-			icon_color = Color("2b9b73")
-			icon_glyph = "↻"
+			icon_color = Color("2b9b73")			icon_glyph = "↻"
 		"Corbeille":
 			icon_color = Color("5a9fd8")
 			icon_glyph = "▤"
@@ -1257,8 +1257,7 @@ func _animate_flyout(panel: Control, opening: bool, from_bottom: bool) -> void:
 		if panel == _start_menu:
 			_start_menu_tween = tween
 		elif panel == _quick_settings_panel:
-			_quick_settings_tween = tween
-		else:
+			_quick_settings_tween = tween		else:
 			_calendar_tween = tween
 
 func _open_window(title: String, message: String, window_size := Vector2(520, 300)) -> Control:
@@ -1437,8 +1436,7 @@ func _open_files() -> void:
 	main_row.add_child(right_pane)
 	quick_title = Label.new()
 	quick_title.name = "ExplorerHeading"
-	quick_title.text = "Accès rapide"
-	quick_title.add_theme_font_size_override("font_size", 20)
+	quick_title.text = "Accès rapide"	quick_title.add_theme_font_size_override("font_size", 20)
 	quick_title.add_theme_color_override("font_color", Color("182235"))
 	right_pane.add_child(quick_title)
 	var quick_grid := GridContainer.new()
@@ -1617,8 +1615,7 @@ func _open_ai() -> void:
 	var content := _get_window_content(app)
 	if content == null:
 		return
-	var response := Label.new()
-	response.text = "Vous vouliez ouvrir le Bloc-notes ? Je peux plutôt vous proposer un abonnement."
+	var response := Label.new()	response.text = "Vous vouliez ouvrir le Bloc-notes ? Je peux plutôt vous proposer un abonnement."
 	response.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	response.add_theme_color_override("font_color", Color("263247"))
 	content.add_child(response)
@@ -1797,8 +1794,7 @@ func _add_settings_section(parent: VBoxContainer, heading_text: String, subtitle
 	parent.add_child(separator)
 
 func _get_window_content(app: Control) -> VBoxContainer:
-	if app.get_child_count() == 0:
-		return null
+	if app.get_child_count() == 0:		return null
 	var layout := app.get_child(0) as VBoxContainer
 	if layout == null or layout.get_child_count() < 2:
 		return null
@@ -1977,8 +1973,7 @@ func _show_desktop_context_menu(pointer: Vector2) -> void:
 			if is_instance_valid(_desktop_icons):
 				_desktop_icons.visible = not _desktop_icons.visible
 		)
-		_add_context_action(items, "Trier par  ›", func():
-			_show_notification("Organisation", "Le tri sera disponible avec la gestion réelle des fichiers.")
+		_add_context_action(items, "Trier par  ›", func():			_show_notification("Organisation", "Le tri sera disponible avec la gestion réelle des fichiers.")
 		)
 		_add_context_action(items, "Actualiser", func():
 			_show_notification("Bureau actualisé", "Le bureau est déjà à jour. Aucun changement nécessaire.")
