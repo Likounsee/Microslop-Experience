@@ -3778,6 +3778,117 @@ func _open_orchid_archive() -> void:
 	field_investigation.pressed.connect(_open_orchid_field_investigation)
 	content.add_child(field_investigation)
 
+	var report_studio := Button.new()
+	report_studio.text = "Ouvrir le studio de rapport — rédiger, assembler et sauvegarder"
+	report_studio.pressed.connect(_open_orchid_report_studio)
+	content.add_child(report_studio)
+
+
+## A playable report-writing tool: the player assembles claims, limits and actions.
+## The draft survives closing the window and restarting the game.
+func _open_orchid_report_studio() -> void:
+	var app := _open_window("Studio de rapport — ORCHID", "OUTIL DE RÉDACTION · BROUILLON LOCAL", Vector2(820, 700))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	var intro := Label.new()
+	intro.text = "Le comité demande un rapport exploitable, pas une accusation spectaculaire. Choisissez les sections à inclure, assemblez un brouillon, puis modifiez-le librement. Les cases et le texte sont conservés localement."
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	intro.custom_minimum_size = Vector2(0, 58)
+	content.add_child(intro)
+
+	var section_specs := [
+		{"id":"report_include_timeline","label":"Chronologie vérifiable","text":"CHRONOLOGIE\nLe paquet a été installé à 21:47, activé à 21:49, puis une notification a été observée à 08:11 le lendemain. Cette séquence établit l’ordre des événements, pas l’identité de la personne qui a autorisé la diffusion."},
+		{"id":"report_include_channel","label":"Écart de canal et approbation","text":"DIFFUSION\nLe manifeste indique DEV_RING_INTERNAL alors que la cible du journal est STABLE / utilisateur final. Aucune référence d’approbation n’est présente dans les éléments consultés. L’écart doit être expliqué avant de conclure à une diffusion autorisée ou volontaire."},
+		{"id":"report_include_metrics","label":"Limites des métriques","text":"MESURE D’ENGAGEMENT\nLe tableau de bord compte les retours après notification, sans distinguer un retour volontaire d’un retour nécessaire pour fermer une fenêtre. Une hausse de cette mesure ne suffit donc pas à démontrer une hausse de satisfaction ou d’utilité."},
+		{"id":"report_include_witness","label":"Témoignages anonymisés","text":"TÉMOIGNAGES\nPlusieurs signalements décrivent des notifications similaires après la mise à jour. Les témoignages sont rapportés sans nom personnel ; ils doivent être rapprochés des journaux et des versions exactes des réponses du support."},
+		{"id":"report_include_uncertainty","label":"Inconnues et limites","text":"LIMITES\nLes éléments disponibles ne prouvent pas que dix-huit fichiers personnels ont été lus, ne permettent pas d’identifier un responsable individuel et n’établissent pas à eux seuls l’intention initiale. Ces points restent à vérifier."},
+		{"id":"report_include_action","label":"Mesures demandées","text":"MESURES PROPOSÉES\nPréserver les journaux originaux, retrouver le ticket d’approbation, comparer les versions du modèle de support et suspendre temporairement le canal concerné jusqu’à vérification indépendante."}
+	]
+	var toggles: Array[CheckButton] = []
+	for spec in section_specs:
+		var toggle := CheckButton.new()
+		toggle.text = str(spec["label"])
+		var saved := CampaignStore.load_case_answer(str(spec["id"]))
+		toggle.button_pressed = saved != 0
+		toggle.toggled.connect(func(enabled: bool, section_id: String = str(spec["id"])):
+			CampaignStore.save_case_answer(section_id, 1 if enabled else 0)
+		)
+		content.add_child(toggle)
+		toggles.append(toggle)
+
+	var actions := HBoxContainer.new()
+	actions.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var assemble := Button.new()
+	assemble.text = "Assembler le rapport"
+	assemble.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	actions.add_child(assemble)
+	var save := Button.new()
+	save.text = "Sauvegarder le brouillon"
+	save.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	actions.add_child(save)
+	content.add_child(actions)
+
+	var editor := TextEdit.new()
+	editor.name = "OrchidReportDraftEditor"
+	editor.placeholder_text = "Le rapport assemblé apparaîtra ici. Vous pouvez ensuite réécrire librement le texte…"
+	editor.custom_minimum_size = Vector2(0, 245)
+	editor.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	editor.text = CampaignStore.load_report_draft()
+	content.add_child(editor)
+
+	var status := Label.new()
+	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	status.custom_minimum_size = Vector2(0, 42)
+	content.add_child(status)
+	assemble.pressed.connect(func():
+		var paragraphs: Array[String] = ["ORCHID — RAPPORT DE REVUE\nObjet : anomalies de diffusion et interruptions après mise à jour\nStatut : brouillon interne"]
+		var selected_count := 0
+		for i in range(section_specs.size()):
+			if toggles[i].button_pressed:
+				paragraphs.append(str(section_specs[i]["text"]))
+				selected_count += 1
+		if selected_count == 0:
+			paragraphs.append("Aucun élément n’a été sélectionné. Choisissez au moins une section avant de transmettre une conclusion.")
+		paragraphs.append("CONCLUSION PROVISOIRE\nLes traces justifient une revue documentée. Les causes exactes et les responsabilités individuelles ne sont pas établies par ce seul dossier.")
+		editor.text = "\n\n".join(paragraphs)
+		status.text = "%d section(s) assemblée(s). Relisez le texte : vous pouvez le modifier avant de sauvegarder." % selected_count
+	)
+	save.pressed.connect(func():
+		if CampaignStore.save_report_draft(editor.text):
+			status.text = "Brouillon sauvegardé localement (%d caractères). Vous pourrez le retrouver en rouvrant le studio." % editor.text.length()
+			_show_notification("Brouillon ORCHID enregistré", "Votre rapport a été sauvegardé dans la progression locale.")
+		else:
+			status.text = "Échec de sauvegarde. Le texte reste dans cette fenêtre : copiez-le avant de fermer."
+	)
+	var review := Button.new()
+	review.text = "Soumettre le brouillon au comité fictif"
+	review.pressed.connect(func():
+		var word_count := editor.text.strip_edges().split(" ", false).size()
+		var has_limits := editor.text.contains("LIMITES") or editor.text.contains("ne prouvent pas") or editor.text.contains("pas établis")
+		var has_action := editor.text.contains("MESURES") or editor.text.contains("demande") or editor.text.contains("vérifier")
+		if word_count < 55:
+			status.text = "Le comité refuse le brouillon : il est trop court pour distinguer faits, limites et action demandée. Ajoutez du contenu, puis réessayez."
+		elif not has_limits:
+			status.text = "Le comité demande une révision : les limites des preuves ne sont pas explicites. Ajoutez une section sur ce qui reste inconnu."
+		elif not has_action:
+			status.text = "Le comité demande une révision : le rapport décrit les faits mais ne propose aucune action vérifiable."
+		else:
+			CampaignStore.save_case_answer("report_studio_reviewed", 1)
+			CampaignStore.save_evidence("report_studio_reviewed")
+			status.text = "BROUILLON ACCEPTÉ POUR REVUE — le comité ouvre une demande de suivi. Ce n’est pas une validation définitive : la référence d’approbation et les journaux originaux restent à obtenir."
+			_show_notification("Demande de suivi créée", "Le comité fictif a accepté le rapport pour revue, sans déclarer l’incident résolu.")
+	)
+	content.add_child(review)
+	var reset := Button.new()
+	reset.text = "Insérer le squelette de rapport"
+	reset.pressed.connect(func():
+		editor.text = "ORCHID — RAPPORT DE REVUE\nObjet :\n\nFAITS OBSERVÉS\n\nLIMITES DES PREUVES\n\nQUESTIONS OUVERTES\n\nMESURES DEMANDÉES\n"
+		status.text = "Squelette inséré. Complétez chaque partie avant de soumettre."
+	)
+	content.add_child(reset)
+
+
 
 ## Narrative-first cinematic sequence: story beats, character moments and animated transitions.
 ## This is a story scene, not another evidence quiz. Choices are remembered locally.
