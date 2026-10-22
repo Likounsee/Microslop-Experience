@@ -3835,7 +3835,9 @@ func _open_orchid_crisis_tabletop() -> void:
 		"stage": clampi(CampaignStore.load_case_answer("orchid_crisis_stage"), 0, 12),
 		"score": CampaignStore.load_case_answer("orchid_crisis_score")
 	}
-	if int(state["score"]) < -30 or int(state["score"]) > 30:
+	if int(state["stage"]) == 0 and CampaignStore.load_case_answer("orchid_crisis_choice_00") < 0:
+		state["score"] = 0
+	elif int(state["score"]) < -24 or int(state["score"]) > 24:
 		state["score"] = 0
 	_render_orchid_crisis_tabletop(app, state)
 
