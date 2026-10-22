@@ -970,9 +970,15 @@ func _build_notification_center() -> void:
 
 	empty.name = "EmptyNotifications"
 
-	empty.text = "Vous êtes à jour.\nAucune nouvelle notification."
+	empty.text = "✓\nVous êtes à jour.\nAucune nouvelle notification."
+
+	empty.custom_minimum_size.y = 180
 
 	empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+	empty.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
+	empty.add_theme_font_size_override("font_size", 13)
 
 	empty.add_theme_color_override("font_color", Color("596780"))
 
@@ -1020,9 +1026,15 @@ func _clear_notification_history() -> void:
 
 	empty.name = "EmptyNotifications"
 
-	empty.text = "Vous êtes à jour.\nAucune nouvelle notification."
+	empty.text = "✓\nVous êtes à jour.\nAucune nouvelle notification."
+
+	empty.custom_minimum_size.y = 180
 
 	empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+	empty.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
+	empty.add_theme_font_size_override("font_size", 13)
 
 	empty.add_theme_color_override("font_color", Color("596780"))
 
@@ -1050,9 +1062,15 @@ func _refresh_notification_center() -> void:
 
 		empty.name = "EmptyNotifications"
 
-		empty.text = "Vous êtes à jour.\nAucune nouvelle notification."
+		empty.text = "✓\nVous êtes à jour.\nAucune nouvelle notification."
+
+		empty.custom_minimum_size.y = 180
 
 		empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+		empty.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
+		empty.add_theme_font_size_override("font_size", 13)
 
 		empty.add_theme_color_override("font_color", Color("596780"))
 
