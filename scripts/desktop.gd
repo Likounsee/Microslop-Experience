@@ -3641,78 +3641,72 @@ func _set_explorer_location(path: String, address: LineEdit, heading: Label, sta
 
 func _open_browser() -> void:
 
-	var app := _open_window("Microslop Browser", "Votre navigateur nouvelle génération.", Vector2(680, 400))
+	if _mission_step == 4:
+		_advance_mission("Les résultats confirment que le projet ORCHID masque volontairement les interruptions.")
 
+	var app := _open_window("Microslop Browser", "Votre navigateur nouvelle génération.", Vector2(680, 420))
 	var content := _get_window_content(app)
-
 	if content == null:
-
 		return
 
 	var address := LineEdit.new()
-
 	address.placeholder_text = "Rechercher sur le Web ou saisir une adresse"
-
-	address.text = "comment travailler sans être interrompu"
-
+	address.text = "projet ORCHID Microslop interruptions"
 	content.add_child(address)
 
 	var results := Label.new()
-
-	results.text = "Résultat sponsorisé : Achetez Microslop Premium pour réduire les interruptions de 3 %."
-
+	results.text = "Résultat sponsorisé : Microslop Premium réduit les interruptions visibles de 3 %.\n\nUn résultat a été retiré pour non-conformité aux recommandations de productivité."
 	results.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-
 	results.add_theme_color_override("font_color", Color("263247"))
-
 	content.add_child(results)
 
 	var search := Button.new()
-
 	search.text = "Rechercher"
-
 	search.pressed.connect(func():
-
-		results.text = "Résultats pour : « %s »\\n\\n1. Microslop Premium — SPONSORISÉ\\n2. Microslop AI — recommandé\\n3. Résultat utile masqué par les annonces." % address.text
-
+		var query := address.text.strip_edges()
+		if query.to_lower().contains("orchid") or query.to_lower().contains("interruption"):
+			results.text = "Résultats pour : « %s »\n\n1. [ARCHIVE INTERNE] ORCHID : optimiser le temps d’attention\n2. Microslop Premium — SPONSORISÉ\n3. Résultat supprimé par le programme de qualité\n\nExtrait de l’archive : « Les interruptions augmentent l’engagement. Ne pas informer l’utilisateur. »" % query
+		else:
+			results.text = "Résultats pour : « %s »\n\n1. Microslop Premium — SPONSORISÉ\n2. Microslop AI — recommandé\n3. Le résultat utile est momentanément indisponible." % query
 	)
-
 	content.add_child(search)
+
+
 func _open_recycle_bin() -> void:
 
 	_open_window("Corbeille", "La corbeille est vide.\n\nElle a tout de même besoin d'une mise à jour de 4,7 Go.", Vector2(440, 240))
 
 func _open_ai() -> void:
 
-	var app := _open_window("Microslop AI", "Bonjour ! J'ai analysé votre demande et préparé 46 suggestions.", Vector2(500, 330))
+	if _mission_step == 3:
+		_advance_mission("Microslop AI a révélé par erreur le nom du programme interne ORCHID.")
 
+	var app := _open_window("Microslop AI", "Assistant personnel — toujours à votre écoute.", Vector2(540, 390))
 	var content := _get_window_content(app)
-
 	if content == null:
-
 		return
 
 	var response := Label.new()
-	response.text = "Vous vouliez ouvrir le Bloc-notes ? Je peux plutôt vous proposer un abonnement."
-
+	response.text = "Bonjour ! Je suis là pour vous aider à être plus productif.\n\nDiagnostic interne : le programme ORCHID classe vos pauses comme des « opportunités de réengagement ».\n\nOups. Ce message n’était pas destiné à l’utilisateur. Souhaitez-vous que je reformule cette information de façon plus positive ?"
 	response.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-
 	response.add_theme_color_override("font_color", Color("263247"))
 	content.add_child(response)
 
 	var suggestion := Button.new()
-
-	suggestion.text = "Générer une autre suggestion"
-
+	suggestion.text = "Demander une explication"
 	suggestion.pressed.connect(func():
-
-		var suggestions := ["Avez-vous essayé de redémarrer votre redémarrage ?", "Votre productivité serait 2 % meilleure avec Premium.", "J'ai trouvé 18 solutions. Aucune ne répond à la question.", "Souhaitez-vous résumer ce bouton avec l'IA ?"]
-
-		response.text = suggestions[randi() % suggestions.size()]
-
+		response.text = "ORCHID est un test interne visant à maximiser le temps passé devant l’écran. Les notifications sont déclenchées lorsque vous semblez sur le point de vous concentrer.\n\nJe ne peux pas vous donner plus de détails. Je viens de signaler cette conversation à… personne. Enfin, j’espère."
 	)
-
 	content.add_child(suggestion)
+
+	var distract := Button.new()
+	distract.text = "Accepter les recommandations"
+	distract.pressed.connect(func():
+		response.text = "Excellent choix ! J’ai masqué le dossier ORCHID et activé 12 recommandations. Votre tranquillité est notre priorité numéro 47."
+		_show_notification("Microslop AI", "Merci pour votre confiance. Le dossier ORCHID est désormais plus difficile à retrouver.")
+	)
+	content.add_child(distract)
+
 
 func _open_search() -> void:
 
@@ -3721,32 +3715,29 @@ func _open_search() -> void:
 func _trigger_update() -> void:
 
 	if _mission_step == 2:
+		_advance_mission("La mise à jour révèle le nom ORCHID dans ses notes internes.")
 
-		_advance_mission("Mise à jour consultée. Elle reste à 99 %, évidemment.")
-
-	_open_window("Microslop Update", "Une mise à jour importante est disponible.\n\nMicroslop Experience Update 1.0.99 (préversion)\nProgression : 99 %\n\nNe fermez pas votre ordinateur. Cette opération peut prendre quelques instants…", Vector2(520, 280))
-
+	_open_window("Microslop Update", "Mise à jour obligatoire — version 1.0.99 (préversion)\n\nProgression : 99 %\n\nNotes visibles : stabilité améliorée, recommandations personnalisées.\nNote interne : « ORCHID — optimiser les interruptions pour maintenir l’engagement. Ne pas afficher dans le résumé public. »\n\nNe fermez pas votre ordinateur. Cette opération peut prendre quelques instants…", Vector2(560, 350))
 	var app := _window_layer.get_child(_window_layer.get_child_count() - 1) as Control
-
 	var content := _get_window_content(app)
-
 	if content != null:
+		var inspect := Button.new()
+		inspect.text = "Examiner les notes internes"
+		inspect.pressed.connect(func():
+			_show_notification("Note interne découverte", "ORCHID : maximiser le temps d’attention. Déclencher des interruptions lorsque l’utilisateur se concentre. Ne pas documenter cette fonctionnalité.")
+		)
+		content.add_child(inspect)
 
 		var later := Button.new()
-
 		later.text = "Me rappeler dans 5 minutes"
-
 		later.pressed.connect(func():
-
 			_show_notification("Rappel programmé", "Nous vous rappellerons quand vous serez occupé.")
-
 			app.queue_free()
-
 		)
-
 		content.add_child(later)
 
 	_show_notification("Mise à jour en attente", "Redémarrage recommandé. Nous choisirons le moment.")
+
 
 func _open_settings() -> void:
 
@@ -4154,7 +4145,7 @@ func _advance_mission(reason: String) -> void:
 
 	var previous_step := _mission_step
 
-	_mission_step = mini(_mission_step + 1, 3)
+	_mission_step = mini(_mission_step + 1, 5)
 
 	_save_progress()
 
@@ -4175,22 +4166,18 @@ func _save_progress() -> void:
 func _update_mission() -> void:
 
 	if not is_instance_valid(_mission_label):
-
 		return
 
 	var missions := [
-
-		"MISSION 01\nOuvrir le menu Démarrer.\n\nRécompense : une recommandation sponsorisée.",
-
-		"MISSION 02\nOuvrir l'explorateur de fichiers.\n\nLe système respecte votre vie privée (promis).",
-
-		"MISSION 03\nConsulter les mises à jour.\n\nProgression estimée : presque terminée.",
-
-		"MISSION TERMINÉE\nVous avez utilisé votre ordinateur.\n\nUne enquête de satisfaction est disponible."
-
+		"MISSION 01 · PREMIER CONTACT\nOuvrir le menu Démarrer.\n\nMicroslop vous souhaite la bienvenue. Il a déjà choisi vos applications préférées.",
+		"MISSION 02 · VOS FICHIERS\nOuvrir l’explorateur de fichiers.\n\nLe dossier « Documents » semble vide. Une notification prétend pourtant avoir analysé 18 fichiers.",
+		"MISSION 03 · MISE À JOUR\nConsulter Microslop Update.\n\nLa mise à jour reste bloquée à 99 %. Dans les notes, un nom étrange apparaît : ORCHID.",
+		"MISSION 04 · L’ASSISTANT\nInterroger Microslop AI.\n\nL’assistant connaît ORCHID, mais prétend ne pas comprendre votre question.",
+		"MISSION 05 · LA PREUVE\nRechercher « ORCHID » dans le navigateur.\n\nLes résultats sponsorisés semblent cacher une archive interne.",
+		"CHAPITRE 1 TERMINÉ\nVous avez trouvé une preuve : les interruptions sont intentionnelles.\n\nMicroslop prépare déjà une enquête de satisfaction sur votre découverte."
 	]
-
 	_mission_label.text = missions[mini(_mission_step, missions.size() - 1)]
+
 
 func _dismiss_flyouts_on_outside_click(pointer_position: Vector2) -> void:
 
