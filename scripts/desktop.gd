@@ -136,9 +136,11 @@ func _layout_shell_for_viewport() -> void:
 
 		if is_instance_valid(_pinned_grid):
 
-			_pinned_grid.columns = 3 if menu_width >= 560.0 else 2
+			# Windows 11 uses a dense pinned-app grid on full-size Start menus.
+			# Keep a two-column layout only when the available width is compact.
+			_pinned_grid.columns = 6 if menu_width >= 560.0 else 2
 
-			var button_width := maxf(100.0, (menu_width - 64.0 - float(_pinned_grid.columns - 1) * 10.0) / float(_pinned_grid.columns))
+			var button_width := maxf(76.0, (menu_width - 64.0 - float(_pinned_grid.columns - 1) * 8.0) / float(_pinned_grid.columns)
 
 			for pinned_button in _pinned_grid.get_children():
 
@@ -2084,11 +2086,11 @@ func _build_start_menu() -> void:
 
 	_pinned_grid = pinned
 
-	pinned.columns = 3
+	pinned.columns = 6
 
 	pinned.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-	pinned.add_theme_constant_override("h_separation", 10)
+	pinned.add_theme_constant_override("h_separation", 8)
 
 	pinned.add_theme_constant_override("v_separation", 8)
 
