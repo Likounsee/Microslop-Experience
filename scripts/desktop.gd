@@ -31,6 +31,8 @@ var _notification_tween: Tween
 var _wallpaper: TextureRect
 var _desktop_icons: VBoxContainer
 var _desktop_context_menu: PanelContainer
+var _desktop_icon_context_menu: PanelContainer
+var _context_desktop_icon: Button
 var _quick_link_menu: PanelContainer
 var _task_view_panel: PanelContainer
 var _taskbar_preview: PanelContainer
@@ -299,6 +301,8 @@ func _add_desktop_icon(parent: VBoxContainer, glyph: String, caption: String, ca
 	button.custom_minimum_size = Vector2(104, 92)
 
 	button.tooltip_text = "%s — double-cliquez pour ouvrir" % caption
+	button.set_meta("desktop_caption", caption)
+	button.set_meta("desktop_open_callback", callback)
 
 	button.add_theme_color_override("font_color", Color.WHITE)
 
@@ -3978,6 +3982,9 @@ func _input(event: InputEvent) -> void:
 		if is_instance_valid(_desktop_context_menu) and _desktop_context_menu.visible:
 			if not _desktop_context_menu.get_global_rect().has_point(event.position):
 				_desktop_context_menu.hide()
+		if is_instance_valid(_desktop_icon_context_menu) and _desktop_icon_context_menu.visible:
+			if not _desktop_icon_context_menu.get_global_rect().has_point(event.position):
+				_desktop_icon_context_menu.hide()
 		# Clicking empty desktop space clears the icon selection.
 		if is_instance_valid(_desktop_icons) and not _is_pointer_over_desktop_icon(event.position):
 			_clear_desktop_icon_selection()
@@ -3986,6 +3993,12 @@ func _input(event: InputEvent) -> void:
 
 		if _is_pointer_over_window(event.position):
 
+			return
+
+		var clicked_desktop_icon := _get_desktop_icon_at(event.position)
+		if is_instance_valid(clicked_desktop_icon):
+			_show_desktop_icon_context_menu(event.position, clicked_desktop_icon)
+			get_viewport().set_input_as_handled()
 			return
 
 		if _start_menu.visible or _quick_settings_panel.visible:
@@ -4052,6 +4065,12 @@ func _input(event: InputEvent) -> void:
 
 				_desktop_context_menu = null
 
+				closed_flyout = true
+
+			if is_instance_valid(_desktop_icon_context_menu) and is_instance_valid(_desktop_icon_context_menu.get_parent()):
+				_desktop_icon_context_menu.queue_free()
+				_desktop_icon_context_menu = null
+				_context_desktop_icon = null
 				closed_flyout = true
 
 			if closed_flyout:
@@ -4195,6 +4214,77 @@ func _is_pointer_over_window(pointer: Vector2) -> bool:
 			return true
 
 	return false
+
+func _get_desktop_icon_at(pointer: Vector2) -> Button:
+	if not is_instance_valid(_desktop_icons):
+		return null
+	for child in _desktop_icons.get_children():
+		if child is Button and child.visible and child.get_global_rect().has_point(pointer):
+			return child
+	return null
+
+func _show_desktop_icon_context_menu(pointer: Vector2, icon_button: Button) -> void:
+	if not is_instance_valid(icon_button):
+		return
+	_context_desktop_icon = icon_button
+	_clear_desktop_icon_selection()
+	icon_button.add_theme_stylebox_override("normal", _flat_style(Color(0.35, 0.55, 0.88, 0.36), 7))
+	if is_instance_valid(_desktop_context_menu):
+		_desktop_context_menu.hide()
+	if not is_instance_valid(_desktop_icon_context_menu):
+		_desktop_icon_context_menu = PanelContainer.new()
+		_desktop_icon_context_menu.name = "DesktopIconContextMenu"
+		_desktop_icon_context_menu.z_index = 101
+		var menu_style := _flat_style(Color(0.96, 0.97, 0.99, 0.98), 10)
+		menu_style.shadow_color = Color(0.02, 0.04, 0.10, 0.30)
+		menu_style.shadow_size = 18
+		menu_style.shadow_offset = Vector2(0, 4)
+		menu_style.set_border_width_all(1)
+		menu_style.border_color = Color(1, 1, 1, 0.78)
+		_desktop_icon_context_menu.add_theme_stylebox_override("panel", menu_style)
+		var margin := MarginContainer.new()
+		for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+			margin.add_theme_constant_override(side, 5)
+		_desktop_icon_context_menu.add_child(margin)
+		var items := VBoxContainer.new()
+		items.add_theme_constant_override("separation", 2)
+		margin.add_child(items)
+		_add_context_action(items, "Ouvrir", func():
+			if is_instance_valid(_context_desktop_icon):
+				var open_callback: Callable = _context_desktop_icon.get_meta("desktop_open_callback", Callable())
+				if open_callback.is_valid():
+					open_callback.call()
+		)
+		var separator := HSeparator.new()
+		items.add_child(separator)
+		_add_context_action(items, "Épingler à la barre des tâches", func():
+			if is_instance_valid(_context_desktop_icon):
+				_show_notification("Barre des tâches", "%s : l’épinglage sera disponible dans la personnalisation du shell." % str(_context_desktop_icon.get_meta("desktop_caption", "Application")))
+		)
+		_add_context_action(items, "Renommer", func():
+			if is_instance_valid(_context_desktop_icon):
+				_show_notification("Renommer", "Le renommage des raccourcis sera disponible avec la gestion des fichiers.")
+		)
+		_add_context_action(items, "Propriétés", func():
+			if is_instance_valid(_context_desktop_icon):
+				_show_notification("Propriétés", "%s\nRaccourci du bureau Microslop Experience." % str(_context_desktop_icon.get_meta("desktop_caption", "Application")))
+		)
+		add_child(_desktop_icon_context_menu)
+	_desktop_icon_context_menu.visible = true
+	var viewport_size := get_viewport_rect().size
+	var menu_size := _desktop_icon_context_menu.get_combined_minimum_size()
+	_desktop_icon_context_menu.position = Vector2(
+		clampf(pointer.x, 8.0, maxf(8.0, viewport_size.x - menu_size.x - 8.0)),
+		clampf(pointer.y, 8.0, maxf(8.0, viewport_size.y - menu_size.y - 8.0))
+	)
+	_desktop_icon_context_menu.pivot_offset = menu_size / 2.0
+	_desktop_icon_context_menu.scale = Vector2(0.97, 0.97)
+	_desktop_icon_context_menu.modulate.a = 0.0
+	var menu_tween := create_tween()
+	menu_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	menu_tween.set_parallel(true)
+	menu_tween.tween_property(_desktop_icon_context_menu, "scale", Vector2.ONE, 0.15)
+	menu_tween.tween_property(_desktop_icon_context_menu, "modulate:a", 1.0, 0.13)
 
 func _is_pointer_over_desktop_icon(pointer: Vector2) -> bool:
 	if not is_instance_valid(_desktop_icons):
