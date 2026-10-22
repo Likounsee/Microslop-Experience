@@ -134,3 +134,8 @@ The ORCHID archive now includes a separate thirteen-task interactive work sprint
 ### ORCHID incident-response tabletop
 
 A twelve-decision incident exercise is available from the ORCHID archive, spanning containment, evidence, hypothesis testing, communication, remediation, and committee handoff. Each decision has three options, consequences, persistent progress, and a score-dependent ending. Containment choices can change the saved in-game notification policy, so this activity interacts with the existing notification center. The scenario is fictional and is not a real security audit.
+
+
+### Dossier transversal ORCHID
+
+Nouveau parcours jouable en dix étapes, du triage du signalement à la passation documentée. Il sauvegarde les décisions, produit des preuves, relie le confinement à la politique de notifications et propose un bilan rejouable. Les scénarios sont fictifs. Voir [la documentation de campagne](docs/ORCHID_CAMPAIGN.md).
