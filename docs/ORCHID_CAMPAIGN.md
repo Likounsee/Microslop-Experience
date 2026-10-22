@@ -15,6 +15,17 @@ Le jeu n'accède jamais aux vrais fichiers ou paramètres de l'ordinateur. Tous 
 - **Équipe Expérience** : présence indirecte dans les notes internes. Les documents utilisent des formulations impersonnelles pour que personne ne semble responsable.
 - **Microslop Update / le navigateur** : voix institutionnelle. Les mises à jour sont obligatoires « pour votre confort » et les résultats sponsorisés prennent la place des informations utiles.
 
+## Nouvelle séquence jouable — arrivée d’ORCHID
+
+La mise à jour ne doit pas apparaître comme un programme secret tombé du ciel. Le joueur peut ouvrir l’historique de déploiement depuis la fenêtre Microslop Update et parcourir quatre étapes interactives. La séquence est jouable dans le chapitre 1 ; elle ne touche pas aux vrais fichiers ni aux paramètres du PC.
+
+1. **Le canal** — le paquet est signé par Microslop, mais le journal indique `DEV_RING_INTERNAL` alors que l’appareil devrait utiliser `STABLE`. La signature valide n’est pas une preuve d’autorisation de diffusion.
+2. **L’installation** — le paquet `experience-orchid-preview 0.9.17-dev` a été ciblé sur un appareil utilisateur malgré une règle réservée au groupe interne. Le journal d’approbation manque ; l’erreur de configuration est plausible, mais pas prouvée.
+3. **Le lendemain** — de nouveaux composants apparaissent et une notification affirme que 18 fichiers ont été analysés, alors que Documents semble vide. Le joueur choisit quelle trace vérifier.
+4. **La rétention du composant** — une note interne déconseille de désinstaller automatiquement le build avant d’avoir observé les métriques de retour. Cela rend la suite plus suspecte, sans prouver qui a décidé quoi.
+
+Les trois réponses du joueur sont enregistrées via les sauvegardes de réponses d’enquête déjà utilisées par la campagne. La conclusion assemble les choix et insiste sur la distinction entre l’erreur initiale de diffusion et la décision ultérieure de conserver ORCHID. La scène est implémentée dans `scripts/desktop.gd` ; sa durée et son fonctionnement en jeu doivent encore être vérifiés avec Godot.
+
 ## Structure de campagne
 
 ### Mission 1 — Premier contact
