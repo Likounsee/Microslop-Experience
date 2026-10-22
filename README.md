@@ -119,3 +119,8 @@ L’archive ORCHID donne accès à un tableau de synthèse persistant qui regrou
 ### Enquête de terrain jouable — 12 défis à validation
 
 L’archive ORCHID donne accès à une nouvelle enquête structurée en trois actes et douze défis : reconstituer la chronologie, tester les mécanismes de rétention, puis évaluer la chaîne de conformité et rédiger une conclusion prudente. Chaque défi présente des traces, une question à résoudre et trois réponses. Une réponse incorrecte affiche un indice et permet de réessayer ; seule la bonne réponse valide la pièce et débloque l’étape suivante. Les validations sont sauvegardées et le parcours reprend au premier défi non résolu. Le tableau de synthèse inclut ces pièces. Cela ajoute des décisions réelles au-delà de la lecture des fenêtres, mais la durée réelle dépend du temps de réflexion du joueur. **Non testé en exécution Godot dans cette passe.**
+
+
+### Interactive ORCHID notification controls
+
+The ORCHID archive and campaign dashboard now expose a notification control center. The player can choose standard delivery, block promotional toasts, or keep promotional alerts in the notification history without interrupting the desktop. System-status alerts remain visible in all modes. The controls affect actual in-game toast delivery, save the selected policy in the campaign save, and provide promotional/system test buttons plus evidence checks. This is an in-game simulation only; it does not change host OS settings.
