@@ -83,6 +83,34 @@ func load_evidence() -> Array:
 	return raw if raw is Array else []
 
 
+## Saves the latest answer for a named ORCHID evidence puzzle.
+func save_case_answer(case_id: String, answer: int) -> bool:
+	if case_id.strip_edges().is_empty() or answer < 0 or answer > 2:
+		return false
+	var config := ConfigFile.new()
+	config.load(SAVE_PATH)
+	config.set_value("campaign", "case_answers", config.get_value("campaign", "case_answers", {}))
+	var answers: Dictionary = config.get_value("campaign", "case_answers", {})
+	answers[case_id] = answer
+	config.set_value("campaign", "case_answers", answers)
+	config.set_value("campaign", "version", CAMPAIGN_VERSION)
+	var error := config.save(SAVE_PATH)
+	if error != OK:
+		push_warning("Impossible d'enregistrer la réponse ORCHID : %s" % error)
+		return false
+	return true
+
+
+func load_case_answer(case_id: String) -> int:
+	var config := ConfigFile.new()
+	if config.load(SAVE_PATH) != OK:
+		return -1
+	var raw: Variant = config.get_value("campaign", "case_answers", {})
+	if raw is Dictionary:
+		return int(raw.get(case_id, -1))
+	return -1
+
+
 func load_ending() -> String:
 	var config := ConfigFile.new()
 	if config.load(SAVE_PATH) != OK:
