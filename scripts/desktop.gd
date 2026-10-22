@@ -3810,8 +3810,8 @@ func _render_orchid_cinematic_scene(app: Control, state: Dictionary) -> void:
 		return
 	while content.get_child_count() > 0:
 		var old_child := content.get_child(0)
-		content.remove_child(content.get_child(0))
-		content.get_child(0).queue_free()
+		content.remove_child(old_child)
+		old_child.queue_free()
 	var scenes := _orchid_cinematic_scenes()
 	var stage := int(state.get("stage", 0))
 	var progress := ProgressBar.new()
@@ -4063,6 +4063,7 @@ func _render_orchid_campaign_dashboard(summary: Label) -> void:
 		{"name":"Recommandations et classement", "ids":["audit_wifi", "audit_exit", "audit_answer", "audit_common_rule"]},
 		{"name":"Contrôles de conformité", "ids":["compliance_signature", "compliance_channel", "compliance_approval", "compliance_notice", "compliance_finding"]},
 		{"name":"Pièces annexes", "ids":["support_ticket", "survey_bias", "night_log_reconstructed", "incident_report"]},
+		{"name":"Séquence narrative (10 scènes)", "ids":["cinematic_scene_00", "cinematic_scene_01", "cinematic_scene_02", "cinematic_scene_03", "cinematic_scene_04", "cinematic_scene_05", "cinematic_scene_06", "cinematic_scene_07", "cinematic_scene_08", "cinematic_scene_09"]},
 		{"name":"Enquête de terrain (12 défis)", "ids":["field_stage_00", "field_stage_01", "field_stage_02", "field_stage_03", "field_stage_04", "field_stage_05", "field_stage_06", "field_stage_07", "field_stage_08", "field_stage_09", "field_stage_10", "field_stage_11", "field_investigation_completed"]}
 	]
 	var lines := PackedStringArray(["DOSSIER ORCHID — SYNTHÈSE ACTUALISÉE", "Pièces enregistrées : %d" % evidence.size(), ""])
