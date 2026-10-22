@@ -27,6 +27,8 @@ var _desktop_icons: VBoxContainer
 var _desktop_context_menu: PanelContainer
 var _quick_link_menu: PanelContainer
 var _task_view_panel: PanelContainer
+var _taskbar_preview: PanelContainer
+var _taskbar_preview_tween: Tween
 var _pinned_buttons: Array[Button] = []
 var _pinned_empty_label: Label
 var _pinned_heading_label: Label
@@ -1454,11 +1456,13 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 
 	# Subtle icon lift on hover mirrors the responsive taskbar feedback in Windows 11.
 	button.mouse_entered.connect(func():
+		_show_taskbar_preview(app_id, button, glyph)
 		var hover_tween := create_tween()
 		hover_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		hover_tween.tween_property(icon_tile, "scale", Vector2(1.07, 1.07), 0.10)
 	)
 	button.mouse_exited.connect(func():
+		_hide_taskbar_preview()
 		var hover_tween := create_tween()
 		hover_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		hover_tween.tween_property(icon_tile, "scale", Vector2.ONE, 0.12)
@@ -1543,6 +1547,93 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 	)
 
 	parent.add_child(button)
+
+func _show_taskbar_preview(app_id: String, source_button: Button, glyph: String) -> void:
+
+	_hide_taskbar_preview()
+	var app := _find_app_window(app_id)
+	if not is_instance_valid(app):
+		return
+
+	_taskbar_preview = PanelContainer.new()
+	_taskbar_preview.name = "TaskbarWindowPreview"
+	_taskbar_preview.z_index = 105
+	_taskbar_preview.custom_minimum_size = Vector2(232, 142)
+	var preview_style := _flat_style(Color("f5f7fb"), 12)
+	preview_style.border_color = Color("d4ddeb")
+	preview_style.set_border_width_all(1)
+	preview_style.shadow_color = Color(0.02, 0.04, 0.10, 0.28)
+	preview_style.shadow_size = 18
+	preview_style.shadow_offset = Vector2(0, 4)
+	_taskbar_preview.add_theme_stylebox_override("panel", preview_style)
+
+	var layout := VBoxContainer.new()
+	layout.add_theme_constant_override("separation", 7)
+	layout.add_theme_constant_override("margin_left", 10)
+	layout.add_theme_constant_override("margin_right", 10)
+	layout.add_theme_constant_override("margin_top", 9)
+	layout.add_theme_constant_override("margin_bottom", 9)
+	_taskbar_preview.add_child(layout)
+
+	var title_row := HBoxContainer.new()
+	var app_icon := Label.new()
+	app_icon.text = glyph
+	app_icon.custom_minimum_size = Vector2(24, 24)
+	app_icon.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	app_icon.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	app_icon.add_theme_color_override("font_color", Color("2679d8"))
+	app_icon.add_theme_font_size_override("font_size", 18)
+	title_row.add_child(app_icon)
+	var title_label := Label.new()
+	title_label.text = str(app.get_meta("window_title", "Application"))
+	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title_label.clip_text = true
+	title_label.add_theme_color_override("font_color", Color("24344d"))
+	title_label.add_theme_font_size_override("font_size", 12)
+	title_row.add_child(title_label)
+	layout.add_child(title_row)
+
+	var thumbnail := PanelContainer.new()
+	thumbnail.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	thumbnail.custom_minimum_size = Vector2(0, 78)
+	thumbnail.add_theme_stylebox_override("panel", _flat_style(Color("e5edf8"), 7))
+	var thumbnail_content := CenterContainer.new()
+	thumbnail.add_child(thumbnail_content)
+	var thumbnail_label := Label.new()
+	thumbnail_label.text = glyph + "\n" + str(app.get_meta("window_title", "Application"))
+	thumbnail_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	thumbnail_label.add_theme_color_override("font_color", Color("526681"))
+	thumbnail_label.add_theme_font_size_override("font_size", 11)
+	thumbnail_content.add_child(thumbnail_label)
+	layout.add_child(thumbnail)
+
+	add_child(_taskbar_preview)
+	var button_rect := source_button.get_global_rect()
+	var preview_position := to_local(button_rect.position + Vector2(button_rect.size.x / 2.0 - 116.0, -150.0))
+	var viewport_size := get_viewport_rect().size
+	preview_position.x = clampf(preview_position.x, 8.0, maxf(8.0, viewport_size.x - 240.0))
+	preview_position.y = maxf(8.0, preview_position.y)
+	_taskbar_preview.position = preview_position
+	_taskbar_preview.modulate.a = 0.0
+	_taskbar_preview.scale = Vector2(0.96, 0.96)
+	_taskbar_preview.pivot_offset = Vector2(116, 71)
+	_taskbar_preview_tween = create_tween()
+	_taskbar_preview_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_taskbar_preview_tween.set_parallel(true)
+	_taskbar_preview_tween.tween_property(_taskbar_preview, "modulate:a", 1.0, 0.13)
+	_taskbar_preview_tween.tween_property(_taskbar_preview, "scale", Vector2.ONE, 0.13)
+
+
+func _hide_taskbar_preview() -> void:
+
+	if not is_instance_valid(_taskbar_preview):
+		return
+	if is_instance_valid(_taskbar_preview_tween):
+		_taskbar_preview_tween.kill()
+	_taskbar_preview.queue_free()
+	_taskbar_preview = null
+	_taskbar_preview_tween = null
+
 
 func _find_app_window(app_id: String) -> Control:
 
