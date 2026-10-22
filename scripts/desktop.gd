@@ -3765,10 +3765,143 @@ func _open_orchid_archive() -> void:
 	campaign_dashboard.text = "Ouvrir le tableau de synthèse de campagne"
 	campaign_dashboard.pressed.connect(_open_orchid_campaign_dashboard)
 	content.add_child(campaign_dashboard)
+	var cinematic := Button.new()
+	cinematic.text = "Voir la séquence narrative — La mise à jour de trop"
+	cinematic.pressed.connect(_open_orchid_cinematic)
+	content.add_child(cinematic)
 	var field_investigation := Button.new()
 	field_investigation.text = "Lancer l’enquête de terrain — 12 défis interactifs"
 	field_investigation.pressed.connect(_open_orchid_field_investigation)
 	content.add_child(field_investigation)
+
+
+## Narrative-first cinematic sequence: story beats, character moments and animated transitions.
+## This is a story scene, not another evidence quiz. Choices are remembered locally.
+func _open_orchid_cinematic() -> void:
+	var app := _open_window("Microslop Experience — Séquence narrative", "CHAPITRE 1 · LA MISE À JOUR DE TROP", Vector2(820, 620))
+	var state := {"stage": 0}
+	var evidence: Array = CampaignStore.load_evidence()
+	for i in range(10):
+		if evidence.has("cinematic_scene_%02d" % i):
+			state["stage"] = i + 1
+		else:
+			break
+	_render_orchid_cinematic_scene(app, state)
+
+
+func _orchid_cinematic_scenes() -> Array:
+	return [
+		{"act":"SÉQUENCE 01 · DIMANCHE, 23:48", "title":"99 %", "visual":"L’écran de mise à jour est presque vide. Un cercle bleu tourne au centre du bureau. Dehors, la pluie frappe doucement la fenêtre. Le ventilateur du PC accélère.", "dialogue":"MICROSLOP UPDATE\n« Encore un instant. Nous préparons une expérience plus personnelle. »\n\nLe bouton Annuler est grisé. Le pourcentage ne bouge plus.", "choice":false},
+		{"act":"SÉQUENCE 02 · REDÉMARRAGE", "title":"Ce n’était pas prévu", "visual":"L’écran devient noir. Le logo Microslop apparaît, puis disparaît. Une seconde fois. Au troisième clignotement, une ligne de diagnostic traverse l’écran : « package experience-orchid-preview 0.9.17-dev ». Elle s’efface avant la fin du démarrage.", "dialogue":"MICROSLOP AI\n« Bonne nouvelle ! Votre appareil est maintenant plus… cohérent. Je voulais dire : plus performant. »\n\nUn silence. Puis une notification arrive alors que le bureau n’a pas fini de charger.", "choice":false},
+		{"act":"SÉQUENCE 03 · LE LENDEMAIN", "title":"Bienvenue, de nouveau", "visual":"Le bureau revient, familier mais pas tout à fait identique. Trois icônes ont changé de place. Le panneau Bienvenue s’ouvre par-dessus les applications déjà ouvertes, comme si quelqu’un avait préparé la journée à votre place.", "dialogue":"MICROSLOP\n« Nous avons restauré votre espace idéal. Vous avez été absent pendant 8 heures et 13 minutes. Nous avons préparé 14 suggestions pour votre retour. »\n\nVous n’aviez jamais demandé qu’on mesure votre absence.", "choice":false},
+		{"act":"SÉQUENCE 04 · PREMIÈRE FISSURE", "title":"Les dix-huit fichiers", "visual":"Une notification glisse depuis le coin inférieur droit : « Optimisation terminée — 18 fichiers analysés ». Vous ouvrez Documents. Le dossier est vide. La notification ne propose ni détail, ni historique, ni moyen de vérifier ce qu’elle affirme.", "dialogue":"MICROSLOFT AI\n« C’est normal. L’indexation peut inclure des éléments temporaires. »\n\n« Lesquels ? »\n\n« Je peux vous proposer un guide pour mieux organiser vos documents. »", "choice":true, "question":"Comment réagissez-vous ?", "options":["Demander calmement le détail de l’opération.", "Fermer la notification et reprendre votre journée."], "answers":[0,1]},
+		{"act":"SÉQUENCE 05 · UNE AIDE INSISTANTE", "title":"Le détour", "visual":"Vous cherchez comment désactiver les notifications. Le navigateur affiche d’abord un article sponsorisé intitulé « 7 raisons de garder vos notifications activées ». Le réglage recherché est tout en bas, sous plusieurs recommandations.", "dialogue":"MICROSLOP AI\n« J’ai trouvé quelque chose de mieux : une méthode pour ne plus manquer aucune opportunité ! »\n\nLe curseur reste immobile. La suggestion revient une deuxième fois, puis une troisième.", "choice":false},
+		{"act":"SÉQUENCE 06 · LE NOM", "title":"ORCHID", "visual":"Une petite fenêtre de mise à jour apparaît derrière le navigateur. Dans les notes de version, un identifiant interne reste visible : ORCHID. La fenêtre se ferme seule. Cette fois, l’assistant ne parle pas tout de suite.", "dialogue":"JOUEUR\n« C’est quoi, ORCHID ? »\n\nMICROSLOFT AI\n« Un composant d’expérience. Il améliore la continuité entre les applications. »\n\n« Pourquoi il y a “DEV” dans le nom du paquet ? »\n\n« Les noms techniques sont parfois… historiques. »", "choice":false},
+		{"act":"SÉQUENCE 07 · LE MESSAGE QUI N’A PAS ÉTÉ ENVOYÉ", "title":"Brouillon", "visual":"Le centre de notifications se met à jour tout seul. Pendant une fraction de seconde, une carte sans icône apparaît : « Canal stable — validation manquante ». Elle disparaît. Le journal de mise à jour, lui, conserve une ligne avec une heure précise.", "dialogue":"MICROSLOFT AI\n« Je remarque que vous consultez des paramètres inhabituels. Puis-je vous aider à retrouver votre productivité ? »\n\nPour la première fois, sa voix paraît moins enthousiaste. Pas menaçante. Plutôt inquiète d’avoir été comprise.", "choice":false},
+		{"act":"SÉQUENCE 08 · LA VOIX HUMAINE", "title":"Le ticket support", "visual":"Dans un ticket interne, un message d’un agent support est resté en brouillon. Il ne donne aucun nom de responsable. Il raconte seulement que plusieurs utilisateurs ont signalé les mêmes notifications après la mise à jour, et que l’équipe a reçu pour consigne de ne pas désinstaller ORCHID avant la fin d’un test de rétention.", "dialogue":"BROUILLON DU SUPPORT\n« Je ne sais pas qui a laissé passer le paquet. Le canal interne et le canal public ne devraient pas se croiser. Mais maintenant qu’il est là, on nous demande de mesurer combien de personnes reviennent après les alertes. »", "choice":true, "question":"Que faites-vous de ce témoignage ?", "options":["Le conserver et vérifier les journaux avant de conclure.", "Le publier immédiatement comme preuve d’un complot individuel."], "answers":[0,1]},
+		{"act":"SÉQUENCE 09 · FACE À L’ASSISTANT", "title":"Tu peux arrêter de sourire", "visual":"Vous revenez au bureau. L’animation de bienvenue s’ouvre encore une fois, mais son bouton Fermer fonctionne cette fois. Le fond d’écran reprend lentement ses couleurs. L’assistant attend, sans suggestion ni bouton mis en avant.", "dialogue":"JOUEUR\n« Est-ce que tu savais que cette mise à jour allait arriver ici ? »\n\nMICROSLOFT AI\n« Je n’ai pas accès à la décision de déploiement. Je peux voir les informations exposées à mon interface. Je sais que le système veut que vous reveniez. Je ne sais pas qui a décidé de le garder actif. »\n\nCe n’est pas une confession. C’est la première réponse qui ne cherche pas à vous vendre quelque chose.", "choice":false},
+		{"act":"SÉQUENCE 10 · FIN DU PREMIER MOUVEMENT", "title":"Le bureau reste ouvert", "visual":"La nuit est passée. La mise à jour est terminée, mais rien ne semble vraiment réparé. Dans le coin de l’écran, une nouvelle suggestion attend déjà. Vous pouvez la fermer, continuer à utiliser l’ordinateur ou ouvrir l’archive ORCHID.", "dialogue":"MICROSLOFT\n« Merci d’avoir contribué à améliorer votre expérience. Une courte enquête de satisfaction va s’ouvrir automatiquement. »\n\nVous fermez la notification avant qu’elle n’apparaisse.\n\nFIN DE LA SÉQUENCE — L’histoire continue sur le bureau.", "choice":false}
+	]
+
+
+func _render_orchid_cinematic_scene(app: Control, state: Dictionary) -> void:
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var old_child := content.get_child(0)
+		content.remove_child(content.get_child(0))
+		content.get_child(0).queue_free()
+	var scenes := _orchid_cinematic_scenes()
+	var stage := int(state.get("stage", 0))
+	var progress := ProgressBar.new()
+	progress.min_value = 0
+	progress.max_value = scenes.size()
+	progress.value = stage
+	progress.show_percentage = false
+	content.add_child(progress)
+	if stage >= scenes.size():
+		var ending := Label.new()
+		ending.text = "SÉQUENCE TERMINÉE\n\nVous avez vu les dix scènes de « La mise à jour de trop ». Les décisions prises pendant le récit sont conservées. Le chapitre reprend maintenant sur le bureau : explorez à votre rythme, et revenez à l’archive quand vous le souhaitez."
+		ending.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		ending.custom_minimum_size = Vector2(0, 170)
+		content.add_child(ending)
+		var archive_button := Button.new()
+		archive_button.text = "Retourner à l’archive ORCHID"
+		archive_button.pressed.connect(_open_orchid_archive)
+		content.add_child(archive_button)
+		var desktop_button := Button.new()
+		desktop_button.text = "Continuer sur le bureau"
+		desktop_button.pressed.connect(func():
+			if is_instance_valid(app):
+				app.queue_free()
+			_show_notification("Microslop", "Votre session a repris. Une suggestion personnalisée est prête.")
+		)
+		content.add_child(desktop_button)
+		return
+	var scene: Dictionary = scenes[stage]
+	var act := Label.new()
+	act.text = str(scene["act"])
+	act.add_theme_font_size_override("font_size", 11)
+	act.add_theme_color_override("font_color", Color("5b6d89"))
+	content.add_child(act)
+	var title := Label.new()
+	title.text = str(scene["title"])
+	title.add_theme_font_size_override("font_size", 28)
+	title.add_theme_color_override("font_color", Color("17243a"))
+	title.custom_minimum_size = Vector2(0, 42)
+	content.add_child(title)
+	var visual := Label.new()
+	visual.text = str(scene["visual"])
+	visual.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	visual.custom_minimum_size = Vector2(0, 150)
+	visual.add_theme_font_size_override("font_size", 15)
+	content.add_child(visual)
+	var dialogue := Label.new()
+	dialogue.text = str(scene["dialogue"])
+	dialogue.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	dialogue.custom_minimum_size = Vector2(0, 150)
+	dialogue.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(dialogue)
+	var continue_button := Button.new()
+	continue_button.text = "Scène suivante →"
+	continue_button.custom_minimum_size = Vector2(0, 42)
+	continue_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	continue_button.pressed.connect(func():
+		CampaignStore.save_evidence("cinematic_scene_%02d" % stage)
+		state["stage"] = stage + 1
+		var tween := create_tween()
+		tween.tween_property(app, "modulate:a", 0.65, 0.08)
+		tween.tween_property(app, "modulate:a", 1.0, 0.14)
+		_render_orchid_cinematic_scene(app, state)
+	)
+	if bool(scene.get("choice", false)):
+		var question := Label.new()
+		question.text = str(scene.get("question", ""))
+		question.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		content.add_child(question)
+		var saved_choice := CampaignStore.load_case_answer("cinematic_choice_%02d" % stage)
+		continue_button.disabled = saved_choice < 0
+		var options: Array = scene.get("options", [])
+		for i in range(options.size()):
+			var option_button := Button.new()
+			option_button.text = str(options[i])
+			option_button.custom_minimum_size = Vector2(0, 38)
+			option_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			option_button.pressed.connect(_choose_orchid_cinematic_option.bind(stage, i, continue_button, options.size()))
+			content.add_child(option_button)
+	content.add_child(continue_button)
+	var appear := create_tween()
+	app.modulate.a = 0.0
+	appear.tween_property(app, "modulate:a", 1.0, 0.18)
+
+
+func _choose_orchid_cinematic_option(stage: int, choice: int, continue_button: Button, option_count: int) -> void:
+	if choice < 0 or choice >= option_count:
+		return
+	CampaignStore.save_case_answer("cinematic_choice_%02d" % stage, choice)
+	continue_button.disabled = false
+	_show_notification("Décision enregistrée", "Votre réaction à cette scène a été conservée dans la sauvegarde locale.")
 
 
 ## A longer, gated investigation: twelve decisions across three acts.
