@@ -1445,6 +1445,18 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 
 	button.add_child(icon_tile)
 
+	# Subtle icon lift on hover mirrors the responsive taskbar feedback in Windows 11.
+	button.mouse_entered.connect(func():
+		var hover_tween := create_tween()
+		hover_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		hover_tween.tween_property(icon_tile, "scale", Vector2(1.07, 1.07), 0.10)
+	)
+	button.mouse_exited.connect(func():
+		var hover_tween := create_tween()
+		hover_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		hover_tween.tween_property(icon_tile, "scale", Vector2.ONE, 0.12)
+	)
+
 	button.add_theme_color_override("font_color", Color("24344d"))
 
 	button.add_theme_stylebox_override("normal", _flat_style(Color(0.0, 0.0, 0.0, 0.0), 7))
@@ -2347,6 +2359,10 @@ func _toggle_start_menu() -> void:
 		_quick_settings_panel.visible = false
 
 		_calendar_panel.visible = false
+
+		# Win+Start opens the launcher ready for immediate keyboard search.
+		if is_instance_valid(_start_search):
+			_start_search.call_deferred("grab_focus")
 
 		if _mission_step == 0:
 
