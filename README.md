@@ -83,3 +83,8 @@ Le projet et la CI ciblent Godot **4.7.2-stable**, dernière version stable au m
 ### Enquêtes ORCHID approfondies
 
 L’archive de campagne comprend maintenant des enquêtes interactives supplémentaires : journal chronologique du déploiement, ticket d’assistance interne avec choix de réponse, enquête de satisfaction dont le tableau de bord révèle le biais de mesure, et banc d’essai comparant trois recommandations à l’intention initiale de l’utilisateur. Les éléments examinés sont ajoutés au dossier de preuves via la sauvegarde de campagne. Ces scènes restent à valider dans une exécution réelle de Godot ; leur présence dans le dépôt ne signifie pas que le parcours a déjà passé les tests en jeu.
+
+
+### Contrôle de diffusion et comité d’incident
+
+L’archive ORCHID inclut aussi une revue de conformité en quatre contrôles (signature, canal, approbation et information utilisateur) ainsi qu’un comité d’incident proposant trois décisions persistantes : escalader avec un rapport sourcé, surveiller et reproduire, ou clore comme incident de configuration. Un récapitulatif classe les indices collectés par famille. Ces ajouts narratifs restent à valider par exécution dans Godot avant d’être considérés comme testés.
