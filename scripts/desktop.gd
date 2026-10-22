@@ -1645,7 +1645,8 @@ func _show_taskbar_preview(app_id: String, source_button: Button, glyph: String)
 
 	add_child(_taskbar_preview)
 	var button_rect := source_button.get_global_rect()
-	var preview_position := to_local(button_rect.position + Vector2(button_rect.size.x / 2.0 - 116.0, -150.0))
+	# The desktop Control fills the viewport, so global-rect coordinates map directly to its local space.
+	var preview_position := button_rect.position + Vector2(button_rect.size.x / 2.0 - 116.0, -150.0)
 	var viewport_size := get_viewport_rect().size
 	preview_position.x = clampf(preview_position.x, 8.0, maxf(8.0, viewport_size.x - 240.0))
 	preview_position.y = maxf(8.0, preview_position.y)
