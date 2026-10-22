@@ -3714,6 +3714,30 @@ func _input(event: InputEvent) -> void:
 
 				get_viewport().set_input_as_handled()
 
+		elif event.meta_pressed and event.keycode == KEY_D:
+
+			_toggle_show_desktop()
+
+			get_viewport().set_input_as_handled()
+
+		elif event.meta_pressed and event.keycode == KEY_E:
+
+			_open_files()
+
+			get_viewport().set_input_as_handled()
+
+		elif event.meta_pressed and event.keycode == KEY_I:
+
+			_open_settings()
+
+			get_viewport().set_input_as_handled()
+
+		elif event.meta_pressed and event.keycode == KEY_S:
+
+			_open_search()
+
+			get_viewport().set_input_as_handled()
+
 		elif event.alt_pressed and event.keycode == KEY_F4:
 
 			_close_active_window()
