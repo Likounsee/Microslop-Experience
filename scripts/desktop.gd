@@ -626,9 +626,7 @@ func _toggle_show_desktop() -> void:
 
 			if is_instance_valid(app):
 
-				app.show()
-
-				app.move_to_front()
+				app.call("restore_from_taskbar")
 
 		_desktop_hidden_windows.clear()
 
@@ -1507,9 +1505,13 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 
 			else:
 
-				existing.show()
+				if existing.visible:
 
-				existing.move_to_front()
+					existing.move_to_front()
+
+				else:
+
+					existing.call("restore_from_taskbar")
 
 				_active_app_id = app_id
 
