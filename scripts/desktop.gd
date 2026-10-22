@@ -1049,6 +1049,7 @@ func _build_mission_hint() -> void:
 func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, callback: Callable) -> void:
 	var button := Button.new()
 	button.set_meta("app_name", caption.to_lower())
+	button.tooltip_text = "Ouvrir %s" % caption
 	_pinned_buttons.append(button)
 	button.custom_minimum_size = Vector2(168, 76)
 	button.add_theme_color_override("font_color", Color("263247"))
