@@ -124,3 +124,16 @@ L’archive ORCHID propose désormais plusieurs pistes consultables séparément
 Les nouveaux indices utilisent CampaignStore.save_evidence et les réponses sont persistées via CampaignStore.save_case_answer. Les nouvelles clés de progression sont recommendation_audit_count et audit_common_rule, ainsi que les identifiants de preuve propres à chaque scénario. Les comptages sont des marqueurs de progression, pas des statistiques télémétriques réelles.
 
 **Validation restante :** le code a été poussé sur la branche de campagne, mais ces scènes n’ont pas été exécutées dans Godot pendant cette passe. Il faut encore vérifier le rendu des fenêtres à différentes résolutions, les captures de variables dans les callbacks GDScript et le parcours complet avec une sauvegarde existante avant de qualifier ces scènes de validées en jeu.
+
+
+## Deux nouvelles scènes de décision et de contrôle
+
+### Revue de conformité de diffusion
+
+Le joueur examine quatre contrôles distincts : intégrité de la signature, cohérence du canal, présence d’une autorisation formelle et qualité de l’information fournie à l’utilisateur. Les fiches soulignent une distinction centrale de l’intrigue : une signature valide atteste l’intégrité du paquet, pas son autorisation de diffusion. Le constat final reste verrouillé tant que les quatre contrôles n’ont pas été consultés. Il enregistre les identifiants `compliance_signature`, `compliance_channel`, `compliance_approval`, `compliance_notice` puis `compliance_finding`.
+
+### Comité d’incident ORCHID
+
+Le joueur peut recommander une escalade avec rapport sourcé, une surveillance avec reproduction contrôlée, ou une clôture comme incident de configuration. Chaque option affiche ses conséquences narratives et est enregistrée dans `incident_committee_decision`, avec une preuve distincte pour l’option choisie. Le panneau synthétise aussi les indices déjà collectés dans trois familles — chronologie, recommandations et conformité — afin de rendre visibles les lacunes du dossier. L’état de preuves peut être actualisé sans perdre les choix précédents.
+
+Ces décisions ne désignent pas automatiquement un coupable : l’histoire doit préserver la différence entre les faits observés (canal incompatible, approbation absente, relances de rétention) et l’hypothèse sur l’origine du déploiement. Les fenêtres ajoutées n’agissent que dans la simulation du jeu et n’inspectent aucun fichier réel de l’ordinateur.
