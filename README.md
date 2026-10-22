@@ -129,3 +129,8 @@ The ORCHID archive and campaign dashboard now expose a notification control cent
 ### ORCHID task sprint
 
 The ORCHID archive now includes a separate thirteen-task interactive work sprint: finish a document, handle a sponsored interruption, prepare for a meeting, inspect a misleading urgent alert, and report outcomes. Choices have distinct feedback and quality-score impacts. Some choices trigger simulated promotional notifications, which obey the player's saved notification policy. Stage, choices, score, and interruption count persist separately from the 41-scene workday; the sprint can be replayed from its ending screen. All scenarios are fictional and the score is a gameplay signal, not scientific productivity measurement.
+
+
+### ORCHID incident-response tabletop
+
+A twelve-decision incident exercise is available from the ORCHID archive, spanning containment, evidence, hypothesis testing, communication, remediation, and committee handoff. Each decision has three options, consequences, persistent progress, and a score-dependent ending. Containment choices can change the saved in-game notification policy, so this activity interacts with the existing notification center. The scenario is fictional and is not a real security audit.
