@@ -18,7 +18,7 @@ The game combines three elements:
 
 ### Story chapter 1 — ORCHID
 
-Chapter 1 is an investigation told through the simulated desktop: open Start, inspect the apparently empty Documents folder, review the update stuck at 99%, question an evasive Microslop AI, then search for ORCHID. The browser now opens a full internal report describing predictive interruptions, sponsored-result diversion, and the rebranding of engagement metrics as user comfort. The player can publish the report or keep a local copy; that ending choice is saved separately in the existing campaign file. The AI now deflects before explaining the clue, and accepting recommendations remains a satirical detour rather than a softlock. The full narrative, evidence chain, and remaining implementation work are tracked in [`docs/ORCHID_CAMPAIGN.md`](docs/ORCHID_CAMPAIGN.md).
+Chapter 1 is an investigation told through the simulated desktop: open Start, inspect the apparently empty Documents folder, review the update stuck at 99%, question an evasive Microslop AI, then search for ORCHID. The browser now opens a full internal report describing predictive interruptions, sponsored-result diversion, and the rebranding of engagement metrics as user comfort. A new investigation casebook contains eight evidence pieces spanning notifications, indexing, update notes, AI dialogue, sponsored results, biased surveys, and an A/B test; the player opens each piece, tracks collected evidence across sessions, and can reconstruct a provisional timeline after examining at least four. The player can publish the report or keep a local copy; that ending choice is saved separately in the existing campaign file. The AI now deflects before explaining the clue, and accepting recommendations remains a satirical detour rather than a softlock. The full narrative, evidence chain, and remaining implementation work are tracked in [`docs/ORCHID_CAMPAIGN.md`](docs/ORCHID_CAMPAIGN.md).
 
 ### Chapter 2 — Separate DLC: your home OS
 
@@ -50,7 +50,7 @@ Keyboard shortcuts in the prototype:
 |---|---|---|
 | P0 | Project foundation, desktop shell, window system | In progress |
 | P1 | Fake OS applications and persistent display/audio/performance settings | Partly prototyped |
-| P2 | Campaign, missions, ads, update events and progression | ORCHID investigation and two saved report endings implemented; narrative QA and richer side clues remain |
+| P2 | Campaign, missions, ads, update events and progression | ORCHID report, two saved endings, and eight-piece evidence casebook implemented; narrative QA and richer systemic interruptions remain |
 | P3 | Audio, animation, accessibility, saves and polish | Planned |
 | P4 | Steam store page, builds, QA and release | Planned |
 
