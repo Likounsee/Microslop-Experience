@@ -93,3 +93,8 @@ L’archive ORCHID inclut aussi une revue de conformité en quatre contrôles (s
 ### Parcours interactif après redémarrage
 
 La fenêtre de mise à jour propose désormais une séquence narrative en cinq étapes : redémarrage, première notification, recherche de désactivation, conversation avec l’assistant et décision sur la preuve à conserver. Trois actions sont proposées à chaque étape ; leurs conséquences sont affichées et les réponses sont sauvegardées séparément. Le bilan final récapitule la progression et donne accès à l’archive ou à l’historique du déploiement. Cette séquence reste à valider par exécution dans Godot.
+
+
+### Tableau de synthèse et conséquences réactives
+
+L’archive ORCHID donne accès à un tableau de synthèse persistant qui regroupe cinq familles de preuves, les cinq décisions du parcours de redémarrage, la décision du comité et la conclusion choisie. Le tableau distingue enquête en cours, faisceau partiel et convergence de plusieurs sources ; il ne prétend pas identifier l’auteur sans trace correspondante. Les dialogues de Microslop AI et les résultats de Recherche réagissent désormais aux preuves déjà sauvegardées : une enquête avancée modifie les réponses de l’assistant, et les audits/conclusions de conformité rendent visibles des avertissements dans la recherche. Les doublons de commandes d’interface dans l’archive et la fenêtre de mise à jour ont aussi été retirés. Cette passe n’a pas été exécutée dans Godot : ces changements sont présents dans le code mais restent à vérifier en jeu.
