@@ -3695,7 +3695,7 @@ func _open_browser() -> void:
 ## Mini-jeu de tâches : les choix changent le score, les interruptions et le bilan.
 ## Progression sauvegardée séparément du parcours narratif de 41 séquences.
 func _open_orchid_task_sprint() -> void:
-	var app := _open_window("Sprint de travail — ORCHID", "SIMULATION ACTIVE · 5 TÂCHES · SAUVEGARDE LOCALE", Vector2(760, 620))
+	var app := _open_window("Sprint de travail — ORCHID", "SIMULATION ACTIVE · 13 TÂCHES · SAUVEGARDE LOCALE", Vector2(760, 620))
 	var state := {
 		"stage": clampi(CampaignStore.load_case_answer("orchid_sprint_stage"), 0, 5),
 		"score": CampaignStore.load_case_answer("orchid_sprint_score") if CampaignStore.load_case_answer("orchid_sprint_score") >= -10 else 0,
@@ -3743,9 +3743,9 @@ func _render_orchid_task_sprint(app: Control, state: Dictionary) -> void:
 		var ending := Label.new()
 		ending.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		ending.custom_minimum_size = Vector2(0, 170)
-		if score >= 12:
-			ending.text = "SPRINT TERMINÉ · OBJECTIF PROTÉGÉ\n\nScore de qualité : %d/20. Interruptions promotionnelles ouvertes : %d. Vous avez privilégié les tâches terminées et gardé les alertes distinctes des recommandations. Ce n’est pas une preuve scientifique, seulement le résultat de cette simulation." % [score, interrupted]
-		elif score >= 4:
+		if score >= 16:
+			ending.text = "SPRINT TERMINÉ · OBJECTIF PROTÉGÉ\n\nScore de qualité : %d/26. Interruptions promotionnelles ouvertes : %d. Vous avez privilégié les tâches terminées et gardé les alertes distinctes des recommandations. Ce n’est pas une preuve scientifique, seulement le résultat de cette simulation." % [score, interrupted]
+		elif score >= 6:
 			ending.text = "SPRINT TERMINÉ · RÉSULTAT MITIGÉ\n\nScore de qualité : %d/10. Interruptions promotionnelles ouvertes : %d. Certaines décisions ont protégé le travail ; d’autres ont optimisé la réaction immédiate plutôt que le résultat." % [score, interrupted]
 		else:
 			ending.text = "SPRINT TERMINÉ · LE TABLEAU DE BORD A GAGNÉ\n\nScore de qualité : %d/10. Interruptions promotionnelles ouvertes : %d. Vous avez généré de l’activité, mais le parcours a rendu plus difficile la réalisation des tâches." % [score, interrupted]
@@ -3876,7 +3876,7 @@ func _open_orchid_archive() -> void:
 	content.add_child(simulator)
 
 	var sprint := Button.new()
-	sprint.text = "Jouer le sprint de travail — 10 tâches, interruptions et conséquences"
+	sprint.text = "Jouer le sprint de travail — 13 tâches, interruptions et conséquences"
 	sprint.pressed.connect(_open_orchid_task_sprint)
 	content.add_child(sprint)
 
