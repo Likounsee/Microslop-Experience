@@ -25,6 +25,7 @@ var _notification_tween: Tween
 var _wallpaper: TextureRect
 var _desktop_icons: VBoxContainer
 var _desktop_context_menu: PanelContainer
+var _quick_link_menu: PanelContainer
 var _pinned_buttons: Array[Button] = []
 var _pinned_empty_label: Label
 var _pinned_heading_label: Label
@@ -3702,6 +3703,12 @@ func _input(event: InputEvent) -> void:
 
 				closed_flyout = true
 
+			if is_instance_valid(_quick_link_menu) and _quick_link_menu.visible:
+
+				_quick_link_menu.visible = false
+
+				closed_flyout = true
+
 			if is_instance_valid(_desktop_context_menu) and is_instance_valid(_desktop_context_menu.get_parent()):
 
 				_desktop_context_menu.queue_free()
@@ -3713,6 +3720,12 @@ func _input(event: InputEvent) -> void:
 			if closed_flyout:
 
 				get_viewport().set_input_as_handled()
+
+		elif event.meta_pressed and event.keycode == KEY_X:
+
+			_toggle_quick_link_menu()
+
+			get_viewport().set_input_as_handled()
 
 		elif event.meta_pressed and event.keycode == KEY_D:
 
@@ -3942,6 +3955,98 @@ func _add_context_action(parent: VBoxContainer, caption: String, callback: Calla
 	)
 
 	parent.add_child(button)
+
+func _toggle_quick_link_menu() -> void:
+
+	if is_instance_valid(_quick_link_menu):
+		_quick_link_menu.queue_free()
+		_quick_link_menu = null
+		return
+
+	_start_menu.visible = false
+	_start_open = false
+	_quick_settings_panel.visible = false
+	_calendar_panel.visible = false
+	if is_instance_valid(_notification_center):
+		_notification_center.visible = false
+
+	_quick_link_menu = PanelContainer.new()
+	_quick_link_menu.name = "QuickLinkMenu"
+	_quick_link_menu.z_index = 110
+	_quick_link_menu.custom_minimum_size = Vector2(290, 0)
+	var menu_style := _flat_style(Color(0.95, 0.97, 0.99, 0.98), 12)
+	menu_style.shadow_color = Color(0.02, 0.04, 0.10, 0.30)
+	menu_style.shadow_size = 20
+	menu_style.shadow_offset = Vector2(0, 4)
+	menu_style.set_border_width_all(1)
+	menu_style.border_color = Color(1, 1, 1, 0.82)
+	_quick_link_menu.add_theme_stylebox_override("panel", menu_style)
+
+	var margin := MarginContainer.new()
+	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+		margin.add_theme_constant_override(side, 7)
+	_quick_link_menu.add_child(margin)
+
+	var items := VBoxContainer.new()
+	items.add_theme_constant_override("separation", 3)
+	margin.add_child(items)
+
+	var heading := Label.new()
+	heading.text = "Accès rapides"
+	heading.add_theme_font_size_override("font_size", 13)
+	heading.add_theme_color_override("font_color", Color("64748b"))
+	items.add_child(heading)
+
+	_add_quick_link_action(items, "Applications et fonctionnalités", func():
+		_open_window("Applications et fonctionnalités", "Applications installées\n\nMicroslop Experience\n\nLa gestion des applications est simulée.", Vector2(430, 300))
+	)
+	_add_quick_link_action(items, "Centre de mobilité", func():
+		_open_window("Centre de mobilité", "Luminosité   ━━━━━━━━━\n\nVolume   ━━━━━━━━\n\nÉtat de la batterie : alimentation secteur", Vector2(380, 260))
+	)
+	_add_quick_link_action(items, "Options d’alimentation", func():
+		_open_window("Alimentation", "Mode d’alimentation : Équilibré\n\nÉconomiseur de batterie : désactivé", Vector2(380, 230))
+	)
+	var separator := HSeparator.new()
+	items.add_child(separator)
+	_add_quick_link_action(items, "Gestionnaire des tâches", func():
+		_open_window("Gestionnaire des tâches", "Processus\n\nMicroslop Experience     En cours d’exécution\nUtilisation CPU : —\nUtilisation mémoire : —", Vector2(500, 320))
+	)
+	_add_quick_link_action(items, "Paramètres", _open_settings)
+	_add_quick_link_action(items, "Explorateur de fichiers", _open_files)
+	_add_quick_link_action(items, "Bureau", _toggle_show_desktop)
+
+	add_child(_quick_link_menu)
+	var viewport_size := get_viewport_rect().size
+	_quick_link_menu.reset_size()
+	await get_tree().process_frame
+	if not is_instance_valid(_quick_link_menu):
+		return
+	var menu_size := _quick_link_menu.get_combined_minimum_size()
+	_quick_link_menu.position = Vector2(12, maxf(8.0, viewport_size.y - TASKBAR_HEIGHT - menu_size.y - 20))
+	_quick_link_menu.modulate.a = 0.0
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_quick_link_menu, "modulate:a", 1.0, 0.14)
+
+
+func _add_quick_link_action(parent: VBoxContainer, caption: String, callback: Callable) -> void:
+
+	var button := Button.new()
+	button.text = caption
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.custom_minimum_size = Vector2(260, 34)
+	button.add_theme_color_override("font_color", Color("24344d"))
+	button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 6))
+	button.add_theme_stylebox_override("hover", _flat_style(Color("dce8f8"), 6))
+	button.focus_mode = Control.FOCUS_NONE
+	button.pressed.connect(func():
+		if is_instance_valid(_quick_link_menu):
+			_quick_link_menu.queue_free()
+			_quick_link_menu = null
+		callback.call()
+	)
+	parent.add_child(button)
+
 
 func _process(delta: float) -> void:
 
