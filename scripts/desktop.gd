@@ -4421,6 +4421,10 @@ func _open_orchid_campaign_dashboard() -> void:
 		_render_orchid_campaign_dashboard(summary)
 	)
 	content.add_child(refresh)
+	var notification_button := Button.new()
+	notification_button.text = "Configurer les notifications ORCHID"
+	notification_button.pressed.connect(_open_orchid_notification_controls)
+	content.add_child(notification_button)
 	var evidence_button := Button.new()
 	evidence_button.text = "Examiner les pièces manquantes"
 	evidence_button.pressed.connect(_open_orchid_casebook)
@@ -4958,7 +4962,6 @@ func _open_orchid_notification_controls() -> void:
 	var promo := Button.new()
 	promo.text = "Envoyer une notification promotionnelle de test"
 	promo.pressed.connect(func() -> void:
-		var before := _notification_history.size()
 		var mode := CampaignStore.load_case_answer("orchid_notification_mode")
 		_show_notification("Suggestion personnalisée", "Un article de productivité sponsorisé vous attend. Cliquez maintenant pour prolonger votre expérience.")
 		if mode == 1:
