@@ -854,6 +854,10 @@ func _build_start_menu() -> void:
 	search.add_theme_color_override("caret_color", Color("0878d1"))
 	search.add_theme_color_override("font_color", Color("1d2a40"))
 	search.add_theme_stylebox_override("normal", _flat_style(Color.WHITE, 10))
+	var search_focus_style := _flat_style(Color.WHITE, 10)
+	search_focus_style.set_border_width_all(2)
+	search_focus_style.border_color = Color("78afe9")
+	search.add_theme_stylebox_override("focus", search_focus_style)
 	search.text_changed.connect(_filter_pinned_apps)
 	search.text_submitted.connect(func(query: String):
 		_start_menu.visible = false
@@ -1087,7 +1091,10 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 		"Navigateur":
 			icon_color = Color("2879d0")
 			icon_glyph = "◎"
-	icon_tile.add_theme_stylebox_override("panel", _flat_style(icon_color, 10))
+	var icon_tile_style := _flat_style(icon_color, 10)
+	icon_tile_style.set_border_width_all(1)
+	icon_tile_style.border_color = Color(1, 1, 1, 0.38)
+	icon_tile.add_theme_stylebox_override("panel", icon_tile_style)
 	content.add_child(icon_tile)
 	var icon_label := Label.new()
 	icon_label.text = icon_glyph
@@ -1162,6 +1169,7 @@ func _add_all_apps_entry(glyph: String, caption: String, callback: Callable) -> 
 	button.add_theme_color_override("font_color", Color("263247"))
 	button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 7))
 	button.add_theme_stylebox_override("hover", _flat_style(Color("dce8f8"), 7))
+	button.add_theme_stylebox_override("pressed", _flat_style(Color("cddff7"), 7))
 	button.pressed.connect(callback)
 	button.focus_mode = Control.FOCUS_NONE
 	_all_apps_entries.append(button)
