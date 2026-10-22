@@ -22,7 +22,7 @@ Chapter 1 is an investigation told through the simulated desktop. The update now
 
 ### Cinematic story sequence — Chapter 1
 
-Chapter 1 now includes a **30-scene narrative sequence**, “La mise à jour de trop”, accessible from the ORCHID archive. It begins with the overnight update and follows the next day through interruptions during work and a meeting, messages with Léa, an unhelpful support response, a follow-up meeting that sanitizes complaints, a report that gets rewritten, and a patch whose effectiveness is uncertain. Ten choices are saved locally; later scenes change some dialogue based on those choices, and progress can be resumed.
+Chapter 1 now includes a **36-scene narrative sequence**, “La mise à jour de trop”, accessible from the ORCHID archive. It begins with the overnight update and follows the next day through interruptions during work and a meeting, messages with Léa, an unhelpful support response, a follow-up meeting that sanitizes complaints, a report that gets rewritten, and a patch whose effectiveness is uncertain. Ten choices are saved locally; later scenes change some dialogue based on those choices, and progress can be resumed.
 
 The story prioritizes character moments, escalation, humor and cinematic-style transitions over a chain of investigation quizzes. It uses in-game UI, scene titles, dialogue and animated transitions rather than pre-rendered video. Godot runtime verification is still pending. Chapter 2 remains separate DLC and is not part of this work.
 
@@ -34,7 +34,7 @@ L’archive ORCHID includes a configurable A/B test bench: choose one of three u
 
 ### Parcours jouable — « Une journée avec ORCHID »
 
-En complément des 30 scènes narratives, l’archive propose maintenant une journée interactive en **41 séquences**, sept actes et un épilogue. Le joueur doit réellement choisir quoi fermer, quoi enregistrer, quoi répondre à Léa, comment gérer les interruptions en réunion, quelle formulation garder dans le rapport et comment transmettre les éléments. Chaque décision affiche une conséquence immédiate et reste sauvegardée ; le parcours reprend à la première séquence non terminée. Les choix couvrent aussi les limites de ce que les preuves permettent d’affirmer : le récit évite de transformer une notification douteuse en preuve d’accès aux fichiers ou d’inventer un responsable. Ce parcours est du contenu narratif jouable supplémentaire, pas une promesse de durée mesurée ; il reste à valider dans une exécution réelle de Godot.
+En complément des 36 scènes narratives, l’archive propose maintenant une journée interactive en **41 séquences**, sept actes et un épilogue. Le joueur doit réellement choisir quoi fermer, quoi enregistrer, quoi répondre à Léa, comment gérer les interruptions en réunion, quelle formulation garder dans le rapport et comment transmettre les éléments. Chaque décision affiche une conséquence immédiate et reste sauvegardée ; le parcours reprend à la première séquence non terminée. Les choix couvrent aussi les limites de ce que les preuves permettent d’affirmer : le récit évite de transformer une notification douteuse en preuve d’accès aux fichiers ou d’inventer un responsable. Ce parcours est du contenu narratif jouable supplémentaire, pas une promesse de durée mesurée ; il reste à valider dans une exécution réelle de Godot.
 
 ### Chapter 2 — Separate DLC: your home OS
 
@@ -66,7 +66,7 @@ Keyboard shortcuts in the prototype:
 |---|---|---|
 | P0 | Project foundation, desktop shell, window system | In progress |
 | P1 | Fake OS applications and persistent display/audio/performance settings | Partly prototyped |
-| P2 | Campaign, missions, ads, update events and progression | ORCHID report, two saved endings, evidence casebook, 30-scene narrative sequence, 41-stage interactive workday, and configurable three-variant A/B test simulator implemented; runtime QA, audio and systemic interruption polish remain |
+| P2 | Campaign, missions, ads, update events and progression | ORCHID report, two saved endings, evidence casebook, 36-scene narrative sequence, 41-stage interactive workday, and configurable three-variant A/B test simulator implemented; runtime QA, audio and systemic interruption polish remain |
 | P3 | Audio, animation, accessibility, saves and polish | Planned |
 | P4 | Steam store page, builds, QA and release | Planned |
 
