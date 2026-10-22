@@ -111,6 +111,26 @@ func load_case_answer(case_id: String) -> int:
 	return -1
 
 
+## Stores an editable report draft independently of the campaign ending and progress.
+func save_report_draft(draft: String) -> bool:
+	var config := ConfigFile.new()
+	config.load(SAVE_PATH)
+	config.set_value("campaign", "report_draft", draft)
+	config.set_value("campaign", "version", CAMPAIGN_VERSION)
+	var error := config.save(SAVE_PATH)
+	if error != OK:
+		push_warning("Impossible d’enregistrer le brouillon ORCHID : %s" % error)
+		return false
+	return true
+
+
+func load_report_draft() -> String:
+	var config := ConfigFile.new()
+	if config.load(SAVE_PATH) != OK:
+		return ""
+	return str(config.get_value("campaign", "report_draft", ""))
+
+
 func load_ending() -> String:
 	var config := ConfigFile.new()
 	if config.load(SAVE_PATH) != OK:
