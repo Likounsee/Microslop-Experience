@@ -973,7 +973,8 @@ func _build_notification_center() -> void:
 
 	style.set_border_width_all(1)
 
-	style.border_color = Color(1, 1, 1, 0.78)
+	style.border_color = Color(1, 1, 1, 0.84)
+	style.shadow_size = 24
 
 	_notification_center.add_theme_stylebox_override("panel", style)
 
@@ -1302,7 +1303,8 @@ func _build_quick_settings() -> void:
 
 	panel_style.set_border_width_all(1)
 
-	panel_style.border_color = Color(1, 1, 1, 0.78)
+	panel_style.border_color = Color(1, 1, 1, 0.84)
+	panel_style.shadow_size = 24
 
 	_quick_settings_panel.add_theme_stylebox_override("panel", panel_style)
 
@@ -1971,7 +1973,7 @@ func _build_start_menu() -> void:
 
 	_start_menu.visible = false
 
-	var start_style := _flat_style(Color(0.91, 0.94, 0.98, 0.92), 18)
+	var start_style := _flat_style(Color(0.92, 0.95, 0.99, 0.94), 18)
 
 	start_style.shadow_color = Color(0.02, 0.04, 0.10, 0.30)
 
@@ -1981,7 +1983,7 @@ func _build_start_menu() -> void:
 
 	start_style.set_border_width_all(1)
 
-	start_style.border_color = Color(1, 1, 1, 0.78)
+	start_style.border_color = Color(1, 1, 1, 0.84)
 
 	_start_menu.add_theme_stylebox_override("panel", start_style)
 
@@ -2344,6 +2346,8 @@ func _build_start_menu() -> void:
 	power.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 8))
 
 	power.add_theme_stylebox_override("hover", _flat_style(Color("e1e9f5"), 8))
+	power.add_theme_stylebox_override("pressed", _flat_style(Color("d2e1f4"), 8))
+	power.add_theme_stylebox_override("focus", _flat_style(Color(0, 0, 0, 0), 8))
 
 	power.pressed.connect(func(): _show_power_menu(power))
 
