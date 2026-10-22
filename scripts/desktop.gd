@@ -456,7 +456,7 @@ func _build_taskbar() -> void:
 
 	taskbar.offset_bottom = -12
 
-	var panel_style := _flat_style(Color(0.88, 0.92, 0.98, 0.76), 16)
+	var panel_style := _flat_style(Color(0.90, 0.93, 0.98, 0.82), 16)
 
 	panel_style.shadow_color = Color(0.02, 0.04, 0.10, 0.28)
 
@@ -466,7 +466,7 @@ func _build_taskbar() -> void:
 
 	panel_style.set_border_width_all(1)
 
-	panel_style.border_color = Color(1, 1, 1, 0.78)
+	panel_style.border_color = Color(1, 1, 1, 0.68)
 
 	taskbar.add_theme_stylebox_override("panel", panel_style)
 
@@ -619,7 +619,8 @@ func _build_taskbar() -> void:
 
 	search_button.add_theme_stylebox_override("hover", _flat_style(Color(1, 1, 1, 0.98), 11))
 
-	search_button.add_theme_stylebox_override("pressed", _flat_style(Color("dce9f8"), 11))
+	search_button.add_theme_stylebox_override("pressed", _flat_style(Color("d2e3f8"), 11))
+	search_button.add_theme_stylebox_override("focus", _flat_style(Color(0.0, 0.0, 0.0, 0.0), 11))
 
 	search_button.pressed.connect(_open_search)
 
@@ -675,6 +676,8 @@ func _build_taskbar() -> void:
 	_tray_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 9))
 
 	_tray_button.add_theme_stylebox_override("hover", _flat_style(Color(0.78, 0.86, 0.96, 0.72), 9))
+	_tray_button.add_theme_stylebox_override("pressed", _flat_style(Color(0.66, 0.79, 0.94, 0.86), 9))
+	_tray_button.add_theme_stylebox_override("focus", _flat_style(Color(0.0, 0.0, 0.0, 0.0), 9))
 
 	_tray_button.pressed.connect(_toggle_quick_settings)
 
@@ -698,6 +701,8 @@ func _build_taskbar() -> void:
 	_clock_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 9))
 
 	_clock_button.add_theme_stylebox_override("hover", _flat_style(Color(0.78, 0.86, 0.96, 0.72), 9))
+	_clock_button.add_theme_stylebox_override("pressed", _flat_style(Color(0.66, 0.79, 0.94, 0.86), 9))
+	_clock_button.add_theme_stylebox_override("focus", _flat_style(Color(0.0, 0.0, 0.0, 0.0), 9))
 
 	_clock_button.pressed.connect(_toggle_calendar)
 
@@ -719,6 +724,7 @@ func _build_taskbar() -> void:
 	show_desktop.add_theme_stylebox_override("hover", _flat_style(Color("8fb9eb"), 2))
 
 	show_desktop.add_theme_stylebox_override("pressed", _flat_style(Color("4389d5"), 2))
+	show_desktop.add_theme_stylebox_override("focus", _flat_style(Color(0.0, 0.0, 0.0, 0.0), 2))
 
 	show_desktop.focus_mode = Control.FOCUS_NONE
 
