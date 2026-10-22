@@ -96,7 +96,11 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	elif normalized_title.contains("corbeille"):
 		icon_background = Color("5a9fd8")
 		icon_glyph = "▤"
-	app_icon.add_theme_stylebox_override("panel", _panel_style(icon_background, icon_background))
+	var app_icon_style := _panel_style(icon_background, icon_background)
+	app_icon_style.set_corner_radius_all(6)
+	app_icon_style.set_border_width_all(1)
+	app_icon_style.border_color = Color(1, 1, 1, 0.42)
+	app_icon.add_theme_stylebox_override("panel", app_icon_style)
 	title_row.add_child(app_icon)
 	var app_icon_glyph := Label.new()
 	app_icon_glyph.text = icon_glyph
