@@ -293,6 +293,10 @@ func _show_snap_layouts(button: Button) -> void:
 		margin.add_child(layouts)
 		_add_snap_option(layouts, "½ gauche", "left")
 		_add_snap_option(layouts, "½ droite", "right")
+		_add_snap_option(layouts, "¼ haut G", "top_left")
+		_add_snap_option(layouts, "¼ haut D", "top_right")
+		_add_snap_option(layouts, "¼ bas G", "bottom_left")
+		_add_snap_option(layouts, "¼ bas D", "bottom_right")
 		_add_snap_option(layouts, "⅔ gauche", "two_thirds_left")
 		_add_snap_option(layouts, "⅓ droite", "one_third_right")
 		_add_snap_option(layouts, "⅓ gauche", "one_third_left")
@@ -368,6 +372,18 @@ func _apply_snap_layout(mode: String) -> void:
 		"two_thirds_right":
 			position = Vector2(third_width, 0)
 			size = Vector2(full_width * 2.0 / 3.0, full_height)
+		"top_left":
+			position = Vector2.ZERO
+			size = Vector2(left_width, full_height / 2.0)
+		"top_right":
+			position = Vector2(left_width, 0)
+			size = Vector2(left_width, full_height / 2.0)
+		"bottom_left":
+			position = Vector2(0, full_height / 2.0)
+			size = Vector2(left_width, full_height / 2.0)
+		"bottom_right":
+			position = Vector2(left_width, full_height / 2.0)
+			size = Vector2(left_width, full_height / 2.0)
 	if is_instance_valid(_maximize_button):
 		_maximize_button.text = "□"
 		_maximize_button.tooltip_text = "Dispositions Snap"
