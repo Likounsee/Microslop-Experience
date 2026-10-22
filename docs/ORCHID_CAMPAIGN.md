@@ -26,6 +26,12 @@ La mise à jour ne doit pas apparaître comme un programme secret tombé du ciel
 
 Les trois réponses du joueur sont enregistrées via les sauvegardes de réponses d’enquête déjà utilisées par la campagne. La conclusion assemble les choix et insiste sur la distinction entre l’erreur initiale de diffusion et la décision ultérieure de conserver ORCHID. La scène est implémentée dans `scripts/desktop.gd` ; sa durée et son fonctionnement en jeu doivent encore être vérifiés avec Godot.
 
+## Séquence cinématique implémentée — « La mise à jour de trop »
+
+Le chapitre comporte désormais une séquence narrative autonome de dix scènes, accessible depuis l’archive ORCHID. Elle se concentre sur l’arrivée du paquet de développement, le redémarrage nocturne, le retour sur le bureau, la notification des « 18 fichiers », le détournement des recherches, l’apparition du nom ORCHID, le ticket support et la conversation plus honnête avec Microslop AI. Deux scènes proposent un choix de réaction, sauvegardé localement. La progression scène par scène est conservée afin que le joueur puisse reprendre la séquence.
+
+Cette séquence vise une mise en scène plus cinématique au sein de l’interface simulée : titres de scène, descriptions visuelles, dialogues distincts, progression et transitions animées. Elle ne constitue pas encore une cinématique vidéo pré-rendue ni une mise en scène audio ; le rendu, le rythme et les transitions doivent être vérifiés dans Godot. Le récit maintient volontairement l’incertitude sur la diffusion initiale : un mauvais ciblage de canal reste plausible, tandis que la décision de garder ORCHID actif pour mesurer les retours est beaucoup plus préoccupante.
+
 ## Structure de campagne
 
 ### Mission 1 — Premier contact
