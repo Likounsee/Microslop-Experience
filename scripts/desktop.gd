@@ -3980,7 +3980,120 @@ func _trigger_update() -> void:
 		)
 		content.add_child(later)
 
+		var history := Button.new()
+		history.text = "Enquêter sur l’origine de cette mise à jour"
+		history.pressed.connect(_open_orchid_deployment_history)
+		content.add_child(history)
+
 	_show_notification("Mise à jour en attente", "Redémarrage recommandé. Nous choisirons le moment.")
+
+
+## The player can investigate how an unreleased developer build reached their machine.
+func _open_orchid_deployment_history() -> void:
+	var app := _open_window("Historique de déploiement — dossier confidentiel", "ENQUÊTE LOCALE · JOURNAL DE MISE À JOUR", Vector2(700, 520))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var old_child := content.get_child(0)
+		content.remove_child(old_child)
+		old_child.queue_free()
+	_render_deployment_stage(app, 0)
+
+
+func _render_deployment_stage(app: Control, stage: int) -> void:
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var old_child := content.get_child(0)
+		content.remove_child(old_child)
+		old_child.queue_free()
+
+	var headings := [
+		"ÉTAPE 1/4 — LE CANAL",
+		"ÉTAPE 2/4 — L’INSTALLATION",
+		"ÉTAPE 3/4 — LE LENDEMAIN",
+		"ÉTAPE 4/4 — QUI A AUTORISÉ ÇA ?"
+	]
+	var narratives := [
+		"Journal Update · 02:13\nCanal reçu : DEV_RING_INTERNAL\nCanal attendu pour cet appareil : STABLE\nSignature : valide. Approbation de diffusion : champ absent.\n\nLe paquet est signé par Microslop, mais il vient d’un canal réservé aux équipes de développement. Une signature valide prouve qui a produit le paquet, pas que sa diffusion était autorisée.",
+		"Journal Update · 02:14\nPaquet : experience-orchid-preview\nVersion : 0.9.17-dev (non destinée au public)\nRègle de déploiement : « test progressif — groupe interne »\nCible détectée : appareil utilisateur, canal stable.\n\nLe programme d’installation indique qu’il a suivi une règle automatique. Il n’indique pas qui a modifié la règle ni si quelqu’un a forcé ce déploiement.",
+		"Journal de session · 08:06\n« Optimisations de confort appliquées. »\nNouveaux composants : Experience Relevance Service, Notification Timing Preview.\n\nÀ 08:11, une notification affirme que 18 fichiers ont été analysés. Le dossier Documents paraît pourtant vide. Le compteur peut provenir d’un événement de test, mais le système le présente comme un résultat réel.",
+		"Note interne · accès restreint\n« Le build 0.9.17-dev ne doit pas quitter le groupe de test avant validation de l’expérience. »\nNote ajoutée après installation : « Ne pas désinstaller automatiquement avant analyse des métriques de retour. »\n\nLa première phrase prouve qu’une restriction existait. La seconde suggère qu’après le déploiement, quelqu’un a préféré observer le comportement plutôt que retirer le programme. Aucun nom individuel n’apparaît."
+	]
+	var heading := Label.new()
+	heading.text = headings[stage]
+	heading.add_theme_font_size_override("font_size", 17)
+	heading.add_theme_color_override("font_color", Color("24344d"))
+	content.add_child(heading)
+
+	var body := Label.new()
+	body.text = narratives[stage]
+	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(body)
+
+	if stage < 3:
+		var prompts := [
+			"Que faites-vous de la différence entre les canaux ?",
+			"Comment interprétez-vous cette installation ?",
+			"Quelle trace voulez-vous suivre ?"
+		]
+		var options := [
+			["Vérifier le canal stable attendu", "Faire confiance à la signature valide", "Ignorer l’avertissement de canal"],
+			["Noter une erreur de configuration possible", "Conclure à une installation volontaire", "Ne rien conclure sans le journal d’approbation"],
+			["Comparer la notification avec les fichiers", "Accepter le compteur comme preuve", "Chercher le composant de notification"]
+		]
+		var question := Label.new()
+		question.text = prompts[stage]
+		question.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		question.add_theme_color_override("font_color", Color("24344d"))
+		content.add_child(question)
+		for choice_index in range(3):
+			var choice := Button.new()
+			choice.text = options[stage][choice_index]
+			choice.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			choice.pressed.connect(_choose_deployment_answer.bind(app, stage, choice_index))
+			content.add_child(choice)
+	else:
+		var previous_channel := CampaignStore.load_case_answer("deployment_channel")
+		var previous_install := CampaignStore.load_case_answer("deployment_install")
+		var previous_trace := CampaignStore.load_case_answer("deployment_trace")
+		var conclusion := Label.new()
+		conclusion.text = "VOTRE DOSSIER PROVISOIRE\nCanal : %s\nInterprétation : %s\nPiste suivie : %s\n\nConclusion : une préversion destinée aux développeurs a atteint un appareil du canal stable. L’explication la plus prudente est une erreur de ciblage ou de configuration au départ. La décision de conserver le composant après son arrivée est distincte et plus suspecte. Les journaux disponibles ne permettent pas encore de trancher entre négligence, expérimentation tolérée et déploiement délibéré." % [
+			["canal incorrect repéré", "signature jugée suffisante", "avertissement ignoré"][clampi(previous_channel, 0, 2)],
+			["erreur possible", "intention supposée", "preuve insuffisante pour conclure"][clampi(previous_install, 0, 2)],
+			["contradiction fichiers/notification", "compteur accepté", "composant de notification recherché"][clampi(previous_trace, 0, 2)]
+		]
+		conclusion.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		conclusion.add_theme_color_override("font_color", Color("263247"))
+		content.add_child(conclusion)
+		var archive_button := Button.new()
+		archive_button.text = "Comparer avec le rapport ORCHID"
+		archive_button.pressed.connect(_open_orchid_archive)
+		content.add_child(archive_button)
+		var restart := Button.new()
+		restart.text = "Reprendre l’enquête depuis le début"
+		restart.pressed.connect(_restart_deployment_history.bind(app))
+		content.add_child(restart)
+
+
+func _choose_deployment_answer(app: Control, stage: int, answer: int) -> void:
+	var case_ids := ["deployment_channel", "deployment_install", "deployment_trace"]
+	CampaignStore.save_case_answer(case_ids[stage], answer)
+	var feedback := [
+		["Bonne piste : le canal DEV_RING_INTERNAL n’est pas celui prévu pour le public.", "Une signature valide ne prouve pas qu’un paquet était autorisé à être diffusé.", "L’avertissement ignoré reste dans le journal ; il ne disparaît pas parce que l’installation a réussi."],
+		["C’est plausible, mais cela ne suffit pas à expliquer pourquoi le composant a été conservé ensuite.", "C’est une hypothèse, pas une preuve : le journal d’approbation manque justement.", "Prudence utile : l’absence d’approbation empêche de conclure qui a lancé le déploiement."],
+		["Le compteur ne donne aucun nom ni chemin de fichier : la contradiction mérite une enquête.", "Le compteur seul ne démontre pas qu’une analyse de fichiers a eu lieu.", "Le composant de notification peut expliquer le message, pas prouver que les fichiers ont été lus."]
+	]
+	_show_notification("Note ajoutée au dossier", feedback[stage][answer])
+	_render_deployment_stage(app, stage + 1)
+
+
+func _restart_deployment_history(app: Control) -> void:
+	_render_deployment_stage(app, 0)
 
 
 func _open_settings() -> void:
