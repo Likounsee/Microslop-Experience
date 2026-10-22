@@ -1350,6 +1350,11 @@ func _open_files() -> void:
 	content.add_child(toolbar)
 	for caption in ["←", "→", "↑", "⟳"]:
 		var nav := Button.new()
+		match caption:
+			"←": nav.name = "ExplorerBackButton"
+			"→": nav.name = "ExplorerForwardButton"
+			"↑": nav.name = "ExplorerUpButton"
+			"⟳": nav.name = "ExplorerRefreshButton"
 		nav.text = caption
 		nav.custom_minimum_size = Vector2(36, 34)
 		nav.add_theme_font_size_override("font_size", 17)
@@ -1518,6 +1523,20 @@ func _explorer_toolbar_action(action: String, content: VBoxContainer) -> void:
 			search.clear()
 			_set_explorer_location(address.text, address, heading, status, false)
 	search.placeholder_text = "Rechercher dans %s" % address.text
+	_refresh_explorer_navigation_buttons(address)
+
+func _refresh_explorer_navigation_buttons(address: LineEdit) -> void:
+	var history: Array = address.get_meta("explorer_history", ["Accueil"])
+	var history_index := int(address.get_meta("explorer_history_index", 0))
+	var toolbar := address.get_parent()
+	if toolbar == null:
+		return
+	var back := toolbar.get_node_or_null("ExplorerBackButton") as Button
+	var forward := toolbar.get_node_or_null("ExplorerForwardButton") as Button
+	if back != null:
+		back.disabled = history_index <= 0
+	if forward != null:
+		forward.disabled = history_index >= history.size() - 1
 
 func _set_explorer_location(path: String, address: LineEdit, heading: Label, status: Label, record_history: bool = true) -> void:
 	var clean_path := path.replace("🏠  ", "").replace("🖥  ", "").replace("⬇  ", "").replace("📄  ", "").replace("🖼  ", "").replace("🎵  ", "").replace("🎬  ", "").replace("💾  ", "").strip_edges()
@@ -1535,6 +1554,7 @@ func _set_explorer_location(path: String, address: LineEdit, heading: Label, sta
 	address.text = clean_path
 	heading.text = clean_path
 	status.text = "Aucun élément à afficher dans %s. Le contenu personnel reste inaccessible." % clean_path
+	_refresh_explorer_navigation_buttons(address)
 	var grid := heading.get_parent().get_node_or_null("GridContainer") as GridContainer
 	if grid == null:
 		return
