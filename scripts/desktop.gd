@@ -4431,7 +4431,10 @@ func _add_context_action(parent: VBoxContainer, caption: String, callback: Calla
 
 	button.pressed.connect(func():
 
-		_desktop_context_menu.visible = false
+		if is_instance_valid(_desktop_context_menu):
+			_desktop_context_menu.visible = false
+		if is_instance_valid(_desktop_icon_context_menu):
+			_desktop_icon_context_menu.visible = false
 
 		callback.call()
 
