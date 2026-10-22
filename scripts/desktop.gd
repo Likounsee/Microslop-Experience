@@ -3760,7 +3760,26 @@ func _update_mission() -> void:
 
 	_mission_label.text = missions[mini(_mission_step, missions.size() - 1)]
 
+func _dismiss_flyouts_on_outside_click(pointer_position: Vector2) -> void:
+
+	if is_instance_valid(_start_menu) and _start_menu.visible and not _start_menu.get_global_rect().has_point(pointer_position):
+		_start_open = false
+		_animate_flyout(_start_menu, false, false)
+
+	if is_instance_valid(_quick_settings_panel) and _quick_settings_panel.visible and not _quick_settings_panel.get_global_rect().has_point(pointer_position):
+		_animate_flyout(_quick_settings_panel, false, true)
+
+	if is_instance_valid(_calendar_panel) and _calendar_panel.visible and not _calendar_panel.get_global_rect().has_point(pointer_position):
+		_animate_flyout(_calendar_panel, false, true)
+
+	if is_instance_valid(_notification_center) and _notification_center.visible and not _notification_center.get_global_rect().has_point(pointer_position):
+		_animate_flyout(_notification_center, false, true)
+
+
 func _input(event: InputEvent) -> void:
+
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_dismiss_flyouts_on_outside_click(event.position)
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 
