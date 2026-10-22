@@ -140,7 +140,7 @@ func _layout_shell_for_viewport() -> void:
 			# Keep a two-column layout only when the available width is compact.
 			_pinned_grid.columns = 6 if menu_width >= 560.0 else 2
 
-			var button_width := maxf(76.0, (menu_width - 64.0 - float(_pinned_grid.columns - 1) * 8.0) / float(_pinned_grid.columns)
+			var button_width := maxf(76.0, (menu_width - 64.0 - float(_pinned_grid.columns - 1) * 8.0) / float(_pinned_grid.columns))
 
 			for pinned_button in _pinned_grid.get_children():
 
