@@ -170,7 +170,7 @@ func _layout_shell_for_viewport() -> void:
 
 		var panel_width := minf(336.0, maxf(260.0, viewport_size.x - 24.0))
 
-		var panel_height := minf(420.0, maxf(220.0, viewport_size.y - 96.0))
+		var panel_height := minf(440.0, maxf(220.0, viewport_size.y - 96.0))
 
 		_quick_settings_panel.offset_left = -panel_width - 12.0
 
@@ -205,7 +205,7 @@ func _layout_shell_for_viewport() -> void:
 
 		var notification_width := minf(360.0, maxf(260.0, viewport_size.x - 24.0))
 
-		var notification_height := minf(430.0, maxf(220.0, viewport_size.y - 96.0))
+		var notification_height := minf(480.0, maxf(220.0, viewport_size.y - 96.0))
 
 		_notification_center.offset_left = -notification_width - 12.0
 
@@ -995,8 +995,6 @@ func _build_notification_center() -> void:
 
 	title.add_theme_font_size_override("font_size", 21)
 
-	title.add_theme_color_override("font_color", Color("17243a"))
-
 	title.add_theme_color_override("font_color", Color("1d2a40"))
 
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1012,9 +1010,13 @@ func _build_notification_center() -> void:
 
 	clear_button.add_theme_color_override("font_color", Color("24344d"))
 
-	clear_button.add_theme_stylebox_override("normal", _flat_style(Color("e3eaf4"), 7))
+	clear_button.add_theme_stylebox_override("normal", _flat_style(Color("e3eaf4"), 8))
 
-	clear_button.add_theme_stylebox_override("hover", _flat_style(Color("d3e2f5"), 7))
+	clear_button.add_theme_stylebox_override("hover", _flat_style(Color("d3e2f5"), 8))
+
+	clear_button.add_theme_stylebox_override("pressed", _flat_style(Color("c5d9f2"), 8))
+
+	clear_button.focus_mode = Control.FOCUS_NONE
 
 	clear_button.pressed.connect(_clear_notification_history)
 
@@ -2426,7 +2428,7 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 
 	_pinned_buttons.append(button)
 
-	button.custom_minimum_size = Vector2(168, 76)
+	button.custom_minimum_size = Vector2(84, 76)
 
 	button.add_theme_color_override("font_color", Color("263247"))
 
