@@ -3702,6 +3702,7 @@ func _open_orchid_archive() -> void:
 	report.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	report.add_theme_color_override("font_color", Color("263247"))
 	content.add_child(report)
+	var keep: Button
 	var publish := Button.new()
 	publish.text = "Publier le rapport (et déclencher une dernière interruption)"
 	publish.pressed.connect(func():
@@ -3712,7 +3713,7 @@ func _open_orchid_archive() -> void:
 		keep.disabled = true
 	)
 	content.add_child(publish)
-	var keep := Button.new()
+	keep = Button.new()
 	keep.text = "Conserver une copie locale"
 	keep.pressed.connect(func():
 		CampaignStore.save_ending("preserved")
