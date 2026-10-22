@@ -1,6 +1,8 @@
 extends PanelContainer
 ## Lightweight in-game window (never creates or changes real OS windows).
 
+signal window_activated
+
 const EDGE_RIGHT := 1
 const EDGE_BOTTOM := 2
 const EDGE_LEFT := 4
@@ -70,6 +72,7 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	gui_input.connect(func(event: InputEvent):
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			move_to_front()
+			window_activated.emit()
 	)
 
 	var title_row := HBoxContainer.new()
@@ -177,7 +180,8 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 
 	var text := Label.new()
 	text.text = message
-	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART	text.add_theme_color_override("font_color", Color("263247"))
+	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.add_theme_color_override("font_color", Color("263247"))
 	content.add_child(text)
 
 	_add_resize_handle(EDGE_LEFT, Control.CURSOR_HSIZE, Vector2(0, 48), Vector2(6, -6))
@@ -429,6 +433,7 @@ func _on_titlebar_input(event: InputEvent, _titlebar: Control) -> void:
 			_drag_start_mouse = get_global_mouse_position()
 			_drag_offset = _drag_start_mouse - global_position
 			move_to_front()
+			window_activated.emit()
 		else:
 			var was_dragging := _dragging
 			_dragging = false
