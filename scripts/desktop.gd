@@ -3985,6 +3985,10 @@ func _input(event: InputEvent) -> void:
 		if is_instance_valid(_desktop_icon_context_menu) and _desktop_icon_context_menu.visible:
 			if not _desktop_icon_context_menu.get_global_rect().has_point(event.position):
 				_desktop_icon_context_menu.hide()
+		if is_instance_valid(_desktop_icon_context_menu) and _desktop_icon_context_menu.visible:
+			if not _desktop_icon_context_menu.get_global_rect().has_point(event.position):
+				_desktop_icon_context_menu.hide()
+				_context_desktop_icon = null
 		# Clicking empty desktop space clears the icon selection.
 		if is_instance_valid(_desktop_icons) and not _is_pointer_over_desktop_icon(event.position):
 			_clear_desktop_icon_selection()
@@ -4231,6 +4235,8 @@ func _show_desktop_icon_context_menu(pointer: Vector2, icon_button: Button) -> v
 	icon_button.add_theme_stylebox_override("normal", _flat_style(Color(0.35, 0.55, 0.88, 0.36), 7))
 	if is_instance_valid(_desktop_context_menu):
 		_desktop_context_menu.hide()
+	if is_instance_valid(_desktop_context_menu):
+		_desktop_context_menu.hide()
 	if not is_instance_valid(_desktop_icon_context_menu):
 		_desktop_icon_context_menu = PanelContainer.new()
 		_desktop_icon_context_menu.name = "DesktopIconContextMenu"
@@ -4302,6 +4308,11 @@ func _clear_desktop_icon_selection() -> void:
 			child.add_theme_stylebox_override("normal", _flat_style(Color(0.1, 0.2, 0.38, 0.0), 7))
 
 func _show_desktop_context_menu(pointer: Vector2) -> void:
+
+	# Only one shell context menu can be open at a time, matching the desktop shell.
+	if is_instance_valid(_desktop_icon_context_menu):
+		_desktop_icon_context_menu.hide()
+	_context_desktop_icon = null
 
 	if not is_instance_valid(_desktop_context_menu):
 
