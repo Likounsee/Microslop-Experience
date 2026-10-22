@@ -34,6 +34,12 @@ La narration alterne scènes visuelles, dialogues entre le joueur, Léa, Microsl
 
 La séquence se lance depuis l’archive ORCHID. Les trente-six marqueurs de progression sont inclus dans le tableau de synthèse ; fermer la fenêtre ne fait pas perdre les scènes déjà vues. Il s’agit de cinématiques intégrées à l’interface du jeu, pas de vidéos pré-rendues. La durée effective, la lisibilité des scènes longues et le comportement des transitions doivent encore être testés dans Godot.
 
+## Centre de contrôle des notifications — mécanique implémentée
+
+Depuis l’archive ou le tableau de synthèse, le joueur peut ouvrir le centre de contrôle ORCHID et choisir entre trois politiques persistantes : affichage standard, blocage des promotions, ou mode digest (promotions conservées dans l’historique sans toast à l’écran). Les alertes système de test restent visibles dans les trois modes. Deux boutons envoient une notification promotionnelle fictive ou une alerte système afin de constater directement la différence ; un contrôle expose les preuves sauvegardées.
+
+Le mode choisi est enregistré comme réponse de campagne et agit dans la fonction centrale d’affichage des notifications : il ne s’agit pas seulement d’un bouton décoratif. La simulation reste confinée au jeu et ne modifie aucun réglage Windows. À vérifier dans Godot : affichage du centre de notifications en mode digest et fermeture/réouverture de l’application avec le réglage conservé.
+
 ## Banc de test A/B jouable — métrique contre expérience utilisateur
 
 L’archive ORCHID donne accès à un banc de test où le joueur configure trois paramètres : le scénario (document, réunion ou désactivation des notifications), le moment de déclenchement et l’objectif du tableau de bord. Une option permet de faire respecter immédiatement le refus et le mode silencieux. Le bouton de lancement compare trois variantes sur huit profils fictifs : aucune interruption, interruption prédictive et interruption dont le refus est respecté.
