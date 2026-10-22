@@ -803,12 +803,18 @@ func _update_taskbar_indicators() -> void:
 		if not is_instance_valid(button):
 			continue
 		var app := _find_app_window(str(app_id))
-		var active := is_instance_valid(app) and app.visible and str(_active_app_id) == str(app_id)
+		var running := is_instance_valid(app)
+		var active := running and app.visible and str(_active_app_id) == str(app_id)
 		button.add_theme_stylebox_override("normal", _flat_style(Color(0.38, 0.60, 0.88, 0.22) if active else Color(0.0, 0.0, 0.0, 0.0), 7))
 		button.add_theme_stylebox_override("pressed", _flat_style(Color(0.38, 0.60, 0.88, 0.42), 7))
 		var marker = button.get_meta("active_marker", null)
 		if is_instance_valid(marker):
-			marker.visible = active
+			# Windows 11 keeps a small dot for running apps and a longer pill for the focused app.
+			marker.visible = running
+			marker.offset_left = -9 if active else -3
+			marker.offset_right = 9 if active else 3
+			marker.offset_top = -3 if active else -2
+			marker.add_theme_stylebox_override("panel", _flat_style(Color("2679d8") if active else Color("6b7f99"), 3))
 
 func _build_start_menu() -> void:
 	_start_menu = PanelContainer.new()
