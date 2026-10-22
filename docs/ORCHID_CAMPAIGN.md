@@ -118,6 +118,14 @@ La progression historique `mission_step` reste dans `user://campaign.cfg`. La ve
 - **À faire avant de considérer le chapitre comme complet :** jouer le parcours de bout en bout dans Godot 4.7.2, vérifier la syntaxe, la migration d'une ancienne sauvegarde, la réouverture de l'archive, les notifications scénarisées et l'absence de régression sur les fenêtres.
 
 
+## Journée interactive implémentée — « Une journée avec ORCHID »
+
+Le parcours cinématique n’est plus le seul chemin narratif : l’archive ORCHID propose un parcours jouable de **15 séquences réparties en trois actes**, du premier document du matin jusqu’à la pause de midi. Il alterne gestion du bureau, messagerie avec Léa, réunion interrompue, paramètres de concentration, ticket support, rapport réécrit et décision de transmission. Chaque situation propose jusqu’à trois actions et affiche immédiatement un résultat narratif spécifique. Les réponses sont stockées avec les clés `workday_choice_XX`, la progression avec `workday_stage_XX`, et la reprise s’effectue à la première séquence non validée.
+
+Le parcours donne une conséquence concrète aux décisions sans réduire toute l’histoire à des quiz d’enquête : fermer une fenêtre peut faire perdre un brouillon, une réponse peut préserver ou abîmer la confiance de Léa, et une formulation plus neutre peut effacer l’impact réel des interruptions. Les scènes restent prudentes sur les faits inconnus : aucun coupable n’est inventé et l’alerte des « 18 fichiers » ne prouve pas à elle seule un accès aux documents. Le parcours est présent dans `scripts/desktop.gd` et accessible depuis l’archive interne.
+
+**Validation restante :** le contenu et les callbacks ont été ajoutés au dépôt, mais le rendu, la sauvegarde/reprise, la taille des fenêtres et la durée réelle doivent être vérifiés par exécution dans Godot. Ne pas annoncer une durée de jeu mesurée avant ce test.
+ 
 ## Enquêtes interactives ajoutées — octobre 2026
 
 L’archive ORCHID propose désormais plusieurs pistes consultables séparément. Elles sont conçues comme des outils d’enquête, pas comme de simples pages de lore : les actions du joueur enregistrent des identifiants de preuve et certains écrans affichent une conclusion seulement après consultation des éléments requis.
