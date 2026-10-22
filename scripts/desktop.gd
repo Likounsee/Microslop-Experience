@@ -3761,15 +3761,86 @@ func _open_orchid_archive() -> void:
 	decision_board.text = "Ouvrir le comité d’incident ORCHID"
 	decision_board.pressed.connect(_open_orchid_decision_board)
 	content.add_child(decision_board)
+	var campaign_dashboard := Button.new()
+	campaign_dashboard.text = "Ouvrir le tableau de synthèse de campagne"
+	campaign_dashboard.pressed.connect(_open_orchid_campaign_dashboard)
+	content.add_child(campaign_dashboard)
 
-	var compliance := Button.new()
-	compliance.text = "Vérifier la chaîne d’approbation (4 contrôles)"
-	compliance.pressed.connect(_open_orchid_compliance_review)
-	content.add_child(compliance)
-	var decision_board := Button.new()
-	decision_board.text = "Ouvrir le comité d’incident ORCHID"
-	decision_board.pressed.connect(_open_orchid_decision_board)
-	content.add_child(decision_board)
+
+## Consolidates discoveries and player decisions into a persistent case status.
+func _open_orchid_campaign_dashboard() -> void:
+	var app := _open_window("Tableau de synthèse — dossier ORCHID", "ÉTAT DE CAMPAGNE · DONNÉES LOCALES SAUVEGARDÉES", Vector2(740, 590))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	var summary := Label.new()
+	summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	summary.custom_minimum_size = Vector2(0, 290)
+	content.add_child(summary)
+	var refresh := Button.new()
+	refresh.text = "Actualiser le dossier"
+	refresh.pressed.connect(func():
+		_render_orchid_campaign_dashboard(summary)
+	)
+	content.add_child(refresh)
+	var evidence_button := Button.new()
+	evidence_button.text = "Examiner les pièces manquantes"
+	evidence_button.pressed.connect(_open_orchid_casebook)
+	content.add_child(evidence_button)
+	var compliance_button := Button.new()
+	compliance_button.text = "Reprendre la revue de conformité"
+	compliance_button.pressed.connect(_open_orchid_compliance_review)
+	content.add_child(compliance_button)
+	var committee_button := Button.new()
+	committee_button.text = "Revenir au comité d’incident"
+	committee_button.pressed.connect(_open_orchid_decision_board)
+	content.add_child(committee_button)
+	_render_orchid_campaign_dashboard(summary)
+
+
+func _render_orchid_campaign_dashboard(summary: Label) -> void:
+	var evidence: Array = CampaignStore.load_evidence()
+	var groups := [
+		{"name":"Déploiement et provenance", "ids":["deployment_channel", "deployment_install", "deployment_trace", "night_rule", "night_download", "night_install", "night_activation", "night_notification"]},
+		{"name":"Comportement au redémarrage", "ids":["morning_notification_preview", "morning_file_alert", "morning_search_diversion", "morning_ai_deflection", "morning_sequence_completed"]},
+		{"name":"Recommandations et classement", "ids":["audit_wifi", "audit_exit", "audit_answer", "audit_common_rule"]},
+		{"name":"Contrôles de conformité", "ids":["compliance_signature", "compliance_channel", "compliance_approval", "compliance_notice", "compliance_finding"]},
+		{"name":"Pièces annexes", "ids":["support_ticket", "survey_bias", "night_log_reconstructed", "incident_report"]}
+	]
+	var lines := PackedStringArray(["DOSSIER ORCHID — SYNTHÈSE ACTUALISÉE", "Pièces enregistrées : %d" % evidence.size(), ""])
+	var collected := 0
+	var possible := 0
+	for group in groups:
+		var count := 0
+		for evidence_id in group["ids"]:
+			possible += 1
+			if evidence.has(evidence_id):
+				count += 1
+				collected += 1
+		lines.append("%s : %d / %d" % [group["name"], count, group["ids"].size()])
+	var morning := PackedStringArray()
+	for stage in range(5):
+		var answer := CampaignStore.load_case_answer("morning_stage_%d" % stage)
+		morning.append("Étape %d : %s" % [stage + 1, "choix sauvegardé (%d)" % (answer + 1) if answer >= 0 else "non examinée"])
+	lines.append("")
+	lines.append("PARCOURS DU REDÉMARRAGE")
+	lines.append_array(morning)
+	var committee := CampaignStore.load_case_answer("incident_committee_decision")
+	var committee_names := ["Escalade avec rapport sourcé", "Surveillance avant publication", "Clôture comme incident de configuration"]
+	lines.append("")
+	lines.append("DÉCISION DU COMITÉ : %s" % (committee_names[committee] if committee >= 0 and committee < committee_names.size() else "aucune décision enregistrée"))
+	var ending := CampaignStore.load_ending()
+	var ending_label := "rapport transmis" if ending == "published" else ("copie locale conservée" if ending == "preserved" else "non décidée")
+	lines.append("CONCLUSION : %s" % ending_label)
+	lines.append("")
+	if evidence.has("compliance_finding") and evidence.has("audit_common_rule"):
+		lines.append("ÉVALUATION : plusieurs sources indépendantes convergent. Le motif de rétention est étayé ; l’identité de l’auteur et l’intention initiale restent non établies.")
+	elif evidence.has("compliance_finding") or evidence.has("audit_common_rule"):
+		lines.append("ÉVALUATION : faisceau de preuves partiel. Une anomalie est documentée, mais la comparaison croisée reste incomplète.")
+	else:
+		lines.append("ÉVALUATION : enquête en cours. Examinez les traces et séparez les faits établis des hypothèses.")
+	lines.append("Indice de couverture du tableau : %d / %d catégories suivies." % [collected, possible])
+	summary.text = "\n".join(lines)
 
 
 func _open_orchid_recommendation_audit() -> void:
@@ -4297,8 +4368,18 @@ func _open_ai() -> void:
 	if content == null:
 		return
 
+	var evidence: Array = CampaignStore.load_evidence()
+	var morning_choice := CampaignStore.load_case_answer("morning_stage_4")
+	var audit_complete := evidence.has("audit_wifi") and evidence.has("audit_exit") and evidence.has("audit_answer")
 	var response := Label.new()
-	response.text = "Bonjour ! Je suis là pour vous aider à être plus productif.\n\nJ’ai trouvé une référence à « ORCHID » dans les notes de mise à jour. Il s’agit probablement d’un nom de projet interne sans incidence sur votre expérience.\n\nJe peux vous expliquer le vocabulaire du rapport, ou vous proposer des recommandations plus agréables. Les deux options sont également personnalisées !"
+	if evidence.has("compliance_finding") and audit_complete:
+		response.text = "Bonjour. Votre dossier contient maintenant un constat de conformité et trois cas de recommandation comparables.\n\nJe pourrais dire qu’il s’agit d’incidents indépendants, mais les mêmes objectifs apparaissent dans chaque trace : retarder la sortie, détourner la recherche et prolonger les échanges. Cela constitue un motif cohérent, pas encore une preuve de l’identité de la personne qui l’a autorisé.\n\nVotre prochaine décision déterminera si cette distinction reste visible dans le rapport."
+	elif morning_choice == 0:
+		response.text = "Vous avez choisi de préserver la chronologie complète. Je détecte donc que vous privilégiez les traces horodatées plutôt qu’un résumé simplifié.\n\nJe peux vous fournir une explication, mais je ne peux pas garantir que les recommandations proposées ici soient neutres : le classement et l’assistance partagent le même objectif de session."
+	elif evidence.has("morning_sequence_completed") or evidence.has("deployment_channel"):
+		response.text = "Bonjour ! Je suis là pour vous aider à être plus productif.\n\nVous avez consulté des éléments du dossier ORCHID. Les notes parlent d’un objectif de rétention et d’une diffusion dont le canal reste à vérifier. Je ne dispose toujours pas d’une trace attribuant l’action à une personne précise.\n\nVoulez-vous comparer les faits ou accepter une recommandation plus agréable ?"
+	else:
+		response.text = "Bonjour ! Je suis là pour vous aider à être plus productif.\n\nJ’ai trouvé une référence à « ORCHID » dans les notes de mise à jour. Il s’agit probablement d’un nom de projet interne sans incidence sur votre expérience.\n\nJe peux vous expliquer le vocabulaire du rapport, ou vous proposer des recommandations plus agréables. Les deux options sont également personnalisées !"
 	response.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	response.add_theme_color_override("font_color", Color("263247"))
 	content.add_child(response)
@@ -4320,8 +4401,27 @@ func _open_ai() -> void:
 
 
 func _open_search() -> void:
-
-	_open_window("Recherche Microslop", "Résultats pour : « ouvrir une application »\n\n1. Microslop Premium — SPONSORISÉ\n2. Microslop AI — recommandé\n3. L'application que vous recherchiez (peut-être).", Vector2(560, 300))
+	var evidence: Array = CampaignStore.load_evidence()
+	var query := "ouvrir une application"
+	var result_text := "Résultats pour : « %s »\n\n1. Microslop Premium — SPONSORISÉ\n2. Microslop AI — recommandé\n3. L’application que vous recherchiez (peut-être)." % query
+	if evidence.has("audit_wifi") or evidence.has("audit_exit") or evidence.has("audit_answer"):
+		result_text = "Résultats pour : « %s »\n\nAVERTISSEMENT — votre dossier contient déjà des exemples de classement biaisé.\n1. Microslop Premium — SPONSORISÉ (priorité commerciale)\n2. Microslop AI — recommandé\n3. Réglages et résultats non sponsorisés — accessibles via la recherche détaillée.\n\nLa présence d’un résultat en tête ne constitue pas une preuve de pertinence." % query
+	if evidence.has("compliance_finding"):
+		result_text += "\n\nTRACE DE CONFORMITÉ : signature valide, mais canal et autorisation de diffusion non conformes."
+	var app := _open_window("Recherche Microslop", result_text, Vector2(560, 360))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	var investigate := Button.new()
+	investigate.text = "Rechercher ORCHID et les interruptions"
+	investigate.pressed.connect(func():
+		_open_browser()
+	)
+	content.add_child(investigate)
+	var dashboard := Button.new()
+	dashboard.text = "Voir l’état consolidé de l’enquête"
+	dashboard.pressed.connect(_open_orchid_campaign_dashboard)
+	content.add_child(dashboard)
 
 ## A five-stage playable sequence turns the suspicious update into a morning-long incident.
 func _open_orchid_morning_sequence() -> void:
@@ -4480,11 +4580,6 @@ func _trigger_update() -> void:
 		history.text = "Enquêter sur l’origine de cette mise à jour"
 		history.pressed.connect(_open_orchid_deployment_history)
 		content.add_child(history)
-
-		var reboot_story := Button.new()
-		reboot_story.text = "Simuler le redémarrage et suivre la matinée (5 étapes)"
-		reboot_story.pressed.connect(_open_orchid_morning_sequence)
-		content.add_child(reboot_story)
 
 		var reboot_story := Button.new()
 		reboot_story.text = "Simuler le redémarrage et suivre la matinée (5 étapes)"
