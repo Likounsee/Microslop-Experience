@@ -1299,6 +1299,7 @@ func _open_files() -> void:
 		nav_item.add_theme_font_size_override("font_size", 12)
 		nav_item.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 6))
 		nav_item.add_theme_stylebox_override("hover", _flat_style(Color("e5edf8"), 6))
+		nav_item.pressed.connect(_set_explorer_location.bind(caption, address, quick_title, empty_state))
 		sidebar.add_child(nav_item)
 
 	var right_pane := VBoxContainer.new()
@@ -1334,6 +1335,7 @@ func _open_files() -> void:
 		tile.text = "%s   %s\n       %s" % [str(folder["glyph"]), str(folder["name"]), str(folder["detail"])]
 		tile.add_theme_font_size_override("font_size", 12)
 		tile.add_theme_color_override("font_color", Color("243249"))
+		tile.pressed.connect(_set_explorer_location.bind(str(folder["name"]), address, quick_title, empty_state))
 		quick_grid.add_child(tile)
 	var recent_title := Label.new()
 	recent_title.text = "Fichiers récents"
@@ -1368,6 +1370,13 @@ func _open_files() -> void:
 		else:
 			empty_state.text = "Aucun fichier récent. Les fichiers personnels ne sont pas consultés."
 	)
+
+func _set_explorer_location(path: String, address: LineEdit, heading: Label, status: Label) -> void:
+	address.text = path.replace("🏠  ", "").replace("🖥  ", "").replace("⬇  ", "").replace("📄  ", "").replace("🖼  ", "").replace("🎵  ", "").replace("🎬  ", "").replace("💾  ", "")
+	heading.text = address.text
+	status.text = "Aucun élément à afficher dans %s. Le contenu personnel reste inaccessible." % address.text
+	for child in heading.get_parent().get_node("GridContainer").get_children():
+		child.visible = address.text == "Accueil" or child.text.to_lower().contains(address.text.to_lower())
 
 func _open_browser() -> void:
 	var app := _open_window("Microslop Browser", "Votre navigateur nouvelle génération.", Vector2(680, 400))
