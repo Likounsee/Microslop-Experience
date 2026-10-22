@@ -3,7 +3,7 @@ extends Node
 
 const SAVE_PATH := "user://campaign.cfg"
 const MIN_MISSION_STEP := 0
-const MAX_MISSION_STEP := 3
+const MAX_MISSION_STEP := 5
 
 var mission_step: int = MIN_MISSION_STEP
 
