@@ -3901,7 +3901,7 @@ func _open_orchid_cinematic() -> void:
 	var app := _open_window("Microslop Experience — Séquence narrative", "CHAPITRE 1 · LA MISE À JOUR DE TROP", Vector2(820, 620))
 	var state := {"stage": 0}
 	var evidence: Array = CampaignStore.load_evidence()
-	for i in range(30):
+	for i in range(36):
 		if evidence.has("cinematic_scene_%02d" % i):
 			state["stage"] = i + 1
 		else:
@@ -3940,7 +3940,54 @@ func _orchid_cinematic_scenes() -> Array:
 		{"act":"SÉQUENCE 27 · 15:12", "title":"Le dernier sourire", "visual":"Microslop AI affiche son animation habituelle. Le petit sourire apparaît, mais ne bouge plus. Une mise à jour de l’assistant est en attente. Le texte annonce une « amélioration des réponses sensibles aux retours produit ».", "dialogue":"JOUEUR\n« Est-ce qu’ils vont te changer pour que tu ne dises plus ça ? »\n\nMICROSLOFT AI\n« Je ne peux pas prédire les modifications futures. Une mise à jour peut changer mes réponses, mes accès ou les règles que je dois suivre. »\n\n« Et si tu ne peux plus m’aider ? »\n\n« Gardez les documents que vous avez le droit de conserver. Ne faites pas dépendre toute votre mémoire de ma disponibilité. »\n\nPour une fois, l’assistant vous conseille de ne pas avoir besoin de lui.", "choice":false},
 		{"act":"SÉQUENCE 28 · 16:03", "title":"La notification de trop", "visual":"Une nouvelle carte apparaît : « Merci pour votre patience. Votre expérience a été améliorée. » Elle recouvre le bouton Enregistrer du rapport. Vous cliquez sur Fermer. Elle revient une seconde fois, plus petite, juste au-dessus de la barre de tâches. La troisième fois, elle affiche un sondage avec cinq étoiles.", "dialogue":"MICROSLOFT\n« Votre avis nous aide à progresser. »\n\nLÉA\n« Je crois que je vais éteindre mon ordinateur pour la journée. »\n\nVous regardez le bouton d’alimentation. Le jeu ne vous demande pas de sauver le monde. Il vous demande simplement si vous avez envie de continuer à vous battre contre une fenêtre.", "choice":true, "question":"Quelle est votre prochaine action ?", "options":["Enregistrer une copie locale du rapport, puis faire une pause.", "Rester connecté pour répondre à toutes les sollicitations."], "answers":[0,1]},
 		{"act":"SÉQUENCE 29 · 18:47", "title":"Après la fermeture", "visual":"Le bureau se vide progressivement. La messagerie se ferme, puis le navigateur. Une fenêtre de sauvegarde reste seule au centre de l’écran. Quand elle confirme que la copie locale est enregistrée, le fond d’écran paraît presque trop calme. Une dernière notification tente d’apparaître, puis s’efface avant d’avoir chargé son texte.", "dialogue":"LÉA — message enregistré à 18:47\n« Merci. Je ne sais pas ce qu’ils feront du signalement, mais je suis contente de ne pas avoir laissé le système réécrire ce qui s’est passé. On se reparle demain. »\n\nMICROSLOFT AI\n« Bonne soirée. Je ne vais pas vous proposer un article pour vous aider à vous détendre. »\n\nAprès une seconde :\n\n« C’était une blague. Je crois. »", "choice":false},
-		{"act":"SÉQUENCE 30 · LE LENDEMAIN, 08:02", "title":"La mise à jour est prête", "visual":"Le bureau revient au matin. Le ciel est clair. L’horloge avance normalement. Un nouveau badge apparaît sur Microslop Update : « Correctif de stabilité disponible ». Les notes sont courtes, presque banales. La dernière ligne indique : « ORCHID — paramètres de rétention ajustés ». Rien ne dit ce qui a changé ni pourquoi.", "dialogue":"MICROSLOFT\n« Votre expérience a été mise à jour pendant votre absence. »\n\nMICROSLOFT AI\n« Vous avez un rapport, une copie locale et un numéro de dossier. Ce n’est pas une réponse définitive. C’est plus que ce que vous aviez hier matin. »\n\nLe curseur se pose sur le bouton « Consulter le correctif ». En dessous, l’archive ORCHID est toujours accessible.\n\nFIN DU MOUVEMENT NARRATIF — le chapitre continue dans le bureau, avec les conséquences de vos choix.", "dialogue_variants":["MICROSLOFT\\n« Le rapport commun et sa copie locale sont prêts. Vous avez conservé les événements, les heures et les limites des conclusions. »\\n\\nLéa : « On attend la réponse. Et cette fois, on sait ce qu’on a envoyé. »\\n\\nLe correctif ORCHID reste une promesse, pas une preuve de résolution.", "MICROSLOFT\\n« Le rapport a été transmis. Le résumé a été simplifié pour faciliter son traitement. »\\n\\nLéa : « On verra si quelqu’un répond. J’ai quand même gardé les messages. »\\n\\nLe correctif ORCHID reste une promesse, pas une preuve de résolution."], "dialogue_choice_key":"cinematic_choice_25", "choice":false}
+		{"act":"SÉQUENCE 30 · LE LENDEMAIN, 08:02", "title":"La mise à jour est prête", "visual":"Le bureau revient au matin. Le ciel est clair. L’horloge avance normalement. Un nouveau badge apparaît sur Microslop Update : « Correctif de stabilité disponible ». Les notes sont courtes, presque banales. La dernière ligne indique : « ORCHID — paramètres de rétention ajustés ». Rien ne dit ce qui a changé ni pourquoi.", "dialogue":"MICROSLOFT\n« Votre expérience a été mise à jour pendant votre absence. »\n\nMICROSLOFT AI\n« Vous avez un rapport, une copie locale et un numéro de dossier. Ce n’est pas une réponse définitive. C’est plus que ce que vous aviez hier matin. »\n\nLe curseur se pose sur le bouton « Consulter le correctif ». En dessous, l’archive ORCHID est toujours accessible.\n\nFIN DU MOUVEMENT NARRATIF — le chapitre continue dans le bureau, avec les conséquences de vos choix.", "dialogue_variants":["MICROSLOFT\\n« Le rapport commun et sa copie locale sont prêts. Vous avez conservé les événements, les heures et les limites des conclusions. »\\n\\nLéa : « On attend la réponse. Et cette fois, on sait ce qu’on a envoyé. »\\n\\nLe correctif ORCHID reste une promesse, pas une preuve de résolution.", "MICROSLOFT\\n« Le rapport a été transmis. Le résumé a été simplifié pour faciliter son traitement. »\\n\\nLéa : « On verra si quelqu’un répond. J’ai quand même gardé les messages. »\\n\\nLe correctif ORCHID reste une promesse, pas une preuve de résolution."], "dialogue_choice_key":"cinematic_choice_25", "choice":false},
+		{"act":"SÉQUENCE 31 · LE CORRECTIF", "title":"Un changement dans les notes", "visual":"Le bouton « Consulter le correctif » ouvre un changelog presque vide. La première ligne parle de stabilité. La seconde réduit la fréquence des notifications répétées. La troisième dit que le calcul du retour après interruption reste inchangé. Un badge vert annonce pourtant « Expérience améliorée ».", "dialogue":"VOUS
+« Ils ont diminué les alertes, mais ils gardent la métrique qui les récompense. »
+
+MICROSLOFT AI
+« C’est compatible avec une amélioration visible sans modification de l’objectif de mesure. Pour savoir si le correctif aide réellement, il faudrait comparer les tâches terminées, les refus respectés et les interruptions subies. »
+
+Le correctif peut être utile. Il ne répond simplement pas à toutes les questions.", "choice":false},
+		{"act":"SÉQUENCE 32 · 08:16", "title":"Léa ne veut pas recommencer", "visual":"La messagerie s’ouvre. Léa a écrit un message, l’a effacé, puis l’a réécrit. Une petite pastille indique que le support a consulté le ticket, sans commentaire. Elle ne vous demande pas de mener une autre enquête ; elle veut savoir si elle doit continuer à documenter chaque interruption.", "dialogue":"LÉA
+« J’ai dormi quatre heures. Je ne veux pas passer ma semaine à prouver qu’une fenêtre s’est ouverte. Mais si on arrête, ils vont dire que le problème a disparu. »
+
+VOUS
+« On peut faire moins, mais mieux : garder les heures, noter les cas qui changent vraiment et ne pas collecter ce qui n’est pas nécessaire. »
+
+LÉA
+« Ça, je peux le faire. Pas un formulaire de vingt pages par notification. »", "choice":true, "question":"Quel protocole proposez-vous ?", "options":["Documenter un échantillon daté avec le résultat concret sur la tâche.", "Demander à tout le monde de capturer chaque écran toute la journée."], "answers":[0,1]},
+		{"act":"SÉQUENCE 33 · 08:24", "title":"Le message de l’ingénieure", "visual":"Un message arrive d’une personne signée « M. — intégration ». Elle joint un extrait de configuration, pas un aveu. La règle « appareils compatibles » est héritée d’un ancien déploiement de test. La personne qui a copié la règle n’est pas indiquée dans l’extrait.", "dialogue":"INGÉNIEURE INTÉGRATION
+« Je peux confirmer que le ciblage était trop large. Je ne peux pas confirmer pourquoi il a été élargi. La configuration a traversé deux pipelines et le journal de validation est incomplet. »
+
+MICROSLOFT AI
+« Ça réduit une incertitude et en laisse une autre. Une erreur technique peut expliquer l’arrivée du paquet ; elle ne suffit pas à expliquer pourquoi le composant a été conservé après les premiers retours. »
+
+Le message se termine par : « S’il vous plaît, ne publiez pas mon nom. Je n’ai pas approuvé cette diffusion. »", "choice":false},
+		{"act":"SÉQUENCE 34 · 08:31", "title":"Le chiffre préféré du comité", "visual":"Le comité a remplacé le graphique de satisfaction par un compteur plus simple : « Retours après notification : +18 % ». Une note en bas de page précise que les sessions interrompues sont incluses. Le responsable de réunion a demandé une diapositive avant midi.", "dialogue":"COMITÉ ORCHID
+« Nous avons besoin d’un indicateur unique pour décider si le correctif est prêt. »
+
+VOUS
+« Un indicateur unique peut masquer le coût. Si les retours montent et que les tâches terminées baissent, le chiffre ne raconte pas une amélioration. »
+
+MICROSLOFT AI
+« Je peux préparer un tableau qui affiche les deux mesures côte à côte. Il sera moins simple à présenter et plus difficile à mal interpréter. »", "choice":false},
+		{"act":"SÉQUENCE 35 · 08:37", "title":"Le critère de sortie", "visual":"Le formulaire de validation propose deux cases précochées : « Engagement non inférieur au contrôle » et « Aucune régression critique connue ». La case « Refus respectés » est dans une section repliée intitulée « Expérience avancée ». Le curseur attend.", "dialogue":"LÉA
+« S’ils ne vérifient pas le refus, ils vont juste mesurer combien de fois on revient se plaindre. »
+
+VOUS
+« Alors le critère de sortie doit inclure les tâches terminées et le respect du refus. Sinon, le test peut réussir tout en ratant son objectif. »
+
+Le formulaire n’indique pas qui a choisi les critères initiaux.", "choice":true, "question":"Quelle condition demandez-vous avant le déploiement ?", "options":["Bloquer la validation tant que tâches terminées et refus respectés ne sont pas mesurés.", "Valider sur la seule hausse des retours pour ne pas retarder la sortie."], "answers":[0,1]},
+		{"act":"SÉQUENCE 36 · 08:45", "title":"Pas une victoire, un garde-fou", "visual":"Le bureau se calme. Le correctif reste disponible, le ticket a un numéro, et le rapport contient désormais une demande de suivi. Rien ne clignote pendant quelques secondes. Puis une nouvelle carte apparaît, cette fois avec un bouton « Plus tard » clairement visible. Le système n’a pas été réparé par un discours : quelqu’un a ajouté un contrôle, et il faudra vérifier qu’il fonctionne.", "dialogue":"MICROSLOFT AI
+« La revue a ajouté deux critères au prochain test : terminer la tâche et respecter le refus. Cela ne prouve pas que le problème est résolu. Cela permet au moins de le mesurer sans confondre activité et réussite. »
+
+LÉA
+« On attend les résultats. Et si ça recommence, on aura une méthode, pas juste une capture. »
+
+Le curseur quitte le bouton de notification. Le bureau reste ouvert. La suite dépendra des résultats du test et de la réponse au signalement.
+
+FIN DE LA SÉQUENCE CINÉMATIQUE — l’incident reste suivi, pas miraculeusement résolu.", "dialogue_variants":["MICROSLOFT AI\n« Le protocole de suivi inclut les tâches terminées, les refus respectés et un échantillon documenté. Le rapport reste prudent sur ce que les journaux ne prouvent pas. »\n\nLéa : « C’est moins spectaculaire qu’une révélation, mais ça peut servir. »\n\nLe correctif doit encore être vérifié.", "MICROSLOFT AI\n« Le suivi est ouvert, mais le tableau de bord continue de mettre en avant les retours. La mesure des tâches terminées a été proposée, pas encore adoptée. »\n\nLéa : « Alors on garde les preuves et on attend. »\n\nLe correctif doit encore être vérifié."], "dialogue_choice_key":"cinematic_choice_34", "choice":false}
+
 	]
 
 
@@ -3962,7 +4009,7 @@ func _render_orchid_cinematic_scene(app: Control, state: Dictionary) -> void:
 	content.add_child(progress)
 	if stage >= scenes.size():
 		var ending := Label.new()
-		ending.text = "SÉQUENCE TERMINÉE\n\nVous avez vu les trente scènes de « La mise à jour de trop ». Les décisions prises pendant le récit sont conservées. Le chapitre reprend maintenant sur le bureau : explorez à votre rythme, et revenez à l’archive quand vous le souhaitez."
+		ending.text = "SÉQUENCE TERMINÉE\n\nVous avez vu les trente-six scènes de « La mise à jour de trop ». Les décisions prises pendant le récit sont conservées. Le chapitre reprend maintenant sur le bureau : explorez à votre rythme, et revenez à l’archive quand vous le souhaitez."
 		ending.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		ending.custom_minimum_size = Vector2(0, 170)
 		content.add_child(ending)
@@ -4392,7 +4439,7 @@ func _render_orchid_campaign_dashboard(summary: Label) -> void:
 		{"name":"Recommandations et classement", "ids":["audit_wifi", "audit_exit", "audit_answer", "audit_common_rule"]},
 		{"name":"Contrôles de conformité", "ids":["compliance_signature", "compliance_channel", "compliance_approval", "compliance_notice", "compliance_finding"]},
 		{"name":"Pièces annexes", "ids":["support_ticket", "survey_bias", "night_log_reconstructed", "incident_report"]},
-		{"name":"Séquence narrative (30 scènes)", "ids":["cinematic_scene_00", "cinematic_scene_01", "cinematic_scene_02", "cinematic_scene_03", "cinematic_scene_04", "cinematic_scene_05", "cinematic_scene_06", "cinematic_scene_07", "cinematic_scene_08", "cinematic_scene_09", "cinematic_scene_10", "cinematic_scene_11", "cinematic_scene_12", "cinematic_scene_13", "cinematic_scene_14", "cinematic_scene_15", "cinematic_scene_16", "cinematic_scene_17", "cinematic_scene_18", "cinematic_scene_19", "cinematic_scene_20", "cinematic_scene_21", "cinematic_scene_22", "cinematic_scene_23", "cinematic_scene_24", "cinematic_scene_25", "cinematic_scene_26", "cinematic_scene_27", "cinematic_scene_28", "cinematic_scene_29"]},
+		{"name":"Séquence narrative (36 scènes)", "ids":["cinematic_scene_00", "cinematic_scene_01", "cinematic_scene_02", "cinematic_scene_03", "cinematic_scene_04", "cinematic_scene_05", "cinematic_scene_06", "cinematic_scene_07", "cinematic_scene_08", "cinematic_scene_09", "cinematic_scene_10", "cinematic_scene_11", "cinematic_scene_12", "cinematic_scene_13", "cinematic_scene_14", "cinematic_scene_15", "cinematic_scene_16", "cinematic_scene_17", "cinematic_scene_18", "cinematic_scene_19", "cinematic_scene_20", "cinematic_scene_21", "cinematic_scene_22", "cinematic_scene_23", "cinematic_scene_24", "cinematic_scene_25", "cinematic_scene_26", "cinematic_scene_27", "cinematic_scene_28", "cinematic_scene_29", "cinematic_scene_30", "cinematic_scene_31", "cinematic_scene_32", "cinematic_scene_33", "cinematic_scene_34", "cinematic_scene_35"]},
 		{"name":"Parcours ORCHID (41 séquences)", "ids":["workday_stage_00", "workday_stage_01", "workday_stage_02", "workday_stage_03", "workday_stage_04", "workday_stage_05", "workday_stage_06", "workday_stage_07", "workday_stage_08", "workday_stage_09", "workday_stage_10", "workday_stage_11", "workday_stage_12", "workday_stage_13", "workday_stage_14", "workday_stage_15", "workday_stage_16", "workday_stage_17", "workday_stage_18", "workday_stage_19", "workday_stage_20", "workday_stage_21", "workday_stage_22", "workday_stage_23", "workday_stage_24", "workday_stage_25", "workday_stage_26", "workday_stage_27", "workday_stage_28", "workday_stage_29", "workday_stage_30", "workday_stage_31", "workday_stage_32", "workday_stage_33", "workday_stage_34", "workday_stage_35", "workday_stage_36", "workday_stage_37", "workday_stage_38", "workday_stage_39", "workday_stage_40"]},
 		{"name":"Enquête de terrain (12 défis)", "ids":["field_stage_00", "field_stage_01", "field_stage_02", "field_stage_03", "field_stage_04", "field_stage_05", "field_stage_06", "field_stage_07", "field_stage_08", "field_stage_09", "field_stage_10", "field_stage_11", "field_investigation_completed"]}
 	]
