@@ -980,6 +980,7 @@ func _build_notification_center() -> void:
 	var clear_button := Button.new()
 
 	clear_button.text = "Tout effacer"
+	clear_button.tooltip_text = "Effacer toutes les notifications enregistrées"
 
 	clear_button.add_theme_font_size_override("font_size", 11)
 
@@ -1129,13 +1130,21 @@ func _refresh_notification_center() -> void:
 
 		return
 
+	var section_heading := Label.new()
+	section_heading.text = "Aujourd’hui"
+	section_heading.add_theme_font_size_override("font_size", 12)
+	section_heading.add_theme_color_override("font_color", Color("596780"))
+	entries.add_child(section_heading)
+
 	for i in range(_notification_history.size() - 1, -1, -1):
 
 		var item: Dictionary = _notification_history[i]
 
 		var card := PanelContainer.new()
-
-		card.add_theme_stylebox_override("panel", _flat_style(Color.WHITE, 10))
+		var card_style := _flat_style(Color("ffffff"), 10)
+		card_style.set_border_width_all(1)
+		card_style.border_color = Color("dce4ef")
+		card.add_theme_stylebox_override("panel", card_style)
 
 		var padding := MarginContainer.new()
 
