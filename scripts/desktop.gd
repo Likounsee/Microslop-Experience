@@ -4036,12 +4036,7 @@ func _render_orchid_workday_stage(app: Control, state: Dictionary) -> void:
 		option_button.text = str(options[i])
 		option_button.custom_minimum_size = Vector2(0, 38)
 		option_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		option_button.pressed.connect(func():
-			CampaignStore.save_case_answer("workday_choice_%02d" % stage, i)
-			result.text = str(results[i])
-			continue_button.disabled = false
-			_show_notification("Choix enregistré", "Votre décision pour « %s » est conservée." % str(task["title"]))
-		)
+		option_button.pressed.connect(_choose_orchid_workday_option.bind(stage, i, task, result, continue_button))
 		content.add_child(option_button)
 	content.add_child(result)
 	continue_button.pressed.connect(func():
@@ -4056,6 +4051,19 @@ func _render_orchid_workday_stage(app: Control, state: Dictionary) -> void:
 	var appear := create_tween()
 	app.modulate.a = 0.0
 	appear.tween_property(app, "modulate:a", 1.0, 0.16)
+
+
+func _choose_orchid_workday_option(stage: int, choice: int, task: Dictionary, result: Label, continue_button: Button) -> void:
+	var options: Array = task["options"]
+	var results: Array = task["results"]
+	if choice < 0 or choice >= options.size():
+		return
+	if CampaignStore.save_case_answer("workday_choice_%02d" % stage, choice):
+		result.text = str(results[choice])
+		continue_button.disabled = false
+		_show_notification("Choix enregistré", "Votre décision pour « %s » est conservée." % str(task["title"]))
+	else:
+		result.text = "La sauvegarde du choix a échoué. Vous pouvez réessayer."
 
 
 func _open_orchid_workday_replay() -> void:
