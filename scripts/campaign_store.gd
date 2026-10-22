@@ -56,6 +56,33 @@ func save_ending(ending: String) -> bool:
 		return false
 	return true
 
+## Persists optional ORCHID evidence IDs without disturbing mission progress or ending.
+func save_evidence(evidence_id: String) -> bool:
+	if evidence_id.strip_edges().is_empty():
+		return false
+	var config := ConfigFile.new()
+	config.load(SAVE_PATH)
+	var raw: Variant = config.get_value("campaign", "evidence", [])
+	var evidence: Array = raw if raw is Array else []
+	if not evidence.has(evidence_id):
+		evidence.append(evidence_id)
+	config.set_value("campaign", "evidence", evidence)
+	config.set_value("campaign", "version", CAMPAIGN_VERSION)
+	var error := config.save(SAVE_PATH)
+	if error != OK:
+		push_warning("Impossible d'enregistrer les indices ORCHID : %s" % error)
+		return false
+	return true
+
+
+func load_evidence() -> Array:
+	var config := ConfigFile.new()
+	if config.load(SAVE_PATH) != OK:
+		return []
+	var raw: Variant = config.get_value("campaign", "evidence", [])
+	return raw if raw is Array else []
+
+
 func load_ending() -> String:
 	var config := ConfigFile.new()
 	if config.load(SAVE_PATH) != OK:
