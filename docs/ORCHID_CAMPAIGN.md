@@ -108,3 +108,19 @@ La progression historique `mission_step` reste dans `user://campaign.cfg`. La ve
 - **Implémenté :** cinq objectifs principaux, applications simulées, note interne de mise à jour, assistant avec deux actions de réponse, recherche ORCHID, archive complète, deux choix de conclusion et persistance de la fin.
 - **Partiellement implémenté :** les conséquences de dialogue restent légères ; les indices de l'Explorateur et les interruptions sont surtout exposés par les objectifs et notifications existants.
 - **À faire avant de considérer le chapitre comme complet :** jouer le parcours de bout en bout dans Godot 4.7.2, vérifier la syntaxe, la migration d'une ancienne sauvegarde, la réouverture de l'archive, les notifications scénarisées et l'absence de régression sur les fenêtres.
+
+
+## Enquêtes interactives ajoutées — octobre 2026
+
+L’archive ORCHID propose désormais plusieurs pistes consultables séparément. Elles sont conçues comme des outils d’enquête, pas comme de simples pages de lore : les actions du joueur enregistrent des identifiants de preuve et certains écrans affichent une conclusion seulement après consultation des éléments requis.
+
+- **Journal de nuit** : cinq événements chronologiques permettent de comparer le canal de déploiement, l’installation, l’activation et la première notification. Le joueur peut rédiger une reconstruction provisoire après avoir inspecté suffisamment d’entrées.
+- **Ticket d’assistance interne** : le joueur choisit entre demander les chemins de fichiers et journaux, accepter la clôture du ticket, ou escalader vers l’équipe de déploiement. La réponse obtenue diffère selon le choix et celui-ci est sauvegardé.
+- **Enquête de satisfaction** : trois réponses apparemment distinctes sont ensuite transformées par le tableau de bord en interactions positives. Cette scène matérialise le biais de mesure au lieu de seulement l’expliquer.
+- **Banc d’essai des recommandations** : trois cas comparent une demande utilisateur, le résultat affiché et la règle de classement soupçonnée. Les cas couvrent la réparation du Wi-Fi, l’intention de quitter l’application et la demande d’une réponse courte. Une conclusion comparative est disponible après les trois consultations.
+
+### Progression et limites
+
+Les nouveaux indices utilisent CampaignStore.save_evidence et les réponses sont persistées via CampaignStore.save_case_answer. Les nouvelles clés de progression sont recommendation_audit_count et audit_common_rule, ainsi que les identifiants de preuve propres à chaque scénario. Les comptages sont des marqueurs de progression, pas des statistiques télémétriques réelles.
+
+**Validation restante :** le code a été poussé sur la branche de campagne, mais ces scènes n’ont pas été exécutées dans Godot pendant cette passe. Il faut encore vérifier le rendu des fenêtres à différentes résolutions, les captures de variables dans les callbacks GDScript et le parcours complet avec une sauvegarde existante avant de qualifier ces scènes de validées en jeu.
