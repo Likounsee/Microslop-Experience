@@ -177,8 +177,7 @@ func _add_desktop_icon(parent: VBoxContainer, glyph: String, caption: String, ca
 	content.add_child(caption_label)
 	button.pressed.connect(func():
 		for sibling in parent.get_children():
-			if sibling is Button:
-				sibling.add_theme_stylebox_override("normal", _flat_style(Color(0.1, 0.2, 0.38, 0.0), 7))
+			if sibling is Button:				sibling.add_theme_stylebox_override("normal", _flat_style(Color(0.1, 0.2, 0.38, 0.0), 7))
 		button.add_theme_stylebox_override("normal", _flat_style(Color(0.35, 0.55, 0.88, 0.36), 7))
 	)
 	button.gui_input.connect(func(event: InputEvent):
@@ -201,12 +200,12 @@ func _build_taskbar() -> void:
 	taskbar.offset_right = 410
 	taskbar.offset_top = -72
 	taskbar.offset_bottom = -12
-	var panel_style := _flat_style(Color(0.88, 0.92, 0.98, 0.84), 16)
+	var panel_style := _flat_style(Color(0.88, 0.92, 0.98, 0.76), 16)
 	panel_style.shadow_color = Color(0.02, 0.04, 0.10, 0.28)
 	panel_style.shadow_size = 18
 	panel_style.shadow_offset = Vector2(0, 4)
 	panel_style.set_border_width_all(1)
-	panel_style.border_color = Color("d2dce9")
+	panel_style.border_color = Color(1, 1, 1, 0.78)
 	taskbar.add_theme_stylebox_override("panel", panel_style)
 	add_child(taskbar)
 
@@ -341,7 +340,7 @@ func _build_calendar_panel() -> void:
 	panel_style.shadow_size = 20
 	panel_style.shadow_offset = Vector2(0, 5)
 	panel_style.set_border_width_all(1)
-	panel_style.border_color = Color(1, 1, 1, 0.70)
+	panel_style.border_color = Color(1, 1, 1, 0.82)
 	_calendar_panel.add_theme_stylebox_override("panel", panel_style)
 	add_child(_calendar_panel)
 
@@ -358,7 +357,6 @@ func _build_calendar_panel() -> void:
 	heading.add_theme_font_size_override("font_size", 18)
 	heading.add_theme_color_override("font_color", Color("1d2a40"))
 	layout.add_child(heading)
-
 	var today := Label.new()
 	today.text = _get_french_long_date()
 	today.add_theme_font_size_override("font_size", 25)
@@ -418,12 +416,12 @@ func _build_notification_center() -> void:
 	_notification_center.offset_top = -520
 	_notification_center.offset_bottom = -76
 	_notification_center.visible = false
-	var style := _flat_style(Color("edf2f9", 0.96), 18)
+	var style := _flat_style(Color("edf2f9", 0.94), 18)
 	style.shadow_color = Color(0.02, 0.04, 0.10, 0.32)
 	style.shadow_size = 22
 	style.shadow_offset = Vector2(0, 5)
 	style.set_border_width_all(1)
-	style.border_color = Color("d8e0ec")
+	style.border_color = Color(1, 1, 1, 0.78)
 	_notification_center.add_theme_stylebox_override("panel", style)
 	add_child(_notification_center)
 	var margin := MarginContainer.new()
@@ -537,8 +535,7 @@ func _refresh_notification_center() -> void:
 		var timestamp := Label.new()
 		timestamp.text = str(item.get("time", ""))
 		timestamp.add_theme_font_size_override("font_size", 10)
-		timestamp.add_theme_color_override("font_color", Color("697991"))
-		heading_row.add_child(timestamp)
+		timestamp.add_theme_color_override("font_color", Color("697991"))		heading_row.add_child(timestamp)
 		content.add_child(heading_row)
 		var body := Label.new()
 		body.text = str(item.get("message", ""))
@@ -559,12 +556,12 @@ func _build_quick_settings() -> void:
 	_quick_settings_panel.offset_top = -370
 	_quick_settings_panel.offset_bottom = -76
 	_quick_settings_panel.visible = false
-	var panel_style := _flat_style(Color(0.89, 0.93, 0.98, 0.95), 18)
+	var panel_style := _flat_style(Color(0.89, 0.93, 0.98, 0.93), 18)
 	panel_style.shadow_color = Color(0.02, 0.04, 0.10, 0.32)
 	panel_style.shadow_size = 22
 	panel_style.shadow_offset = Vector2(0, 5)
 	panel_style.set_border_width_all(1)
-	panel_style.border_color = Color("d3deec")
+	panel_style.border_color = Color(1, 1, 1, 0.78)
 	_quick_settings_panel.add_theme_stylebox_override("panel", panel_style)
 	add_child(_quick_settings_panel)
 
@@ -717,8 +714,7 @@ func _add_quick_toggle(parent: GridContainer, caption: String, initially_on: boo
 	parent.add_child(toggle)
 
 func _toggle_quick_settings() -> void:
-	var should_open := not _quick_settings_panel.visible
-	if should_open:
+	var should_open := not _quick_settings_panel.visible	if should_open:
 		_start_menu.visible = false
 		_start_open = false
 		_calendar_panel.visible = false
@@ -827,12 +823,12 @@ func _build_start_menu() -> void:
 	_start_menu.offset_top = -(TASKBAR_HEIGHT + 540)
 	_start_menu.offset_bottom = -(TASKBAR_HEIGHT + 12)
 	_start_menu.visible = false
-	var start_style := _flat_style(Color(0.91, 0.94, 0.98, 0.94), 18)
+	var start_style := _flat_style(Color(0.91, 0.94, 0.98, 0.92), 18)
 	start_style.shadow_color = Color(0.02, 0.04, 0.10, 0.30)
 	start_style.shadow_size = 24
 	start_style.shadow_offset = Vector2(0, 5)
 	start_style.set_border_width_all(1)
-	start_style.border_color = Color("d3deec")
+	start_style.border_color = Color(1, 1, 1, 0.78)
 	_start_menu.add_theme_stylebox_override("panel", start_style)
 	add_child(_start_menu)
 
@@ -897,8 +893,7 @@ func _build_start_menu() -> void:
 	pinned.add_theme_constant_override("v_separation", 8)
 	layout.add_child(pinned)
 	_add_pinned_app(pinned, "◎", "Browser", _open_browser)
-	_add_pinned_app(pinned, "▤", "Fichiers", _open_files)
-	_add_pinned_app(pinned, "⚙", "Paramètres", _open_settings)
+	_add_pinned_app(pinned, "▤", "Fichiers", _open_files)	_add_pinned_app(pinned, "⚙", "Paramètres", _open_settings)
 	_add_pinned_app(pinned, "✧", "Microslop AI", _open_ai)
 	_add_pinned_app(pinned, "↻", "Mise à jour", _trigger_update)
 	_add_pinned_app(pinned, "▧", "Corbeille", _open_recycle_bin)
@@ -1077,8 +1072,7 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 			icon_color = Color("e6b43c")
 			icon_glyph = "▰"
 		"Paramètres":
-			icon_color = Color("65758b")
-			icon_glyph = "⚙"
+			icon_color = Color("65758b")			icon_glyph = "⚙"
 		"Microslop AI":
 			icon_color = Color("7868d8")
 			icon_glyph = "✧"
@@ -1257,8 +1251,7 @@ func _animate_flyout(panel: Control, opening: bool, from_bottom: bool) -> void:
 		tween.tween_property(panel, "scale", Vector2(0.97, 0.97), 0.10)
 		tween.chain().tween_callback(func():
 			if is_instance_valid(panel):
-				panel.visible = false
-				panel.modulate.a = 1.0
+				panel.visible = false				panel.modulate.a = 1.0
 				panel.scale = Vector2.ONE
 		)
 		if panel == _start_menu:
@@ -1437,7 +1430,6 @@ func _open_files() -> void:
 		nav_buttons.append(nav_item)
 		sidebar.add_child(nav_item)
 	address.set_meta("explorer_nav_buttons", nav_buttons)
-
 	var right_pane := VBoxContainer.new()
 	right_pane.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right_pane.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -1617,7 +1609,6 @@ func _open_browser() -> void:
 		results.text = "Résultats pour : « %s »\\n\\n1. Microslop Premium — SPONSORISÉ\\n2. Microslop AI — recommandé\\n3. Résultat utile masqué par les annonces." % address.text
 	)
 	content.add_child(search)
-
 func _open_recycle_bin() -> void:
 	_open_window("Corbeille", "La corbeille est vide.\n\nElle a tout de même besoin d'une mise à jour de 4,7 Go.", Vector2(440, 240))
 
@@ -1797,8 +1788,7 @@ func _add_settings_section(parent: VBoxContainer, heading_text: String, subtitle
 	heading.add_theme_font_size_override("font_size", 18)
 	heading.add_theme_color_override("font_color", Color("17243a"))
 	parent.add_child(heading)
-	var subtitle := Label.new()
-	subtitle.text = subtitle_text
+	var subtitle := Label.new()	subtitle.text = subtitle_text
 	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	subtitle.add_theme_font_size_override("font_size", 11)
 	subtitle.add_theme_color_override("font_color", Color("66758b"))
@@ -1975,10 +1965,9 @@ func _show_desktop_context_menu(pointer: Vector2) -> void:
 		menu_style.shadow_size = 18
 		menu_style.shadow_offset = Vector2(0, 4)
 		menu_style.set_border_width_all(1)
-		menu_style.border_color = Color("d8e0ec")
+		menu_style.border_color = Color(1, 1, 1, 0.78)
 		_desktop_context_menu.add_theme_stylebox_override("panel", menu_style)
-		var margin := MarginContainer.new()
-		for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+		var margin := MarginContainer.new()		for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
 			margin.add_theme_constant_override(side, 5)
 		_desktop_context_menu.add_child(margin)
 		var items := VBoxContainer.new()
