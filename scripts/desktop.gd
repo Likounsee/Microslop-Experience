@@ -2377,6 +2377,7 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 	var button := Button.new()
 
 	button.set_meta("app_name", caption.to_lower())
+	button.set_meta("search_terms", _app_search_terms(caption))
 
 	button.tooltip_text = "Ouvrir %s" % caption
 
@@ -2529,6 +2530,23 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 
 	parent.add_child(button)
 
+func _app_search_terms(caption: String) -> String:
+	var aliases := ""
+	match caption.to_lower():
+		"browser", "microslop browser", "navigateur":
+			aliases = " navigateur internet web chrome edge "
+		"fichiers", "explorateur de fichiers":
+			aliases = " explorateur fichiers file explorer dossier documents "
+		"paramètres":
+			aliases = " settings configuration systeme système options "
+		"microslop ai":
+			aliases = " ia intelligence artificielle assistant copilot "
+		"mise à jour":
+			aliases = " update windows update actualisation "
+		"corbeille":
+			aliases = " recycle bin supprimés suppression "
+	return aliases
+
 func _filter_pinned_apps(query: String) -> void:
 
 	var normalized_query := query.strip_edges().to_lower()
@@ -2542,8 +2560,9 @@ func _filter_pinned_apps(query: String) -> void:
 		if is_instance_valid(button):
 
 			var app_name := str(button.get_meta("app_name", ""))
+			var search_terms := str(button.get_meta("search_terms", ""))
 
-			button.visible = normalized_query.is_empty() or app_name.contains(normalized_query)
+			button.visible = normalized_query.is_empty() or app_name.contains(normalized_query) or search_terms.contains(normalized_query)
 
 			if button.visible:
 
@@ -2622,6 +2641,8 @@ func _add_all_apps_entry(glyph: String, caption: String, callback: Callable) -> 
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	button.custom_minimum_size.y = 42
 	button.set_meta("app_name", caption.to_lower())
+	button.set_meta("search_terms", _app_search_terms(caption))
+	button.tooltip_text = "Ouvrir %s" % caption
 	button.add_theme_color_override("font_color", Color("263247"))
 	button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 7))
 	button.add_theme_stylebox_override("hover", _flat_style(Color("dce8f8"), 7))
