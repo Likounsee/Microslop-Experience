@@ -3735,8 +3735,10 @@ func _open_orchid_casebook() -> void:
 	var content := _get_window_content(app)
 	if content == null:
 		return
-	for child in content.get_children():
-		child.queue_free()
+	while content.get_child_count() > 0:
+		var old_child := content.get_child(0)
+		content.remove_child(old_child)
+		old_child.queue_free()
 
 	var intro := Label.new()
 	intro.text = "Ne vous contentez pas du rapport final. Comparez les traces laissées par plusieurs applications. Certaines pièces semblent innocentes isolément ; ensemble, elles racontent autre chose."
