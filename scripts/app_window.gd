@@ -55,7 +55,9 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 
 	var titlebar := PanelContainer.new()
 	titlebar.name = "TitleBar"
-	var titlebar_style := _panel_style(Color("eef3fa"), Color("eef3fa"))
+	var titlebar_style := _panel_style(Color("eef3fa"), Color("d8e1ee"))
+	titlebar_style.set_border_width_all(1)
+	titlebar_style.border_width_bottom = 1
 	titlebar_style.set_corner_radius_all(12)
 	titlebar_style.corner_radius_bottom_left = 0
 	titlebar_style.corner_radius_bottom_right = 0
