@@ -3765,6 +3765,130 @@ func _open_orchid_archive() -> void:
 	campaign_dashboard.text = "Ouvrir le tableau de synthèse de campagne"
 	campaign_dashboard.pressed.connect(_open_orchid_campaign_dashboard)
 	content.add_child(campaign_dashboard)
+	var field_investigation := Button.new()
+	field_investigation.text = "Lancer l’enquête de terrain — 12 défis interactifs"
+	field_investigation.pressed.connect(_open_orchid_field_investigation)
+	content.add_child(field_investigation)
+
+
+## A longer, gated investigation: twelve decisions across three acts.
+## Correct answers unlock the next task; progress is persisted between sessions.
+func _open_orchid_field_investigation() -> void:
+	var app := _open_window("Enquête de terrain — ORCHID", "DOSSIER INTERACTIF · 3 ACTES · 12 DÉFIS", Vector2(760, 620))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	var state := {"stage": 0}
+	var evidence: Array = CampaignStore.load_evidence()
+	for i in range(12):
+		if evidence.has("field_stage_%02d" % i):
+			state["stage"] = i + 1
+		else:
+			break
+	_render_orchid_field_stage(app, state)
+
+
+func _orchid_field_tasks() -> Array:
+	return [
+		{"act":"ACTE I — RECONSTITUER LA NUIT", "title":"1. Vérifier l’ordre des événements", "brief":"Trois lignes ont été extraites du journal. L’horloge est synchronisée ; les heures sont comparables. Installation du paquet : 21:47. Activation du composant : 21:49. Première notification : 08:11 le lendemain.", "question":"Quelle conclusion est directement soutenue par ces heures ?", "options":["La notification est antérieure à l’installation.", "L’activation précède la première notification observée.", "Le journal prouve qui a déclenché le déploiement."], "correct":1, "hint":"Comparez les trois heures sans attribuer une intention ou une identité que le journal ne contient pas.", "explanation":"L’installation précède l’activation, elle-même antérieure à la notification observée. La chronologie établit un ordre, pas l’identité de l’auteur.", "evidence":"field_stage_00"},
+		{"act":"ACTE I — RECONSTITUER LA NUIT", "title":"2. Détecter l’écart de canal", "brief":"Manifeste source : DEV_RING_INTERNAL. Cible inscrite dans le journal de mise à jour : STABLE / utilisateur final. Aucun ticket de dérogation n’est référencé.", "question":"Quel est le problème le plus solide à signaler ?", "options":["Le paquet est forcément falsifié.", "Le canal de développement ne correspond pas à la cible publique.", "La signature prouve qu’un responsable a autorisé la diffusion."], "correct":1, "hint":"La signature porte sur l’intégrité et l’origine du paquet, pas sur le canal qui devait le recevoir.", "explanation":"Le canal source et la cible ne correspondent pas. C’est un écart de diffusion ; seul, il ne permet pas de distinguer erreur d’automatisation et décision volontaire.", "evidence":"field_stage_01"},
+		{"act":"ACTE I — RECONSTITUER LA NUIT", "title":"3. Examiner la notification des 18 fichiers", "brief":"La notification annonce « 18 fichiers analysés ». Les détails n’affichent ni chemins, ni noms, ni empreinte, ni résultat de scan. Le journal interne classe l’événement comme notification d’engagement.", "question":"Quelle affirmation peut être défendue ?", "options":["Dix-huit fichiers personnels ont nécessairement été lus.", "La notification ne fournit pas de preuve vérifiable d’une analyse de fichiers.", "Les fichiers ont été supprimés."], "correct":1, "hint":"Séparez ce que le message prétend de ce que les traces permettent de vérifier.", "explanation":"Le message ne contient aucune trace de fichiers traités. L’indice soutient une alerte non vérifiable, pas une conclusion sur l’accès ou la suppression de documents.", "evidence":"field_stage_02"},
+		{"act":"ACTE I — RECONSTITUER LA NUIT", "title":"4. Choisir la prochaine vérification", "brief":"Vous avez l’heure d’activation et l’écart de canal, mais aucun ticket d’approbation. Le rapport de conception décrit une mesure de rétention, sans nom de responsable.", "question":"Quelle action renforce le mieux le dossier ?", "options":["Publier immédiatement le nom d’un employé supposé.", "Conserver les journaux originaux et demander le ticket d’approbation manquant.", "Supprimer les traces ambiguës pour simplifier le récit."], "correct":1, "hint":"La prochaine action devrait réduire l’incertitude et préserver les sources.", "explanation":"Préserver les originaux et rechercher la référence d’approbation permet de tester les hypothèses sans accuser quelqu’un sans preuve.", "evidence":"field_stage_03"},
+		{"act":"ACTE II — TESTER LE COMPORTEMENT", "title":"5. Comparer l’intention à la recherche", "brief":"Requête de test : « désactiver les notifications ». Le premier résultat est sponsorisé et recommande davantage de notifications. Le réglage pertinent apparaît plus bas.", "question":"Quel test permet de mesurer le détournement sans se fier à une seule capture ?", "options":["Répéter plusieurs requêtes de désactivation et comparer l’ordre des résultats.", "Compter uniquement le nombre de couleurs dans la page.", "Conclure que chaque résultat sponsorisé est illégal."], "correct":0, "hint":"Il faut un protocole reproductible et une comparaison entre intention et classement.", "explanation":"Des requêtes répétées et documentées permettent d’observer si le réglage utile est systématiquement relégué. Le résultat sponsorisé seul ne prouve pas une violation.", "evidence":"field_stage_04"},
+		{"act":"ACTE II — TESTER LE COMPORTEMENT", "title":"6. Comprendre la métrique", "brief":"Le tableau de bord mesure le retour dans l’application après une notification. Il ne mesure pas directement si la tâche de l’utilisateur a été accomplie ni s’il souhaitait recevoir l’alerte.", "question":"Quelle faiblesse méthodologique cela révèle-t-il ?", "options":["Le taux de retour suffit à prouver que les utilisateurs sont satisfaits.", "La métrique d’engagement est utilisée comme substitut à l’utilité réelle.", "Aucune mesure chiffrée ne peut jamais être utilisée."], "correct":1, "hint":"Une personne peut revenir parce qu’elle est distraite ou contrariée, pas parce qu’elle a été aidée.", "explanation":"Le retour est un indicateur d’activité, pas une mesure directe de satisfaction ou de réussite. Le confondre avec l’utilité peut récompenser des interruptions nuisibles.", "evidence":"field_stage_05"},
+		{"act":"ACTE II — TESTER LE COMPORTEMENT", "title":"7. Repérer la répétition du mécanisme", "brief":"Trois tests montrent le même schéma : le réglage Wi-Fi est relégué, la sortie est interrompue par une carte, et la réponse courte est fragmentée pour inviter à continuer.", "question":"Quelle hypothèse explique le mieux ces observations sans dépasser les preuves ?", "options":["Trois erreurs totalement indépendantes sont certaines.", "Un objectif commun de prolongation des interactions est compatible avec les trois cas.", "Ces cas identifient avec certitude une personne responsable."], "correct":1, "hint":"Une règle commune peut expliquer un motif répété, mais pas nécessairement qui l’a conçue.", "explanation":"Les cas convergent vers un mécanisme de rétention. Ils n’établissent ni l’auteur individuel ni la chaîne exacte de décision.", "evidence":"field_stage_06"},
+		{"act":"ACTE II — TESTER LE COMPORTEMENT", "title":"8. Construire un test équitable", "brief":"Vous devez comparer deux versions d’une notification. Les résultats actuels ne distinguent pas tâche terminée, clic accidentel, fermeture de la fenêtre et retour volontaire.", "question":"Quel protocole produit la comparaison la plus informative ?", "options":["Mesurer seulement le nombre de clics sur la version qui interrompt le plus.", "Définir à l’avance tâche terminée, désactivation choisie et retours non sollicités, puis comparer les deux versions.", "Changer le texte, l’heure et la fréquence en même temps sans consigner les changements."], "correct":1, "hint":"Un bon test définit les critères avant de mesurer et évite de changer plusieurs variables simultanément.", "explanation":"Des critères explicites et une comparaison contrôlée aident à distinguer utilité et engagement. Ils empêchent de présenter une hausse de clics comme une amélioration automatique.", "evidence":"field_stage_07"},
+		{"act":"ACTE III — ÉTABLIR LES RESPONSABILITÉS", "title":"9. Évaluer la signature", "brief":"La signature du paquet est valide et l’empreinte correspond au registre interne. Le canal public ne correspond toutefois pas au canal de développement et la référence d’approbation est absente.", "question":"Que prouve la signature ?", "options":["Que la diffusion publique a été approuvée.", "Que le paquet correspond à une origine signée et n’a pas été modifié depuis la signature, dans les limites du mécanisme.", "Que le comportement du composant est acceptable."], "correct":1, "hint":"Intégrité, autorisation et qualité du comportement sont trois contrôles différents.", "explanation":"Une signature valide ne remplace ni l’approbation de diffusion ni une évaluation du comportement. Les contrôles doivent rester séparés.", "evidence":"field_stage_08"},
+		{"act":"ACTE III — ÉTABLIR LES RESPONSABILITÉS", "title":"10. Lire le ticket d’assistance", "brief":"Le support a reçu trois signalements similaires. La réponse modèle conseille de « personnaliser les préférences », mais ne fournit ni chemin de désactivation ni numéro de version. Les signalements ont été classés comme demandes de confort.", "question":"Quelle pièce supplémentaire serait la plus utile ?", "options":["Le nombre de mots dans la réponse modèle.", "L’historique de classification des tickets et la version du modèle de réponse utilisé.", "Une estimation du caractère de la personne qui a écrit le ticket."], "correct":1, "hint":"Cherchez une trace vérifiable qui relie les plaintes à une règle de traitement.", "explanation":"Les versions du modèle et l’historique de classement permettent de vérifier si les plaintes ont été systématiquement détournées. Le style du message n’est pas une preuve.", "evidence":"field_stage_09"},
+		{"act":"ACTE III — ÉTABLIR LES RESPONSABILITÉS", "title":"11. Préparer une conclusion défendable", "brief":"Le dossier contient un écart de canal, une approbation absente, une métrique de rétention et trois exemples de classement biaisé. Aucun journal ne nomme la personne qui a autorisé la mise en production.", "question":"Quelle formulation devrait figurer dans le rapport ?", "options":["« Nous avons identifié avec certitude le coupable. »", "« Plusieurs traces convergent vers un mécanisme de rétention ; l’auteur et l’intention initiale ne sont pas établis. »", "« Aucun problème n’existe puisqu’une signature est valide. »"], "correct":1, "hint":"Énoncez les faits convergents et gardez explicitement les inconnues.", "explanation":"Cette formulation rend compte du faisceau de preuves sans transformer une hypothèse en accusation.", "evidence":"field_stage_10"},
+		{"act":"ACTE III — ÉTABLIR LES RESPONSABILITÉS", "title":"12. Décider de la suite", "brief":"Le rapport est suffisamment étayé pour demander une revue, mais il reste des questions sur l’origine du déploiement. La publication peut protéger d’autres utilisateurs ; une copie locale préserve les traces sans garantir de correction.", "question":"Quelle décision correspond le mieux à une enquête prudente ?", "options":["Effacer les journaux et déclarer l’affaire résolue.", "Conserver les originaux, transmettre les faits sourcés et demander la suspension du canal jusqu’à vérification.", "Affirmer que l’incident est volontaire sans demander d’autres éléments."], "correct":1, "hint":"Privilégiez la conservation des preuves, une formulation sourcée et une action proportionnée au risque.", "explanation":"La décision recommandée combine préservation, transparence sur les limites et demande de contrôle. Elle ne ferme pas prématurément les questions encore ouvertes.", "evidence":"field_stage_11"}
+	]
+
+
+func _render_orchid_field_stage(app: Control, state: Dictionary) -> void:
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var old_child := content.get_child(0)
+		content.remove_child(old_child)
+		old_child.queue_free()
+	var tasks := _orchid_field_tasks()
+	var stage := int(state.get("stage", 0))
+	var progress := Label.new()
+	progress.text = "PROGRESSION : %d / %d défis validés" % [mini(stage, tasks.size()), tasks.size()]
+	content.add_child(progress)
+	var bar := ProgressBar.new()
+	bar.min_value = 0
+	bar.max_value = tasks.size()
+	bar.value = stage
+	bar.show_percentage = true
+	content.add_child(bar)
+	if stage >= tasks.size():
+		var final_report := Label.new()
+		final_report.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		final_report.text = "ENQUÊTE DE TERRAIN TERMINÉE\n\nVous avez résolu les douze défis répartis sur trois actes : chronologie, comportement et conformité. Les conclusions reposent sur des traces conservées, pas sur l’identification spéculative d’un coupable.\n\nLe dossier de terrain est sauvegardé. Vous pouvez maintenant comparer cette enquête au comité d’incident ou reprendre les scènes précédentes pour compléter les pièces manquantes."
+		content.add_child(final_report)
+		CampaignStore.save_evidence("field_investigation_completed")
+		var dashboard := Button.new()
+		dashboard.text = "Ouvrir le tableau de synthèse"
+		dashboard.pressed.connect(_open_orchid_campaign_dashboard)
+		content.add_child(dashboard)
+		var archive := Button.new()
+		archive.text = "Retour à l’archive ORCHID"
+		archive.pressed.connect(_open_orchid_archive)
+		content.add_child(archive)
+		return
+	var task: Dictionary = tasks[stage]
+	var heading := Label.new()
+	heading.text = str(task["act"]) + "\n" + str(task["title"])
+	heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	heading.add_theme_color_override("font_color", Color("164a87"))
+	content.add_child(heading)
+	var brief := Label.new()
+	brief.text = str(task["brief"])
+	brief.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content.add_child(brief)
+	var question := Label.new()
+	question.text = "\nDÉCISION À PRENDRE\n" + str(task["question"])
+	question.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content.add_child(question)
+	var feedback := Label.new()
+	feedback.text = "Choisissez une réponse. Une mauvaise réponse ne bloque pas définitivement l’enquête : vous pouvez réessayer."
+	feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	feedback.custom_minimum_size = Vector2(0, 84)
+	content.add_child(feedback)
+	var next_button := Button.new()
+	next_button.text = "Défi suivant"
+	next_button.disabled = true
+	next_button.pressed.connect(func():
+		state["stage"] = stage + 1
+		_render_orchid_field_stage(app, state)
+	)
+	content.add_child(next_button)
+	var options: Array = task["options"]
+	for i in range(options.size()):
+		var answer_button := Button.new()
+		answer_button.text = "%d. %s" % [i + 1, str(options[i])]
+		answer_button.custom_minimum_size = Vector2(0, 44)
+		answer_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		answer_button.pressed.connect(_answer_orchid_field_stage.bind(app, state, stage, i, feedback, next_button))
+		content.add_child(answer_button)
+
+
+func _answer_orchid_field_stage(app: Control, state: Dictionary, stage: int, answer: int, feedback: Label, next_button: Button) -> void:
+	var tasks := _orchid_field_tasks()
+	if stage < 0 or stage >= tasks.size():
+		return
+	var task: Dictionary = tasks[stage]
+	CampaignStore.save_case_answer("field_stage_%02d" % stage, answer)
+	if answer == int(task["correct"]):
+		CampaignStore.save_evidence(str(task["evidence"]))
+		feedback.text = "TRACE VALIDÉE\n\n%s\n\nNouvelle pièce ajoutée au dossier. La progression est sauvegardée." % str(task["explanation"])
+		next_button.disabled = false
+	else:
+		feedback.text = "RÉPONSE INSUFFISANTE\n\n%s\n\nRelisez les traces et essayez une autre réponse. Le défi suivant reste verrouillé jusqu’à validation." % str(task["hint"])
+		next_button.disabled = true
 
 
 ## Consolidates discoveries and player decisions into a persistent case status.
