@@ -2642,7 +2642,7 @@ func _open_window(title: String, message: String, window_size := Vector2(520, 30
 		_show_notification("Fichier manquant", "Impossible d’ouvrir une fenêtre : scripts/app_window.gd est absent ou contient une erreur.")
 		return
 
-	var app_instance := app_script.new()
+	var app_instance: Object = app_script.new()
 	if not app_instance is Control:
 		push_error("%s doit hériter de Control." % APP_WINDOW_SCRIPT_PATH)
 		return
