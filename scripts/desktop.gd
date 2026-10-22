@@ -89,7 +89,7 @@ func _layout_shell_for_viewport() -> void:
 
 		var menu_width := minf(620.0, maxf(260.0, viewport_size.x - 24.0))
 
-		var menu_height := minf(520.0, maxf(360.0, viewport_size.y - 96.0))
+		var menu_height := minf(520.0, maxf(300.0, viewport_size.y - 96.0))
 
 		_start_menu.offset_left = -menu_width / 2.0
 
@@ -98,6 +98,22 @@ func _layout_shell_for_viewport() -> void:
 		_start_menu.offset_top = -(menu_height + TASKBAR_HEIGHT + 12.0)
 
 		_start_menu.offset_bottom = -(TASKBAR_HEIGHT + 12.0)
+
+		if is_instance_valid(_pinned_grid):
+
+			_pinned_grid.columns = 3 if menu_width >= 560.0 else 2
+
+			var button_width := maxf(100.0, (menu_width - 64.0 - float(_pinned_grid.columns - 1) * 10.0) / float(_pinned_grid.columns))
+
+			for pinned_button in _pinned_grid.get_children():
+
+				if pinned_button is Control:
+
+					pinned_button.custom_minimum_size.x = button_width
+
+		if is_instance_valid(_all_apps_button):
+
+			_all_apps_button.text = "Tous  ›"
 
 	if is_instance_valid(_calendar_panel):
 
