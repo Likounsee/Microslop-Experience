@@ -3874,7 +3874,6 @@ func _open_orchid_lab() -> void:
 			var choice := Button.new()
 			choice.text = str(puzzle["options"][option_index])
 			choice.alignment = HORIZONTAL_ALIGNMENT_LEFT
-			choice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			choice.custom_minimum_size.y = 42
 			choice.add_theme_color_override("font_color", Color("263247"))
 			choice.pressed.connect(_answer_orchid_lab.bind(puzzle, option_index, feedback, progress, puzzles.size()))
