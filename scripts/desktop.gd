@@ -3748,6 +3748,63 @@ func _open_orchid_archive() -> void:
 	survey.text = "Examiner l’enquête de satisfaction biaisée"
 	survey.pressed.connect(_open_orchid_survey)
 	content.add_child(survey)
+	var recommendation_audit := Button.new()
+	recommendation_audit.text = "Auditer les recommandations ORCHID (3 cas)"
+	recommendation_audit.pressed.connect(_open_orchid_recommendation_audit)
+	content.add_child(recommendation_audit)
+
+
+func _open_orchid_recommendation_audit() -> void:
+	var app := _open_window("Audit des recommandations ORCHID", "BANC D’ESSAI · TRACES LOCALES", Vector2(700, 540))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var old_child := content.get_child(0)
+		content.remove_child(old_child)
+		old_child.queue_free()
+	var intro := Label.new()
+	intro.text = "Trois personnes ont formulé des demandes simples. Comparez la demande, le résultat affiché et la règle de classement cachée. Chaque fiche consultée ajoute une pièce au dossier."
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content.add_child(intro)
+	var detail := Label.new()
+	detail.text = "Sélectionnez un cas pour afficher les traces."
+	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	detail.custom_minimum_size = Vector2(0, 145)
+	content.add_child(detail)
+	var status := Label.new()
+	status.text = "Cas examinés : %d / 3" % int(CampaignStore.load_case_answer("recommendation_audit_count", 0))
+	content.add_child(status)
+	var cases := [
+		["Trouver le réglage Wi-Fi", "Le diagnostic réseau est relégué sous deux recommandations sponsorisées.", "Le classement récompense les sessions prolongées, même si la résolution est retardée.", "audit_wifi"],
+		["Fermer l’application", "Une carte « Avant de partir… » apparaît avant le bouton de fermeture.", "Une intention de sortie est traitée comme un risque d’engagement à récupérer.", "audit_exit"],
+		["Obtenir une réponse courte", "La réponse est tronquée et un bouton invite à continuer avec ORCHID.", "Une réponse complète est fragmentée lorsqu’une étape supplémentaire augmente les interactions.", "audit_answer"]
+	]
+	for item in cases:
+		var case_button := Button.new()
+		case_button.text = str(item[0])
+		case_button.custom_minimum_size = Vector2(0, 38)
+		case_button.pressed.connect(func():
+			detail.text = "DEMANDE\n%s\n\nRÉSULTAT\n%s\n\nRÈGLE CACHÉE\n%s" % [item[0], item[1], item[2]]
+			CampaignStore.save_evidence(str(item[3]))
+			var count := int(CampaignStore.load_case_answer("recommendation_audit_count", 0))
+			if count < 3:
+				count += 1
+				CampaignStore.save_case_answer("recommendation_audit_count", count)
+			status.text = "Cas examinés : %d / 3 — pièce ajoutée" % count
+		)
+		content.add_child(case_button)
+	var conclusion := Button.new()
+	conclusion.text = "Comparer les trois règles"
+	conclusion.pressed.connect(func():
+		if int(CampaignStore.load_case_answer("recommendation_audit_count", 0)) >= 3:
+			detail.text = "CONCLUSION\n\nLes trois demandes différentes sont ramenées à la même métrique : provoquer une interaction supplémentaire. Résoudre, quitter et demander de l’aide deviennent des occasions de retenir la personne. La répétition suggère une règle commune de classement plutôt qu’une erreur isolée d’interface."
+			CampaignStore.save_evidence("audit_common_rule")
+			CampaignStore.save_case_answer("audit_common_rule", 1)
+		else:
+			detail.text = "Conclusion incomplète : examinez les trois cas pour comparer leurs règles."
+	)
+	content.add_child(conclusion)
 
 
 ## Additional playable investigative scenes broaden the chapter beyond reading the final report.
