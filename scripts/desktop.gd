@@ -3781,7 +3781,7 @@ func _open_orchid_cinematic() -> void:
 	var app := _open_window("Microslop Experience — Séquence narrative", "CHAPITRE 1 · LA MISE À JOUR DE TROP", Vector2(820, 620))
 	var state := {"stage": 0}
 	var evidence: Array = CampaignStore.load_evidence()
-	for i in range(10):
+	for i in range(30):
 		if evidence.has("cinematic_scene_%02d" % i):
 			state["stage"] = i + 1
 		else:
