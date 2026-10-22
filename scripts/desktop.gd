@@ -3697,7 +3697,7 @@ func _open_browser() -> void:
 func _open_orchid_task_sprint() -> void:
 	var app := _open_window("Sprint de travail — ORCHID", "SIMULATION ACTIVE · 13 TÂCHES · SAUVEGARDE LOCALE", Vector2(760, 620))
 	var state := {
-		"stage": clampi(CampaignStore.load_case_answer("orchid_sprint_stage"), 0, 5),
+		"stage": clampi(CampaignStore.load_case_answer("orchid_sprint_stage"), 0, 13),
 		"score": CampaignStore.load_case_answer("orchid_sprint_score") if CampaignStore.load_case_answer("orchid_sprint_score") >= -10 else 0,
 		"interrupted": maxi(0, CampaignStore.load_case_answer("orchid_sprint_interruptions"))
 	}
@@ -3776,7 +3776,26 @@ func _render_orchid_task_sprint(app: Control, state: Dictionary) -> void:
 	title.add_theme_font_size_override("font_size", 24)
 	content.add_child(title)
 	var brief := Label.new()
-	brief.text = str(task["brief"])
+	var brief_text := str(task["brief"])
+	if stage == 6:
+		var interruption_choice := CampaignStore.load_case_answer("orchid_sprint_choice_01")
+		if interruption_choice == 2:
+			brief_text += "\n\nCONSÉQUENCE : vous avez choisi le mode digest plus tôt. Le rapport doit vérifier que la baisse des interruptions n’a pas masqué une alerte système."
+		elif interruption_choice == 1:
+			brief_text += "\n\nCONSÉQUENCE : l’ouverture immédiate de la promotion a gonflé les retours comptés comme engagement. Comparez-les aux tâches terminées."
+	if stage == 9:
+		var alert_choice := CampaignStore.load_case_answer("orchid_sprint_choice_03")
+		if alert_choice == 2:
+			brief_text += "\n\nRAPPEL DE L’INCIDENT : vous aviez choisi de couper toutes les alertes. Vérifiez que la nouvelle politique ne répète pas ce risque."
+		else:
+			brief_text += "\n\nRAPPEL DE L’INCIDENT : le contrôle doit distinguer les alertes système des promotions, même si certaines sollicitations semblaient urgentes."
+	if stage == 11:
+		var evidence_choice := CampaignStore.load_case_answer("orchid_sprint_choice_10")
+		if evidence_choice == 0:
+			brief_text += "\n\nCONSÉQUENCE : l’annexe indique déjà les sources et la pièce manquante. Le correctif peut être assorti d’un test précis."
+		else:
+			brief_text += "\n\nCONSÉQUENCE : la preuve transmise est insuffisante ou spéculative. Le comité demande une validation supplémentaire avant la diffusion."
+	brief.text = brief_text
 	brief.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	brief.custom_minimum_size = Vector2(0, 90)
 	content.add_child(brief)
@@ -3807,7 +3826,17 @@ func _render_orchid_task_sprint(app: Control, state: Dictionary) -> void:
 			CampaignStore.save_case_answer("orchid_sprint_choice_%02d" % stage, i)
 			state["score"] = int(state.get("score", 0)) + score_delta
 			CampaignStore.save_case_answer("orchid_sprint_score", int(state["score"]))
-			if task.has("promo") and bool(task["promo"][i]):
+			if stage == 1 and i == 2:
+				CampaignStore.save_case_answer("orchid_notification_mode", 2)
+				CampaignStore.save_evidence("sprint_digest_policy_applied")
+				_show_notification("ORCHID · mode digest activé", "Les promotions restent dans l’historique ; les alertes système continuent de passer.")
+			elif stage == 1 and i == 1:
+				CampaignStore.save_case_answer("orchid_notification_mode", 0)
+				CampaignStore.save_evidence("sprint_promo_opened")
+				state["interrupted"] = int(state.get("interrupted", 0)) + 1
+				CampaignStore.save_case_answer("orchid_sprint_interruptions", int(state["interrupted"]))
+				_show_notification("Suggestion personnalisée", "La promotion s’ouvre pendant la relecture ; son retour compte comme engagement, pas comme réussite.")
+			elif task.has("promo") and bool(task["promo"][i]):
 				state["interrupted"] = int(state.get("interrupted", 0)) + 1
 				CampaignStore.save_case_answer("orchid_sprint_interruptions", int(state["interrupted"]))
 				_show_notification("Suggestion personnalisée", "Une recommandation sponsorisée réclame votre attention pendant une tâche. Le centre de contrôle ORCHID décide si elle apparaît.")
