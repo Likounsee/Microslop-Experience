@@ -4631,6 +4631,87 @@ func _choose_orchid_cinematic_option(stage: int, choice: int, continue_button: B
 		feedback = "Vous gardez une trace vérifiable et évitez de conclure avant d’avoir les éléments. Cette décision sera prise en compte dans le bilan final."
 	elif choice == 1:
 		feedback = "Vous privilégiez une sortie rapide ou une conclusion immédiate. Cela peut faire gagner du temps, mais laisse des questions sans réponse."
+
+	# A cinematic choice is more than a score: selected actions change the
+	# simulated desktop policy and create evidence that the archive can inspect.
+	match stage:
+		3: # The first unexplained file operation.
+			if choice == 0:
+				CampaignStore.save_evidence("orchid_cinematic_requested_operation_log")
+				feedback = "Le journal de l’opération est ajouté à votre dossier. Vous n’avez pas encore la preuve d’une suppression, seulement une demande vérifiable."
+			else:
+				CampaignStore.save_evidence("orchid_cinematic_file_notice_dismissed")
+		7: # Support testimony: preserve facts or jump to an accusation.
+			if choice == 0:
+				CampaignStore.save_evidence("orchid_cinematic_support_testimony_preserved")
+				feedback = "Le témoignage est conservé comme piste, pas comme preuve définitive. Les journaux devront le confirmer."
+			else:
+				CampaignStore.save_evidence("orchid_cinematic_unverified_accusation")
+				feedback = "L’accusation est consignée comme non vérifiée. Elle ne remplace pas les journaux manquants."
+		11: # Lea asks for help.
+			if choice == 0:
+				CampaignStore.save_evidence("orchid_cinematic_lea_collaboration")
+				CampaignStore.save_case_answer("orchid_lea_support_status", 1)
+				feedback = "Léa accepte de comparer les heures et de garder ses messages. Le dossier contient maintenant deux témoignages à recouper."
+			else:
+				CampaignStore.save_evidence("orchid_cinematic_lea_unanswered")
+				CampaignStore.save_case_answer("orchid_lea_support_status", 0)
+				feedback = "Léa poursuit seule. Vous n’avez pas ajouté son témoignage au dossier partagé."
+		13: # A one-minute focus test.
+			if choice == 0:
+				CampaignStore.save_case_answer("orchid_notification_mode", 1)
+				CampaignStore.save_case_answer("orchid_cinematic_focus_pause", 1)
+				CampaignStore.save_evidence("orchid_cinematic_focus_pause_enabled")
+				feedback = "La pause locale est activée : les notifications promotionnelles sont bloquées dans la simulation, mais les alertes système restent autorisées."
+			else:
+				CampaignStore.save_case_answer("orchid_notification_mode", 0)
+				CampaignStore.save_case_answer("orchid_cinematic_focus_pause", 0)
+				CampaignStore.save_evidence("orchid_cinematic_focus_pause_skipped")
+				feedback = "La pause n’est pas activée. Les notifications promotionnelles restent en mode standard."
+		16: # Close the recurring panel or enter its survey.
+			if choice == 0:
+				CampaignStore.save_case_answer("orchid_notification_mode", 1)
+				CampaignStore.save_evidence("orchid_cinematic_promotions_muted")
+				feedback = "Les suggestions promotionnelles sont mises en sourdine pour la simulation. Les événements déjà enregistrés restent dans l’historique."
+			else:
+				CampaignStore.save_evidence("orchid_cinematic_survey_opened")
+				feedback = "L’ouverture du questionnaire est enregistrée comme interaction, pas comme preuve de satisfaction."
+		18: # Evidence quality of the report.
+			if choice == 0:
+				CampaignStore.save_evidence("orchid_cinematic_report_fact_checked")
+				CampaignStore.save_case_answer("orchid_report_quality", 1)
+				feedback = "Le signalement factuel est marqué comme prêt à vérifier : faits, hypothèses et questions ouvertes restent séparés."
+			else:
+				CampaignStore.save_evidence("orchid_cinematic_report_unverified_claim")
+				CampaignStore.save_case_answer("orchid_report_quality", 0)
+				feedback = "Le brouillon contient une affirmation non étayée. Le bilan final signalera ce risque de crédibilité."
+		31: # Choose a useful sample size rather than collecting everything.
+			if choice == 0:
+				CampaignStore.save_evidence("orchid_cinematic_sample_protocol")
+				CampaignStore.save_case_answer("orchid_sample_protocol", 1)
+				feedback = "Un protocole d’échantillonnage daté est enregistré : heure, interruption et effet sur la tâche, sans collecte massive inutile."
+			else:
+				CampaignStore.save_evidence("orchid_cinematic_overcollection_risk")
+				CampaignStore.save_case_answer("orchid_sample_protocol", 0)
+				feedback = "Le risque de collecte excessive est enregistré. Plus de captures ne garantit ni une meilleure preuve ni le respect de la vie privée."
+		34: # Release criteria.
+			if choice == 0:
+				CampaignStore.save_evidence("orchid_cinematic_release_guardrail_requested")
+				CampaignStore.save_case_answer("orchid_release_guardrail", 1)
+				feedback = "Le garde-fou de sortie est ajouté au dossier : mesurer les tâches terminées et le respect du refus avant validation."
+			else:
+				CampaignStore.save_evidence("orchid_cinematic_release_guardrail_skipped")
+				CampaignStore.save_case_answer("orchid_release_guardrail", 0)
+				feedback = "La validation reste centrée sur les retours. Le dossier signale qu’elle pourrait confondre activité et réussite."
+		36: # Report the first limited results honestly.
+			if choice == 0:
+				CampaignStore.save_evidence("orchid_cinematic_results_reported_with_limits")
+				CampaignStore.save_case_answer("orchid_results_claim", 0)
+				feedback = "Le point d’étape conserve les limites de l’échantillon. Le résultat est encourageant, mais ne prouve pas une résolution."
+			else:
+				CampaignStore.save_evidence("orchid_cinematic_premature_success_claim")
+				CampaignStore.save_case_answer("orchid_results_claim", 1)
+				feedback = "L’annonce de réussite prématurée est consignée. Si le problème revient, la crédibilité du rapport sera fragilisée."
 	_show_notification("Conséquence narrative enregistrée", feedback)
 
 
