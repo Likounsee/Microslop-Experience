@@ -335,17 +335,41 @@ func _add_desktop_icon(parent: VBoxContainer, glyph: String, caption: String, ca
 
 	icon_tile.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 
-	var tile_color := Color("0878d1")
+	var tile_color := Color("2879d0")
+	var glyph_color := Color.WHITE
 
-	if caption == "Corbeille":
+	match caption:
+		"Corbeille":
+			tile_color = Color("dceeff")
+			glyph_color = Color("2879d0")
+		"Fichiers":
+			tile_color = Color("fff0c9")
+			glyph_color = Color("a97810")
+		"Paramètres":
+			tile_color = Color("e8edf3")
+			glyph_color = Color("65758b")
+		"Microslop AI":
+			tile_color = Color("eee8ff")
+			glyph_color = Color("7860c8")
 
-		tile_color = Color("4c9bd6")
+	var icon_style := _flat_style(tile_color, 10)
+	icon_style.set_border_width_all(1)
+	icon_style.border_color = Color(1, 1, 1, 0.78)
+	icon_style.shadow_color = Color(0.02, 0.06, 0.14, 0.20)
+	icon_style.shadow_size = 5
+	icon_style.shadow_offset = Vector2(0, 2)
+	icon_tile.add_theme_stylebox_override("panel", icon_style)
 
-	elif caption == "Fichiers":
-
-		tile_color = Color("d9a62e")
-
-	icon_tile.add_theme_stylebox_override("panel", _flat_style(tile_color, 9))
+	button.mouse_entered.connect(func():
+		var icon_tween := create_tween()
+		icon_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		icon_tween.tween_property(icon_tile, "scale", Vector2(1.06, 1.06), 0.10)
+	)
+	button.mouse_exited.connect(func():
+		var icon_tween := create_tween()
+		icon_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		icon_tween.tween_property(icon_tile, "scale", Vector2.ONE, 0.12)
+	)
 
 	content.add_child(icon_tile)
 
@@ -359,7 +383,7 @@ func _add_desktop_icon(parent: VBoxContainer, glyph: String, caption: String, ca
 
 	icon_label.add_theme_font_size_override("font_size", 22)
 
-	icon_label.add_theme_color_override("font_color", Color.WHITE)
+	icon_label.add_theme_color_override("font_color", glyph_color)
 
 	icon_tile.add_child(icon_label)
 
@@ -2476,11 +2500,11 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 
 	icon_tile_style.set_border_width_all(1)
 
-	icon_tile_style.border_color = Color(1, 1, 1, 0.48)
+	icon_tile_style.border_color = Color(1, 1, 1, 0.64)
 
-	icon_tile_style.shadow_color = Color(0.05, 0.10, 0.18, 0.16)
+	icon_tile_style.shadow_color = Color(0.04, 0.08, 0.16, 0.20)
 
-	icon_tile_style.shadow_size = 4
+	icon_tile_style.shadow_size = 5
 
 	icon_tile_style.shadow_offset = Vector2(0, 2)
 
