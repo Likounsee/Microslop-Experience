@@ -4230,6 +4230,12 @@ func _update_mission() -> void:
 		"CHAPITRE 1 TERMINÉ\nVous avez trouvé une preuve : les interruptions sont intentionnelles.\n\nMicroslop prépare déjà une enquête de satisfaction sur votre découverte."
 	]
 	_mission_label.text = missions[mini(_mission_step, missions.size() - 1)]
+	if _mission_step >= 5:
+		var saved_ending := CampaignStore.load_ending()
+		if saved_ending == "published":
+			_mission_label.text += "\n\nFIN ENREGISTRÉE : rapport transmis."
+		elif saved_ending == "preserved":
+			_mission_label.text += "\n\nFIN ENREGISTRÉE : copie locale conservée."
 	if is_instance_valid(_chapter_two_button):
 		_chapter_two_button.visible = _mission_step >= 5
 
