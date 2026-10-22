@@ -255,3 +255,10 @@ Le tableau de campagne inclut maintenant les preuves du dossier transversal et l
 ### Sprint de travail — reprise et conséquences différées
 
 La reprise du sprint accepte désormais la plage complète des treize tâches sauvegardées (au lieu de plafonner l’étape restaurée à cinq). Le choix du mode digest applique effectivement ce réglage au centre de notifications ; l’ouverture de la promotion est tracée séparément. Les tâches d’analyse des métriques, de vérification des alertes et de préparation du correctif réaffichent des conséquences liées aux choix antérieurs. Les scénarios restent fictifs ; la validation finale nécessite toujours un lancement du projet sous Godot.
+
+
+### Séquence narrative — bilan déterminé par les choix
+
+La fin des 36 scènes calcule maintenant un bilan à partir des décisions narratives enregistrées : choix prudents et documentés d’un côté, décisions précipitées de l’autre. Le texte final varie selon le résultat, sans présenter ce score fictif comme une vérité absolue ni prétendre que l’incident est résolu. Chaque décision produit aussi une preuve locale dédiée. Le bilan et son score sont sauvegardés pour être repris par les outils de synthèse.
+
+À vérifier en lancement Godot : progression et reprise des 36 scènes, affichage du bilan final avec une sauvegarde vierge puis avec plusieurs profils de choix, absence d’erreurs GDScript et rendu sur fenêtre redimensionnée. Aucune validation d’exécution Godot n’a été effectuée dans cette passe.
