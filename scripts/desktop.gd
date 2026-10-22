@@ -1472,6 +1472,14 @@ func _open_settings() -> void:
 	var body := layout.get_child(1) as MarginContainer
 	var content := body.get_child(0) as VBoxContainer
 	content.get_child(0).queue_free()
+	var settings_scroll := ScrollContainer.new()
+	settings_scroll.name = "SettingsScroll"
+	settings_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	settings_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.remove_child(content)
+	body.add_child(settings_scroll)
+	settings_scroll.add_child(content)
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	_add_settings_section(content, "Système", "Affichage et comportement de la fenêtre")
 	var display_label := Label.new()
