@@ -124,3 +124,8 @@ L’archive ORCHID donne accès à une nouvelle enquête structurée en trois ac
 ### Interactive ORCHID notification controls
 
 The ORCHID archive and campaign dashboard now expose a notification control center. The player can choose standard delivery, block promotional toasts, or keep promotional alerts in the notification history without interrupting the desktop. System-status alerts remain visible in all modes. The controls affect actual in-game toast delivery, save the selected policy in the campaign save, and provide promotional/system test buttons plus evidence checks. This is an in-game simulation only; it does not change host OS settings.
+
+
+### ORCHID task sprint
+
+The ORCHID archive now includes a separate five-task interactive work sprint: finish a document, handle a sponsored interruption, prepare for a meeting, inspect a misleading urgent alert, and report outcomes. Choices have distinct feedback and quality-score impacts. Some choices trigger simulated promotional notifications, which obey the player's saved notification policy. Stage, choices, score, and interruption count persist separately from the 41-scene workday; the sprint can be replayed from its ending screen. All scenarios are fictional and the score is a gameplay signal, not scientific productivity measurement.
