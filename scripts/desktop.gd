@@ -849,7 +849,10 @@ func _build_calendar_panel() -> void:
 	layout.add_child(agenda_heading)
 
 	var agenda_card := PanelContainer.new()
-	agenda_card.add_theme_stylebox_override("panel", _flat_style(Color("e5edf8"), 12))
+	var agenda_card_style := _flat_style(Color("e5edf8"), 12)
+	agenda_card_style.set_border_width_all(1)
+	agenda_card_style.border_color = Color("d6e2f2")
+	agenda_card.add_theme_stylebox_override("panel", agenda_card_style)
 	var agenda_margin := MarginContainer.new()
 	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
 		agenda_margin.add_theme_constant_override(side, 12)
@@ -886,6 +889,12 @@ func _build_calendar_panel() -> void:
 	notifications_button.add_theme_color_override("font_color", Color("24344d"))
 	notifications_button.add_theme_stylebox_override("normal", _flat_style(Color("e1eaf7"), 9))
 	notifications_button.add_theme_stylebox_override("hover", _flat_style(Color("d1e2f7"), 9))
+	notifications_button.add_theme_stylebox_override("pressed", _flat_style(Color("c3d9f4"), 9))
+	var notifications_focus_style := _flat_style(Color("e8f1fc"), 9)
+	notifications_focus_style.set_border_width_all(1)
+	notifications_focus_style.border_color = Color("a9c9ee")
+	notifications_button.add_theme_stylebox_override("focus", notifications_focus_style)
+	notifications_button.focus_mode = Control.FOCUS_ALL
 	notifications_button.pressed.connect(_toggle_notification_center)
 	calendar_footer.add_child(notifications_button)
 	layout.add_child(calendar_footer)
