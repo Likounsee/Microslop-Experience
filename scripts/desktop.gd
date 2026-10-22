@@ -1261,8 +1261,10 @@ func _open_files() -> void:
 		nav.add_theme_font_size_override("font_size", 17)
 		nav.add_theme_stylebox_override("normal", _flat_style(Color("edf2f8"), 8))
 		nav.add_theme_stylebox_override("hover", _flat_style(Color("dce8f7"), 8))
+		nav.pressed.connect(_explorer_toolbar_action.bind(caption, content))
 		toolbar.add_child(nav)
 	var address := LineEdit.new()
+	address.name = "ExplorerAddress"
 	address.text = "Accueil"
 	address.placeholder_text = "Chemin d’accès"
 	address.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1270,6 +1272,7 @@ func _open_files() -> void:
 	address.add_theme_stylebox_override("normal", _flat_style(Color("ffffff"), 8))
 	toolbar.add_child(address)
 	var search := LineEdit.new()
+	search.name = "ExplorerSearch"
 	search.placeholder_text = "Rechercher dans Accueil"
 	search.custom_minimum_size = Vector2(190, 34)
 	search.add_theme_stylebox_override("normal", _flat_style(Color("ffffff"), 8))
@@ -1308,6 +1311,7 @@ func _open_files() -> void:
 	right_pane.add_theme_constant_override("separation", 10)
 	main_row.add_child(right_pane)
 	var quick_title := Label.new()
+	quick_title.name = "ExplorerHeading"
 	quick_title.text = "Accès rapide"
 	quick_title.add_theme_font_size_override("font_size", 20)
 	quick_title.add_theme_color_override("font_color", Color("182235"))
@@ -1343,6 +1347,7 @@ func _open_files() -> void:
 	recent_title.add_theme_color_override("font_color", Color("182235"))
 	right_pane.add_child(recent_title)
 	var empty_state := Label.new()
+	empty_state.name = "ExplorerStatus"
 	empty_state.text = "Aucun fichier récent. Les fichiers personnels ne sont pas consultés."
 	empty_state.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	empty_state.add_theme_color_override("font_color", Color("66758b"))
@@ -1370,6 +1375,25 @@ func _open_files() -> void:
 		else:
 			empty_state.text = "Aucun fichier récent. Les fichiers personnels ne sont pas consultés."
 	)
+
+func _explorer_toolbar_action(action: String, content: VBoxContainer) -> void:
+	var address := content.find_child("ExplorerAddress", true, false) as LineEdit
+	var search := content.find_child("ExplorerSearch", true, false) as LineEdit
+	var heading := content.find_child("ExplorerHeading", true, false) as Label
+	var status := content.find_child("ExplorerStatus", true, false) as Label
+	if address == null or search == null or heading == null or status == null:
+		return
+	match action:
+		"←":
+			_set_explorer_location("Accueil", address, heading, status)
+		"→":
+			_set_explorer_location("Documents", address, heading, status)
+		"↑":
+			_set_explorer_location("Accueil", address, heading, status)
+		"⟳":
+			search.clear()
+			_set_explorer_location("Accueil", address, heading, status)
+	search.placeholder_text = "Rechercher dans %s" % address.text
 
 func _set_explorer_location(path: String, address: LineEdit, heading: Label, status: Label) -> void:
 	address.text = path.replace("🏠  ", "").replace("🖥  ", "").replace("⬇  ", "").replace("📄  ", "").replace("🖼  ", "").replace("🎵  ", "").replace("🎬  ", "").replace("💾  ", "")
