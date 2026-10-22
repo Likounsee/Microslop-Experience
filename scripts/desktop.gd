@@ -4505,11 +4505,11 @@ func _show_desktop_context_menu(pointer: Vector2) -> void:
 
 		_desktop_context_menu.z_index = 100
 
-		var menu_style := _flat_style(Color(0.96, 0.97, 0.99, 0.98), 10)
+		var menu_style := _flat_style(Color(0.96, 0.97, 0.99, 0.985), 12)
 
 		menu_style.shadow_color = Color(0.02, 0.04, 0.10, 0.30)
 
-		menu_style.shadow_size = 18
+		menu_style.shadow_size = 20
 
 		menu_style.shadow_offset = Vector2(0, 4)
 
@@ -4522,13 +4522,13 @@ func _show_desktop_context_menu(pointer: Vector2) -> void:
 		var margin := MarginContainer.new()
 		for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
 
-			margin.add_theme_constant_override(side, 5)
+			margin.add_theme_constant_override(side, 6)
 
 		_desktop_context_menu.add_child(margin)
 
 		var items := VBoxContainer.new()
 
-		items.add_theme_constant_override("separation", 2)
+		items.add_theme_constant_override("separation", 3)
 
 		margin.add_child(items)
 
