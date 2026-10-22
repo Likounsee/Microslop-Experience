@@ -4515,10 +4515,30 @@ func _render_orchid_cinematic_scene(app: Control, state: Dictionary) -> void:
 	progress.show_percentage = false
 	content.add_child(progress)
 	if stage >= scenes.size():
+		var ending_score := 0
+		var careful_choices := 0
+		var rushed_choices := 0
+		for scene_index in range(scenes.size()):
+			if not bool(scenes[scene_index].get("choice", false)):
+				continue
+			var picked := CampaignStore.load_case_answer("cinematic_choice_%02d" % scene_index)
+			if picked == 0:
+				ending_score += 1
+				careful_choices += 1
+			elif picked == 1:
+				ending_score -= 1
+				rushed_choices += 1
+		CampaignStore.save_case_answer("cinematic_outcome_score", ending_score)
+		CampaignStore.save_evidence("cinematic_outcome_calculated")
+		var outcome := "Votre dossier contient des observations utiles, mais plusieurs décisions ont privilégié la rapidité ou une conclusion trop tôt. Gardez les preuves et vérifiez les résultats du correctif."
+		if ending_score >= 4:
+			outcome = "Vous avez privilégié les faits vérifiables, la prudence et les garde-fous. Le dossier est solide, mais le correctif doit encore être testé avant de parler de résolution."
+		elif ending_score >= 1:
+			outcome = "Vous avez construit une piste crédible, avec quelques compromis. Le dossier reste exploitable si vous distinguez clairement les faits des hypothèses."
 		var ending := Label.new()
-		ending.text = "SÉQUENCE TERMINÉE\n\nVous avez vu les trente-six scènes de « La mise à jour de trop ». Les décisions prises pendant le récit sont conservées. Le chapitre reprend maintenant sur le bureau : explorez à votre rythme, et revenez à l’archive quand vous le souhaitez."
+		ending.text = "SÉQUENCE TERMINÉE\n\nVous avez vu les %d scènes de « La mise à jour de trop ».\n\nBILAN DE VOS CHOIX\nDécisions prudentes : %d   ·   Décisions précipitées : %d\n\n%s\n\nLes décisions sont conservées dans la sauvegarde locale. Le chapitre reprend sur le bureau : explorez l’archive ORCHID et les outils d’enquête à votre rythme." % [scenes.size(), careful_choices, rushed_choices, outcome]
 		ending.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		ending.custom_minimum_size = Vector2(0, 170)
+		ending.custom_minimum_size = Vector2(0, 210)
 		content.add_child(ending)
 		var archive_button := Button.new()
 		archive_button.text = "Retourner à l’archive ORCHID"
@@ -4600,8 +4620,14 @@ func _choose_orchid_cinematic_option(stage: int, choice: int, continue_button: B
 	if choice < 0 or choice >= option_count:
 		return
 	CampaignStore.save_case_answer("cinematic_choice_%02d" % stage, choice)
+	CampaignStore.save_evidence("cinematic_choice_evidence_%02d" % stage)
 	continue_button.disabled = false
-	_show_notification("Décision enregistrée", "Votre réaction à cette scène a été conservée dans la sauvegarde locale.")
+	var feedback := "Votre réaction a été conservée. La scène suivante montrera les conséquences possibles de ce choix."
+	if choice == 0:
+		feedback = "Vous gardez une trace vérifiable et évitez de conclure avant d’avoir les éléments. Cette décision sera prise en compte dans le bilan final."
+	elif choice == 1:
+		feedback = "Vous privilégiez une sortie rapide ou une conclusion immédiate. Cela peut faire gagner du temps, mais laisse des questions sans réponse."
+	_show_notification("Conséquence narrative enregistrée", feedback)
 
 
 
