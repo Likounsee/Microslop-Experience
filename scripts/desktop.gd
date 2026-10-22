@@ -3721,6 +3721,31 @@ func _input(event: InputEvent) -> void:
 
 				get_viewport().set_input_as_handled()
 
+		elif event.meta_pressed and event.keycode == KEY_LEFT:
+			var active_window := _find_app_window(_active_app_id)
+			if is_instance_valid(active_window):
+				active_window.call("_apply_snap_layout", "left")
+				get_viewport().set_input_as_handled()
+		elif event.meta_pressed and event.keycode == KEY_RIGHT:
+			var active_window := _find_app_window(_active_app_id)
+			if is_instance_valid(active_window):
+				active_window.call("_apply_snap_layout", "right")
+				get_viewport().set_input_as_handled()
+		elif event.meta_pressed and event.keycode == KEY_UP:
+			var active_window := _find_app_window(_active_app_id)
+			if is_instance_valid(active_window):
+				active_window.call("_toggle_maximize")
+				get_viewport().set_input_as_handled()
+		elif event.meta_pressed and event.keycode == KEY_DOWN:
+			var active_window := _find_app_window(_active_app_id)
+			if is_instance_valid(active_window):
+				if bool(active_window.get("_is_maximized")) or str(active_window.get("_snap_mode")) != "":
+					active_window.call("_toggle_maximize")
+				else:
+					active_window.call("_animate_minimize")
+					_active_app_id = ""
+					_update_taskbar_indicators()
+				get_viewport().set_input_as_handled()
 		elif event.meta_pressed and event.keycode == KEY_X:
 
 			_toggle_quick_link_menu()
