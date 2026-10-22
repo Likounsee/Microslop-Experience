@@ -498,6 +498,19 @@ func _snap_to_edge(pointer: Vector2) -> void:
 	else:
 		_snap_mode = ""
 
+func restore_from_taskbar() -> void:
+	if _minimize_tween and _minimize_tween.is_running():
+		_minimize_tween.kill()
+	show()
+	move_to_front()
+	modulate.a = 0.0
+	scale = Vector2(0.97, 0.97)
+	window_activated.emit()
+	_minimize_tween = create_tween().set_parallel(true)
+	_minimize_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_minimize_tween.tween_property(self, "modulate:a", 1.0, 0.16)
+	_minimize_tween.tween_property(self, "scale", Vector2.ONE, 0.18)
+
 func _animate_minimize() -> void:
 	if _minimize_tween and _minimize_tween.is_running():
 		_minimize_tween.kill()
