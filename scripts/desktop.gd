@@ -1325,6 +1325,8 @@ func _open_files() -> void:
 	# Declare these before wiring navigation callbacks; their controls are built below.
 	var quick_title: Label
 	var empty_state: Label
+	var nav_buttons: Array[Button] = []
+	var folder_tiles: Array[Button] = []
 	var nav_title := Label.new()
 	nav_title.text = "Accueil"
 	nav_title.add_theme_font_size_override("font_size", 14)
@@ -1338,7 +1340,7 @@ func _open_files() -> void:
 		nav_item.add_theme_font_size_override("font_size", 12)
 		nav_item.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 6))
 		nav_item.add_theme_stylebox_override("hover", _flat_style(Color("e5edf8"), 6))
-		nav_item.pressed.connect(_set_explorer_location.bind(caption, address, quick_title, empty_state))
+		nav_buttons.append(nav_item)
 		sidebar.add_child(nav_item)
 
 	var right_pane := VBoxContainer.new()
@@ -1375,7 +1377,7 @@ func _open_files() -> void:
 		tile.text = "%s   %s\n       %s" % [str(folder["glyph"]), str(folder["name"]), str(folder["detail"])]
 		tile.add_theme_font_size_override("font_size", 12)
 		tile.add_theme_color_override("font_color", Color("243249"))
-		tile.pressed.connect(_set_explorer_location.bind(str(folder["name"]), address, quick_title, empty_state))
+		folder_tiles.append(tile)
 		quick_grid.add_child(tile)
 	var recent_title := Label.new()
 	recent_title.text = "Fichiers récents"
@@ -1388,6 +1390,18 @@ func _open_files() -> void:
 	empty_state.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	empty_state.add_theme_color_override("font_color", Color("66758b"))
 	right_pane.add_child(empty_state)
+	# Connect after target controls exist: bind() captures values immediately.
+	var nav_captions := ["🏠  Accueil", "🖥  Bureau", "⬇  Téléchargements", "📄  Documents", "🖼  Images", "🎵  Musique", "🎬  Vidéos", "💾  Ce PC"]
+	for index in range(nav_buttons.size()):
+		nav_buttons[index].pressed.connect(_set_explorer_location.bind(nav_captions[index], address, quick_title, empty_state))
+	for index in range(folder_tiles.size()):
+		folder_tiles[index].pressed.connect(_set_explorer_location.bind(str(folders[index]["name"]), address, quick_title, empty_state))
+	address.text_submitted.connect(func(path: String):
+		var normalized_path := path.strip_edges()
+		if not normalized_path.is_empty():
+			_set_explorer_location(normalized_path, address, quick_title, empty_state)
+			search.placeholder_text = "Rechercher dans %s" % normalized_path
+	)
 	var footer := Label.new()
 	footer.text = "4 dossiers   •   Cet explorateur utilise uniquement des données fictives"
 	footer.add_theme_font_size_override("font_size", 11)
@@ -1432,11 +1446,18 @@ func _explorer_toolbar_action(action: String, content: VBoxContainer) -> void:
 	search.placeholder_text = "Rechercher dans %s" % address.text
 
 func _set_explorer_location(path: String, address: LineEdit, heading: Label, status: Label) -> void:
-	address.text = path.replace("🏠  ", "").replace("🖥  ", "").replace("⬇  ", "").replace("📄  ", "").replace("🖼  ", "").replace("🎵  ", "").replace("🎬  ", "").replace("💾  ", "")
-	heading.text = address.text
-	status.text = "Aucun élément à afficher dans %s. Le contenu personnel reste inaccessible." % address.text
-	for child in heading.get_parent().get_node("GridContainer").get_children():
-		child.visible = address.text == "Accueil" or child.text.to_lower().contains(address.text.to_lower())
+	var clean_path := path.replace("🏠  ", "").replace("🖥  ", "").replace("⬇  ", "").replace("📄  ", "").replace("🖼  ", "").replace("🎵  ", "").replace("🎬  ", "").replace("💾  ", "").strip_edges()
+	if clean_path.is_empty():
+		clean_path = "Accueil"
+	address.text = clean_path
+	heading.text = clean_path
+	status.text = "Aucun élément à afficher dans %s. Le contenu personnel reste inaccessible." % clean_path
+	var grid := heading.get_parent().get_node_or_null("GridContainer") as GridContainer
+	if grid == null:
+		return
+	for child in grid.get_children():
+		if child is Button:
+			child.visible = clean_path == "Accueil" or child.text.to_lower().contains(clean_path.to_lower())
 
 func _open_browser() -> void:
 	var app := _open_window("Microslop Browser", "Votre navigateur nouvelle génération.", Vector2(680, 400))
