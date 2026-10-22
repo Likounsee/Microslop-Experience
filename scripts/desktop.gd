@@ -4591,8 +4591,9 @@ func _toggle_task_view() -> void:
 			card.custom_minimum_size = Vector2(245 if grid.columns == 2 else panel_width - 44.0, 92)
 			card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			card.alignment = HORIZONTAL_ALIGNMENT_LEFT
-			card.text = "%s\n%s%s" % [_glyph_for_app_id(app_id), title, "  •  Fenêtre active" if app_id == _active_app_id else ""]
-			card.tooltip_text = title
+			var window_state := "Fenêtre active" if app_id == _active_app_id else ("Réduite" if not app_window.visible else "Ouverte")
+			card.text = "%s   %s\n%s" % [_glyph_for_app_id(app_id), title, window_state]
+			card.tooltip_text = "%s — %s" % [title, window_state]
 			card.add_theme_color_override("font_color", Color("24344d"))
 			card.add_theme_font_size_override("font_size", 14)
 			var card_normal := _flat_style(Color("eaf3ff") if app_id == _active_app_id else Color("ffffff"), 10)
@@ -4601,6 +4602,16 @@ func _toggle_task_view() -> void:
 			card.add_theme_stylebox_override("normal", card_normal)
 			card.add_theme_stylebox_override("hover", _flat_style(Color("e4efff"), 10))
 			card.add_theme_stylebox_override("pressed", _flat_style(Color("d5e5fb"), 10))
+			card.mouse_entered.connect(func():
+				var hover_tween := create_tween()
+				hover_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+				hover_tween.tween_property(card, "scale", Vector2(1.015, 1.015), 0.10)
+			)
+			card.mouse_exited.connect(func():
+				var hover_tween := create_tween()
+				hover_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+				hover_tween.tween_property(card, "scale", Vector2.ONE, 0.12)
+			)
 			card.pressed.connect(_focus_task_view_app.bind(app_window))
 			grid.add_child(card)
 			window_count += 1
