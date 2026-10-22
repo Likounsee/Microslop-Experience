@@ -83,6 +83,29 @@ func _layout_shell_for_viewport() -> void:
 
 			search_button.visible = viewport_size.x >= 720.0
 
+		# Prioritize the core pinned apps on narrow windows instead of letting
+		# the centered app group collide with the system tray.
+		var settings_button := _taskbar_app_buttons.get("settings") as Button
+		if is_instance_valid(settings_button):
+			settings_button.visible = viewport_size.x >= 600.0
+		var update_button := _taskbar_app_buttons.get("update") as Button
+		if is_instance_valid(update_button):
+			update_button.visible = viewport_size.x >= 700.0
+
+		var tray_row := _taskbar.find_child("SystemTray", true, false) as HBoxContainer
+		if is_instance_valid(tray_row):
+			var tray_button := _tray_button
+			var clock_button := _clock_button
+			var compact_tray := viewport_size.x < 440.0
+			if is_instance_valid(tray_button):
+				tray_button.custom_minimum_size.x = 48.0 if compact_tray else 66.0
+			if is_instance_valid(clock_button):
+				clock_button.custom_minimum_size.x = 76.0 if compact_tray else 92.0
+			var show_desktop_button := tray_row.find_child("ShowDesktopButton", true, false) as Button
+			if is_instance_valid(show_desktop_button):
+				show_desktop_button.visible = viewport_size.x >= 440.0
+			tray_row.offset_left = -132.0 if compact_tray else -202.0
+
 		_taskbar.offset_left = -taskbar_width / 2.0
 
 		_taskbar.offset_right = taskbar_width / 2.0
