@@ -1023,7 +1023,11 @@ func _build_notification_center() -> void:
 
 	clear_button.add_theme_stylebox_override("pressed", _flat_style(Color("c5d9f2"), 8))
 
-	clear_button.focus_mode = Control.FOCUS_NONE
+	var clear_focus_style := _flat_style(Color("e8f1fc"), 8)
+	clear_focus_style.set_border_width_all(1)
+	clear_focus_style.border_color = Color("a9c9ee")
+	clear_button.add_theme_stylebox_override("focus", clear_focus_style)
+	clear_button.focus_mode = Control.FOCUS_ALL
 
 	clear_button.pressed.connect(_clear_notification_history)
 
@@ -1357,6 +1361,12 @@ func _build_quick_settings() -> void:
 	close_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 7))
 
 	close_button.add_theme_stylebox_override("hover", _flat_style(Color("dce6f3"), 7))
+	close_button.add_theme_stylebox_override("pressed", _flat_style(Color("cbd9eb"), 7))
+	var close_focus_style := _flat_style(Color("e8f1fc"), 7)
+	close_focus_style.set_border_width_all(1)
+	close_focus_style.border_color = Color("a9c9ee")
+	close_button.add_theme_stylebox_override("focus", close_focus_style)
+	close_button.focus_mode = Control.FOCUS_ALL
 
 	close_button.pressed.connect(func(): _animate_flyout(_quick_settings_panel, false, true))
 
@@ -1520,6 +1530,17 @@ func _build_quick_settings() -> void:
 	settings_button.text = "⚙"
 
 	settings_button.tooltip_text = "Ouvrir les paramètres"
+	settings_button.custom_minimum_size = Vector2(34, 30)
+	settings_button.add_theme_font_size_override("font_size", 16)
+	settings_button.add_theme_color_override("font_color", Color("34445d"))
+	settings_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 8))
+	settings_button.add_theme_stylebox_override("hover", _flat_style(Color("dce6f3"), 8))
+	settings_button.add_theme_stylebox_override("pressed", _flat_style(Color("cbd9eb"), 8))
+	var settings_focus_style := _flat_style(Color("e8f1fc"), 8)
+	settings_focus_style.set_border_width_all(1)
+	settings_focus_style.border_color = Color("a9c9ee")
+	settings_button.add_theme_stylebox_override("focus", settings_focus_style)
+	settings_button.focus_mode = Control.FOCUS_ALL
 
 	settings_button.pressed.connect(func():
 
@@ -2084,8 +2105,11 @@ func _build_start_menu() -> void:
 	all_apps.add_theme_stylebox_override("hover", _flat_style(Color("d6e4f8"), 7))
 
 	all_apps.add_theme_stylebox_override("pressed", _flat_style(Color("c7dcf7"), 7))
-
-	all_apps.focus_mode = Control.FOCUS_NONE
+	var all_apps_focus_style := _flat_style(Color("e8f1fc"), 7)
+	all_apps_focus_style.set_border_width_all(1)
+	all_apps_focus_style.border_color = Color("a9c9ee")
+	all_apps.add_theme_stylebox_override("focus", all_apps_focus_style)
+	all_apps.focus_mode = Control.FOCUS_ALL
 
 	all_apps.pressed.connect(_toggle_all_apps_view)
 
@@ -2324,8 +2348,11 @@ func _build_start_menu() -> void:
 	account.add_theme_stylebox_override("hover", _flat_style(Color("e1e9f5"), 8))
 
 	account.add_theme_stylebox_override("pressed", _flat_style(Color("d2e1f4"), 8))
-
-	account.focus_mode = Control.FOCUS_NONE
+	var account_focus_style := _flat_style(Color("e8f1fc"), 8)
+	account_focus_style.set_border_width_all(1)
+	account_focus_style.border_color = Color("a9c9ee")
+	account.add_theme_stylebox_override("focus", account_focus_style)
+	account.focus_mode = Control.FOCUS_ALL
 
 	account.pressed.connect(func(): _show_account_menu(account))
 
