@@ -172,6 +172,8 @@ func configure(title: String, message: String, window_size := Vector2(520, 300))
 	close_hover.set_corner_radius_all(0)
 	close_button.add_theme_stylebox_override("hover", close_hover)
 	close_button.add_theme_color_override("font_hover_color", Color.WHITE)
+	close_button.add_theme_color_override("font_pressed_color", Color.WHITE)
+	close_button.add_theme_stylebox_override("focus", close_normal)
 	close_button.pressed.connect(_animate_close)
 	close_button.focus_mode = Control.FOCUS_NONE
 	title_row.add_child(close_button)
