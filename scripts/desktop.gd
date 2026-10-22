@@ -1354,6 +1354,8 @@ func _open_files() -> void:
 	var address := LineEdit.new()
 	address.name = "ExplorerAddress"
 	address.text = "Accueil"
+	address.set_meta("explorer_history", ["Accueil"])
+	address.set_meta("explorer_history_index", 0)
 	address.placeholder_text = "Chemin d’accès"
 	address.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	address.custom_minimum_size.y = 34
@@ -1488,22 +1490,39 @@ func _explorer_toolbar_action(action: String, content: VBoxContainer) -> void:
 	var status := content.find_child("ExplorerStatus", true, false) as Label
 	if address == null or search == null or heading == null or status == null:
 		return
+	var history: Array = address.get_meta("explorer_history", ["Accueil"])
+	var history_index := int(address.get_meta("explorer_history_index", 0))
 	match action:
 		"←":
-			_set_explorer_location("Accueil", address, heading, status)
+			if history_index > 0:
+				history_index -= 1
+				address.set_meta("explorer_history_index", history_index)
+				_set_explorer_location(str(history[history_index]), address, heading, status, false)
 		"→":
-			_set_explorer_location("Documents", address, heading, status)
+			if history_index + 1 < history.size():
+				history_index += 1
+				address.set_meta("explorer_history_index", history_index)
+				_set_explorer_location(str(history[history_index]), address, heading, status, false)
 		"↑":
 			_set_explorer_location("Accueil", address, heading, status)
 		"⟳":
 			search.clear()
-			_set_explorer_location("Accueil", address, heading, status)
+			_set_explorer_location(address.text, address, heading, status, false)
 	search.placeholder_text = "Rechercher dans %s" % address.text
 
-func _set_explorer_location(path: String, address: LineEdit, heading: Label, status: Label) -> void:
+func _set_explorer_location(path: String, address: LineEdit, heading: Label, status: Label, record_history: bool = true) -> void:
 	var clean_path := path.replace("🏠  ", "").replace("🖥  ", "").replace("⬇  ", "").replace("📄  ", "").replace("🖼  ", "").replace("🎵  ", "").replace("🎬  ", "").replace("💾  ", "").strip_edges()
 	if clean_path.is_empty():
 		clean_path = "Accueil"
+	if record_history:
+		var history: Array = address.get_meta("explorer_history", ["Accueil"])
+		var history_index := int(address.get_meta("explorer_history_index", history.size() - 1))
+		while history.size() > history_index + 1:
+			history.pop_back()
+		if history.is_empty() or str(history.back()) != clean_path:
+			history.append(clean_path)
+		address.set_meta("explorer_history", history)
+		address.set_meta("explorer_history_index", history.size() - 1)
 	address.text = clean_path
 	heading.text = clean_path
 	status.text = "Aucun élément à afficher dans %s. Le contenu personnel reste inaccessible." % clean_path
