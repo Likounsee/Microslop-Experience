@@ -1739,7 +1739,7 @@ func _show_taskbar_preview(app_id: String, source_button: Button, glyph: String)
 	_taskbar_preview = PanelContainer.new()
 	_taskbar_preview.name = "TaskbarWindowPreview"
 	_taskbar_preview.z_index = 105
-	_taskbar_preview.custom_minimum_size = Vector2(232, 142)
+	_taskbar_preview.custom_minimum_size = Vector2(244, 166)
 	var preview_style := _flat_style(Color("f5f7fb"), 12)
 	preview_style.border_color = Color("d4ddeb")
 	preview_style.set_border_width_all(1)
@@ -1757,14 +1757,20 @@ func _show_taskbar_preview(app_id: String, source_button: Button, glyph: String)
 	_taskbar_preview.add_child(layout)
 
 	var title_row := HBoxContainer.new()
+	title_row.add_theme_constant_override("separation", 8)
+	var app_icon_tile := PanelContainer.new()
+	app_icon_tile.custom_minimum_size = Vector2(28, 28)
+	app_icon_tile.add_theme_stylebox_override("panel", _flat_style(Color("e0ecff"), 7))
+	title_row.add_child(app_icon_tile)
+	var app_icon_center := CenterContainer.new()
+	app_icon_tile.add_child(app_icon_center)
 	var app_icon := Label.new()
 	app_icon.text = glyph
-	app_icon.custom_minimum_size = Vector2(24, 24)
 	app_icon.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	app_icon.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	app_icon.add_theme_color_override("font_color", Color("2679d8"))
-	app_icon.add_theme_font_size_override("font_size", 18)
-	title_row.add_child(app_icon)
+	app_icon.add_theme_font_size_override("font_size", 17)
+	app_icon_center.add_child(app_icon)
 	var title_label := Label.new()
 	title_label.text = str(app.get_meta("window_title", "Application"))
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1776,7 +1782,7 @@ func _show_taskbar_preview(app_id: String, source_button: Button, glyph: String)
 
 	var thumbnail := PanelContainer.new()
 	thumbnail.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	thumbnail.custom_minimum_size = Vector2(0, 78)
+	thumbnail.custom_minimum_size = Vector2(0, 86)
 	thumbnail.add_theme_stylebox_override("panel", _flat_style(Color("e5edf8"), 7))
 	var thumbnail_content := CenterContainer.new()
 	thumbnail.add_child(thumbnail_content)
@@ -1788,17 +1794,31 @@ func _show_taskbar_preview(app_id: String, source_button: Button, glyph: String)
 	thumbnail_content.add_child(thumbnail_label)
 	layout.add_child(thumbnail)
 
+	var preview_status := HBoxContainer.new()
+	preview_status.add_theme_constant_override("separation", 6)
+	var status_dot := Label.new()
+	status_dot.text = "●"
+	status_dot.add_theme_font_size_override("font_size", 9)
+	status_dot.add_theme_color_override("font_color", Color("1683e8"))
+	preview_status.add_child(status_dot)
+	var status_label := Label.new()
+	status_label.text = "Fenêtre ouverte"
+	status_label.add_theme_font_size_override("font_size", 10)
+	status_label.add_theme_color_override("font_color", Color("65758d"))
+	preview_status.add_child(status_label)
+	layout.add_child(preview_status)
+
 	add_child(_taskbar_preview)
 	var button_rect := source_button.get_global_rect()
 	# The desktop Control fills the viewport, so global-rect coordinates map directly to its local space.
-	var preview_position := button_rect.position + Vector2(button_rect.size.x / 2.0 - 116.0, -150.0)
+	var preview_position := button_rect.position + Vector2(button_rect.size.x / 2.0 - 122.0, -174.0)
 	var viewport_size := get_viewport_rect().size
-	preview_position.x = clampf(preview_position.x, 8.0, maxf(8.0, viewport_size.x - 240.0))
+	preview_position.x = clampf(preview_position.x, 8.0, maxf(8.0, viewport_size.x - 252.0))
 	preview_position.y = maxf(8.0, preview_position.y)
 	_taskbar_preview.position = preview_position
 	_taskbar_preview.modulate.a = 0.0
 	_taskbar_preview.scale = Vector2(0.96, 0.96)
-	_taskbar_preview.pivot_offset = Vector2(116, 71)
+	_taskbar_preview.pivot_offset = Vector2(122, 83)
 	_taskbar_preview_tween = create_tween()
 	_taskbar_preview_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	_taskbar_preview_tween.set_parallel(true)
