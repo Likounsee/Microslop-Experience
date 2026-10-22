@@ -1815,24 +1815,29 @@ func _update_taskbar_indicators() -> void:
 
 		var active := running and app.visible and str(_active_app_id) == str(app_id)
 
-		button.add_theme_stylebox_override("normal", _flat_style(Color(0.38, 0.60, 0.88, 0.22) if active else Color(0.0, 0.0, 0.0, 0.0), 7))
-
+		var idle_style := _flat_style(Color(0.0, 0.0, 0.0, 0.0), 7)
+		var active_style := _flat_style(Color(0.38, 0.60, 0.88, 0.22), 7)
+		var hover_style := _flat_style(Color(0.78, 0.86, 0.96, 0.84), 9)
+		var active_hover_style := _flat_style(Color(0.68, 0.81, 0.96, 0.92), 9)
+		button.add_theme_stylebox_override("normal", active_style if active else idle_style)
+		button.add_theme_stylebox_override("hover", active_hover_style if active else hover_style)
 		button.add_theme_stylebox_override("pressed", _flat_style(Color(0.38, 0.60, 0.88, 0.42), 7))
 
 		var marker = button.get_meta("active_marker", null)
 
 		if is_instance_valid(marker):
 
-			# Windows 11 keeps a small dot for running apps and a longer pill for the focused app.
-
+			# Windows 11 uses a small dot for running apps and a longer pill
+			# for the focused window. Animate the change instead of snapping.
 			marker.visible = running
-
-			marker.offset_left = -9 if active else -3
-
-			marker.offset_right = 9 if active else 3
-
-			marker.offset_top = -3 if active else -2
-
+			var target_left := -9.0 if active else -3.0
+			var target_right := 9.0 if active else 3.0
+			var target_top := -3.0 if active else -2.0
+			var marker_tween := create_tween()
+			marker_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+			marker_tween.tween_property(marker, "offset_left", target_left, 0.12)
+			marker_tween.parallel().tween_property(marker, "offset_right", target_right, 0.12)
+			marker_tween.parallel().tween_property(marker, "offset_top", target_top, 0.12)
 			marker.add_theme_stylebox_override("panel", _flat_style(Color("2679d8") if active else Color("6b7f99"), 3))
 
 func _build_start_menu() -> void:
