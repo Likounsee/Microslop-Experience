@@ -3698,7 +3698,7 @@ func _open_orchid_task_sprint() -> void:
 	var app := _open_window("Sprint de travail — ORCHID", "SIMULATION ACTIVE · 5 TÂCHES · SAUVEGARDE LOCALE", Vector2(760, 620))
 	var state := {
 		"stage": clampi(CampaignStore.load_case_answer("orchid_sprint_stage"), 0, 5),
-		"score": maxi(0, CampaignStore.load_case_answer("orchid_sprint_score")),
+		"score": CampaignStore.load_case_answer("orchid_sprint_score") if CampaignStore.load_case_answer("orchid_sprint_score") >= -10 else 0,
 		"interrupted": maxi(0, CampaignStore.load_case_answer("orchid_sprint_interruptions"))
 	}
 	_render_orchid_task_sprint(app, state)
