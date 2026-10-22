@@ -1322,6 +1322,9 @@ func _open_files() -> void:
 	sidebar.custom_minimum_size.x = 150
 	sidebar.add_theme_constant_override("separation", 5)
 	main_row.add_child(sidebar)
+	# Declare these before wiring navigation callbacks; their controls are built below.
+	var quick_title: Label
+	var empty_state: Label
 	var nav_title := Label.new()
 	nav_title.text = "Accueil"
 	nav_title.add_theme_font_size_override("font_size", 14)
@@ -1343,7 +1346,7 @@ func _open_files() -> void:
 	right_pane.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	right_pane.add_theme_constant_override("separation", 10)
 	main_row.add_child(right_pane)
-	var quick_title := Label.new()
+	quick_title = Label.new()
 	quick_title.name = "ExplorerHeading"
 	quick_title.text = "Accès rapide"
 	quick_title.add_theme_font_size_override("font_size", 20)
@@ -1379,7 +1382,7 @@ func _open_files() -> void:
 	recent_title.add_theme_font_size_override("font_size", 16)
 	recent_title.add_theme_color_override("font_color", Color("182235"))
 	right_pane.add_child(recent_title)
-	var empty_state := Label.new()
+	empty_state = Label.new()
 	empty_state.name = "ExplorerStatus"
 	empty_state.text = "Aucun fichier récent. Les fichiers personnels ne sont pas consultés."
 	empty_state.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
