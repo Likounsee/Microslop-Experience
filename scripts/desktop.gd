@@ -1497,7 +1497,7 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 
 			if existing.visible and _active_app_id == app_id:
 
-				existing.hide()
+				existing.call("_animate_minimize")
 
 				_active_app_id = ""
 
