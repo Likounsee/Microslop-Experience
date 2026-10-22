@@ -3684,6 +3684,45 @@ func _open_browser() -> void:
 	)
 	content.add_child(search)
 
+	var archive := Button.new()
+	archive.text = "Ouvrir l’archive interne complète"
+	archive.pressed.connect(func():
+		_open_orchid_archive()
+	)
+	content.add_child(archive)
+
+
+func _open_orchid_archive() -> void:
+	var app := _open_window("Archive interne — ORCHID", "DOSSIER INTERNE · ACCÈS NON PRÉVU", Vector2(620, 460))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	var report := Label.new()
+	report.text = "ORCHID / RAPPORT DE CONCEPTION 04-B\n\nObjectif officiel : améliorer la pertinence des recommandations.\nObjectif réel : maximiser le temps actif et réduire les sorties de session.\n\nMÉTHODE A — INTERRUPTION PRÉDICTIVE\nDéclencher une notification lorsqu’un utilisateur commence une tâche longue ou semble concentré.\n\nMÉTHODE B — RECOMMANDATION DE DÉTOURNEMENT\nPlacer un résultat sponsorisé devant les sources qui permettraient de désactiver les sollicitations.\n\nMÉTHODE C — RÉÉCRITURE DU CONTEXTE\nPrésenter chaque interruption comme une aide, puis mesurer si l’utilisateur revient dans l’application.\n\nNOTE DE L’ÉQUIPE QUALITÉ\n« Les utilisateurs qui cherchent à désactiver ORCHID doivent recevoir une enquête de satisfaction. »\n\nLe rapport est signé « Équipe Expérience », sans nom individuel. Une annexe mentionne que les alertes de fichiers analysés sont des événements d’engagement, pas des analyses de fichiers." 
+	report.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	report.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(report)
+	var publish := Button.new()
+	publish.text = "Publier le rapport (et déclencher une dernière interruption)"
+	publish.pressed.connect(func():
+		CampaignStore.save_ending("published")
+		_show_notification("Rapport transmis", "Le rapport ORCHID a été placé dans la file de signalement. Une notification sponsorisée vient d’être priorisée devant lui.")
+		report.text += "\n\nFIN — RAPPORT TRANSMIS. Microslop confirme que votre signalement est important et vous propose 14 articles sur la productivité."
+		publish.disabled = true
+		keep.disabled = true
+	)
+	content.add_child(publish)
+	var keep := Button.new()
+	keep.text = "Conserver une copie locale"
+	keep.pressed.connect(func():
+		CampaignStore.save_ending("preserved")
+		_show_notification("Copie enregistrée", "Le rapport est conservé dans votre archive fictive. Microslop a enregistré que vous avez choisi de garder une preuve.")
+		report.text += "\n\nFIN — COPIE CONSERVÉE. Le rapport existe toujours, même si le navigateur refuse de le recommander."
+		publish.disabled = true
+		keep.disabled = true
+	)
+	content.add_child(keep)
+
 
 func _open_recycle_bin() -> void:
 
