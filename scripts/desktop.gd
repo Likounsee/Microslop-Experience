@@ -3753,6 +3753,24 @@ func _open_orchid_archive() -> void:
 	recommendation_audit.pressed.connect(_open_orchid_recommendation_audit)
 	content.add_child(recommendation_audit)
 
+	var compliance := Button.new()
+	compliance.text = "Vérifier la chaîne d’approbation (4 contrôles)"
+	compliance.pressed.connect(_open_orchid_compliance_review)
+	content.add_child(compliance)
+	var decision_board := Button.new()
+	decision_board.text = "Ouvrir le comité d’incident ORCHID"
+	decision_board.pressed.connect(_open_orchid_decision_board)
+	content.add_child(decision_board)
+
+	var compliance := Button.new()
+	compliance.text = "Vérifier la chaîne d’approbation (4 contrôles)"
+	compliance.pressed.connect(_open_orchid_compliance_review)
+	content.add_child(compliance)
+	var decision_board := Button.new()
+	decision_board.text = "Ouvrir le comité d’incident ORCHID"
+	decision_board.pressed.connect(_open_orchid_decision_board)
+	content.add_child(decision_board)
+
 
 func _open_orchid_recommendation_audit() -> void:
 	var app := _open_window("Audit des recommandations ORCHID", "BANC D’ESSAI · TRACES LOCALES", Vector2(700, 540))
@@ -3813,6 +3831,132 @@ func _open_orchid_recommendation_audit() -> void:
 			detail.text = "Conclusion incomplète : examinez les trois cas pour comparer leurs règles."
 	)
 	content.add_child(conclusion)
+
+
+func _open_orchid_compliance_review() -> void:
+	var app := _open_window("Revue de conformité — diffusion 0.9.17", "CONTRÔLE DE CHANGEMENT · DOSSIER INTERNE", Vector2(740, 590))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var old_child := content.get_child(0)
+		content.remove_child(old_child)
+		old_child.queue_free()
+	var intro := Label.new()
+	intro.text = "Le paquet est signé, mais une signature prouve l’origine du fichier, pas l’autorisation de le distribuer. Vérifiez les quatre contrôles indépendants avant de décider si le déploiement pouvait être considéré comme approuvé."
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content.add_child(intro)
+	var detail := Label.new()
+	detail.text = "Choisissez un contrôle pour examiner sa trace et l’écart associé."
+	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	detail.custom_minimum_size = Vector2(0, 132)
+	content.add_child(detail)
+	var status := Label.new()
+	content.add_child(status)
+	var checks := [
+		["1 · Identité du paquet", "Signature cryptographique : valide. Empreinte identique à celle publiée dans le registre interne.", "Ce contrôle confirme l’intégrité du paquet. Il ne confirme pas que le paquet est destiné au canal public.", "compliance_signature"],
+		["2 · Canal de destination", "Canal source : DEV_RING_INTERNAL. Appareil cible : STABLE / utilisateur final.", "Écart majeur : le canal de développement et le canal stable ne correspondent pas. Aucun ticket de dérogation n’est référencé.", "compliance_channel"],
+		["3 · Autorisation de diffusion", "Champ release_approval : absent. Référence de validation : null. Responsable de mise en production : non renseigné.", "Écart majeur : aucune approbation formelle n’est liée au déploiement. Le journal ne permet pas de distinguer un défaut d’automatisation d’une action volontaire.", "compliance_approval"],
+		["4 · Information utilisateur", "Note publique : « améliorations de confort et stabilité ». Le terme préversion n’apparaît pas ; le comportement de notification n’est pas décrit.", "Écart majeur : le texte visible ne permet pas de comprendre la nature expérimentale du composant ni son objectif de mesure.", "compliance_notice"]
+	]
+	for check in checks:
+		var check_button := Button.new()
+		check_button.text = str(check[0])
+		check_button.custom_minimum_size = Vector2(0, 38)
+		check_button.pressed.connect(func():
+			detail.text = "%s\n\nTRACE\n%s\n\nÉVALUATION\n%s" % [check[0], check[1], check[2]]
+			CampaignStore.save_evidence(str(check[3]))
+			var seen: Array = CampaignStore.load_evidence()
+			var count := 0
+			for required in ["compliance_signature", "compliance_channel", "compliance_approval", "compliance_notice"]:
+				if seen.has(required):
+					count += 1
+			status.text = "Contrôles examinés : %d / 4" % count
+		)
+		content.add_child(check_button)
+	var conclusion := Button.new()
+	conclusion.text = "Établir le constat de conformité"
+	conclusion.pressed.connect(func():
+		var seen: Array = CampaignStore.load_evidence()
+		var complete := true
+		for required in ["compliance_signature", "compliance_channel", "compliance_approval", "compliance_notice"]:
+			if not seen.has(required):
+				complete = false
+		if complete:
+			detail.text = "CONSTAT\n\nLa signature est valide, mais trois autres contrôles échouent : canal incompatible, absence d’approbation et information utilisateur incomplète. La validité technique du paquet ne vaut donc pas autorisation de diffusion. Les traces ne prouvent pas qui a provoqué l’écart ; elles établissent qu’il aurait dû être détecté avant la mise en production."
+			CampaignStore.save_evidence("compliance_finding")
+			CampaignStore.save_case_answer("compliance_finding", 1)
+		else:
+			detail.text = "Constat indisponible : examinez les quatre contrôles. La signature valide ne suffit pas à conclure."
+	)
+	content.add_child(conclusion)
+
+
+func _open_orchid_decision_board() -> void:
+	var app := _open_window("Comité d’incident — ORCHID", "SÉANCE DE REVUE · COMPTE RENDU LOCAL", Vector2(720, 560))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	while content.get_child_count() > 0:
+		var old_child := content.get_child(0)
+		content.remove_child(old_child)
+		old_child.queue_free()
+	var intro := Label.new()
+	intro.text = "Vous avez été chargé de proposer la prochaine action. Le comité ne connaît pas l’auteur du déploiement. Il doit décider quoi préserver, quelles affirmations publier et quelles incertitudes laisser explicitement ouvertes."
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content.add_child(intro)
+	var evidence_status := Label.new()
+	evidence_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content.add_child(evidence_status)
+	var report := Label.new()
+	report.text = "Le compte rendu apparaîtra ici après votre décision."
+	report.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	report.custom_minimum_size = Vector2(0, 120)
+	content.add_child(report)
+	var refresh_status := func() -> void:
+		var evidence: Array = CampaignStore.load_evidence()
+		var groups := [
+			{"name":"Chronologie", "ids":["night_rule","night_download","night_install","night_activation","night_notification"]},
+			{"name":"Recommandations", "ids":["audit_wifi","audit_exit","audit_answer"]},
+			{"name":"Conformité", "ids":["compliance_channel","compliance_approval","compliance_notice"]}
+		]
+		var lines := PackedStringArray(["ÉTAT DES PREUVES"])
+		for group in groups:
+			var count := 0
+			for evidence_id in group["ids"]:
+				if evidence.has(evidence_id):
+					count += 1
+			lines.append("%s : %d / %d" % [group["name"], count, group["ids"].size()])
+		evidence_status.text = "\n".join(lines)
+	refresh_status.call()
+	var refresh := Button.new()
+	refresh.text = "Actualiser l’état des preuves"
+	refresh.pressed.connect(func(): refresh_status.call())
+	content.add_child(refresh)
+	var options := [
+		["Escalader avec un rapport sourcé", "decision_escalate", "Le comité transmet les traces horodatées, distingue les faits des hypothèses et demande la suspension du canal de diffusion jusqu’à vérification. Les preuves locales sont conservées. C’est l’option la plus prudente lorsque l’origine de l’erreur reste inconnue."],
+		["Surveiller sans publier immédiatement", "decision_monitor", "Le comité conserve une copie locale et demande une reproduction contrôlée avant toute déclaration publique. Cette option limite les affirmations prématurées, mais laisse le risque actif tant qu’aucune mesure de suspension n’est confirmée."],
+		["Clore comme incident de configuration", "decision_close", "Le comité classe l’événement comme défaut de configuration et ferme le dossier sans attribution de responsabilité. Cette option est rapide, mais elle ne répond ni à l’absence d’approbation ni à la répétition des mécanismes de rétention observés."]
+	]
+	for option in options:
+		var choice := Button.new()
+		choice.text = str(option[0])
+		choice.custom_minimum_size = Vector2(0, 42)
+		choice.pressed.connect(func():
+			CampaignStore.save_case_answer("incident_committee_decision", options.find(option))
+			CampaignStore.save_evidence(str(option[1]))
+			report.text = "DÉCISION ENREGISTRÉE\n\n%s\n\nCette décision ne modifie pas les faits déjà collectés. Elle fixe la manière dont le dossier sera traité." % option[2]
+			for child in content.get_children():
+				if child is Button and child != refresh:
+					child.disabled = true
+		)
+		content.add_child(choice)
+	var prior_decision := CampaignStore.load_case_answer("incident_committee_decision")
+	if prior_decision >= 0 and prior_decision < options.size():
+		report.text = "DERNIÈRE DÉCISION ENREGISTRÉE\n\n%s\n\nVous pouvez consulter les preuves, mais cette séance sauvegardée ne peut pas être votée une seconde fois dans la même fenêtre." % str(options[prior_decision][2])
+		for child in content.get_children():
+			if child is Button and child != refresh:
+				child.disabled = true
 
 
 ## Additional playable investigative scenes broaden the chapter beyond reading the final report.
