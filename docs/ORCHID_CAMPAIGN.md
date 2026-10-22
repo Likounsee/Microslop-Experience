@@ -137,3 +137,20 @@ Le joueur examine quatre contrôles distincts : intégrité de la signature, coh
 Le joueur peut recommander une escalade avec rapport sourcé, une surveillance avec reproduction contrôlée, ou une clôture comme incident de configuration. Chaque option affiche ses conséquences narratives et est enregistrée dans `incident_committee_decision`, avec une preuve distincte pour l’option choisie. Le panneau synthétise aussi les indices déjà collectés dans trois familles — chronologie, recommandations et conformité — afin de rendre visibles les lacunes du dossier. L’état de preuves peut être actualisé sans perdre les choix précédents.
 
 Ces décisions ne désignent pas automatiquement un coupable : l’histoire doit préserver la différence entre les faits observés (canal incompatible, approbation absente, relances de rétention) et l’hypothèse sur l’origine du déploiement. Les fenêtres ajoutées n’agissent que dans la simulation du jeu et n’inspectent aucun fichier réel de l’ordinateur.
+
+
+## Parcours jouable : la matinée après le redémarrage
+
+La fenêtre de mise à jour ouvre maintenant un parcours en cinq étapes qui suit le joueur depuis le redémarrage jusqu’à la décision de préserver les preuves. Chaque étape présente une situation, trois actions possibles et une conséquence narrative visible dans la fenêtre :
+
+1. **Le redémarrage (07:56)** — le composant de notification apparaît dans un message d’installation rassurant ; le joueur peut examiner les détails, conserver la note ou passer.
+2. **La première alerte (08:11)** — le compteur « 18 fichiers analysés » est confronté à l’absence de chemins vérifiables ; le joueur peut consulter l’historique, vérifier Documents ou accepter le résumé.
+3. **Le détour de recherche (08:17)** — le lien de désactivation est relégué sous un résultat sponsorisé ; le joueur peut ouvrir les paramètres, suivre la page sponsorisée ou capturer les résultats.
+4. **La réponse de l’assistant (08:23)** — ORCHID est minimisé puis la conversation dérive vers des recommandations ; le joueur peut demander des traces, accepter la réponse ou sauvegarder la conversation.
+5. **La preuve à préserver (08:31)** — le journal établit une séquence temporelle sans identifier un responsable ; le joueur choisit de joindre la chronologie, de rédiger une conclusion prudente ou de fermer sans nouvelle pièce.
+
+Chaque choix est enregistré par étape (`morning_stage_0` à `morning_stage_4`) et ajoute un identifiant de preuve propre au choix. Le bilan récapitule les cinq réponses sauvegardées, puis permet de revenir à l’archive ou à l’historique de déploiement. Les choix décrivent la méthode d’enquête ; ils ne modifient pas artificiellement les faits des journaux et ne désignent pas automatiquement un coupable.
+
+Le parcours est lancé depuis la fenêtre **Microslop Update** par le bouton « Simuler le redémarrage et suivre la matinée (5 étapes) ». Il s’agit d’une séquence simulée dans le jeu, pas d’un redémarrage réel de l’ordinateur.
+
+**Validation restante :** cette séquence vient d’être ajoutée au code et doit encore être exécutée dans Godot. Vérifier notamment les callbacks des boutons dans les boucles, le rendu des fenêtres sur petit écran, le retour à l’archive et la persistance des cinq réponses après fermeture puis relance du jeu.
