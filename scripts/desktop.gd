@@ -2138,11 +2138,31 @@ func _build_start_menu() -> void:
 
 	recommended_card.add_child(recommended_margin)
 
-	var recommended_layout := VBoxContainer.new()
+	var recommended_layout := HBoxContainer.new()
 
-	recommended_layout.add_theme_constant_override("separation", 5)
+	recommended_layout.add_theme_constant_override("separation", 12)
+
+	recommended_layout.alignment = BoxContainer.ALIGNMENT_CENTER
 
 	recommended_margin.add_child(recommended_layout)
+
+	var recent_icon_tile := PanelContainer.new()
+
+	recent_icon_tile.custom_minimum_size = Vector2(48, 48)
+
+	var recent_icon_style := _flat_style(Color("dceaff"), 10)
+
+	recent_icon_style.set_border_width_all(1)
+
+	recent_icon_style.border_color = Color("c6dcfa")
+
+	recent_icon_tile.add_theme_stylebox_override("panel", recent_icon_style)
+
+	recommended_layout.add_child(recent_icon_tile)
+
+	var recent_icon_center := CenterContainer.new()
+
+	recent_icon_tile.add_child(recent_icon_center)
 
 	var recent_icon := Label.new()
 
@@ -2152,11 +2172,13 @@ func _build_start_menu() -> void:
 
 	recent_icon.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
+	recent_icon.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
 	recent_icon.add_theme_font_size_override("font_size", 24)
 
-	recent_icon.add_theme_color_override("font_color", Color("477bb8"))
+	recent_icon.add_theme_color_override("font_color", Color("2679d8"))
 
-	recommended_layout.add_child(recent_icon)
+	recent_icon_center.add_child(recent_icon)
 
 	var recent_empty := Label.new()
 
@@ -2164,13 +2186,15 @@ func _build_start_menu() -> void:
 
 	recent_empty.text = "Vos fichiers récents apparaîtront ici."
 
-	recent_empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	recent_empty.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	recent_empty.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 
 	recent_empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 	recent_empty.add_theme_font_size_override("font_size", 12)
 
-	recent_empty.add_theme_color_override("font_color", Color("596780"))
+	recent_empty.add_theme_color_override("font_color", Color("34445e"))
 
 	recommended_layout.add_child(recent_empty)
 
@@ -2178,15 +2202,19 @@ func _build_start_menu() -> void:
 
 	reopen_button.text = "Ouvrir à nouveau"
 
-	reopen_button.custom_minimum_size.y = 30
+	reopen_button.custom_minimum_size = Vector2(108, 34)
 
 	reopen_button.add_theme_font_size_override("font_size", 12)
 
 	reopen_button.add_theme_color_override("font_color", Color("263247"))
 
-	reopen_button.add_theme_stylebox_override("normal", _flat_style(Color("dce8f8"), 7))
+	reopen_button.add_theme_stylebox_override("normal", _flat_style(Color("dce8f8"), 8))
 
-	reopen_button.add_theme_stylebox_override("hover", _flat_style(Color("cbdcf3"), 7))
+	reopen_button.add_theme_stylebox_override("hover", _flat_style(Color("cbdcf3"), 8))
+
+	reopen_button.add_theme_stylebox_override("pressed", _flat_style(Color("b9d2f3"), 8))
+
+	reopen_button.focus_mode = Control.FOCUS_NONE
 
 	reopen_button.pressed.connect(_reopen_recent_app)
 
