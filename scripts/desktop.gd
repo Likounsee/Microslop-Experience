@@ -7168,12 +7168,18 @@ func _refresh_task_manager_processes(list: VBoxContainer, task_manager: Control,
 		return
 	var process_count := 0
 	var visible_count := 0
+	var running_count := 0
+	var minimized_count := 0
 	var normalized_query := filter_query.strip_edges().to_lower()
 	for candidate in _window_layer.get_children():
 		if not candidate is Control or not candidate.has_meta("app_id"):
 			continue
 		var process_window := candidate as Control
 		process_count += 1
+		if process_window.visible:
+			running_count += 1
+		else:
+			minimized_count += 1
 		var app_id := str(process_window.get_meta("app_id", ""))
 		var title := str(process_window.get_meta("window_title", app_id))
 		if not normalized_query.is_empty() and not (title.to_lower().contains(normalized_query) or app_id.to_lower().contains(normalized_query)):
@@ -7245,7 +7251,7 @@ func _refresh_task_manager_processes(list: VBoxContainer, task_manager: Control,
 		empty_label.text = "Aucun résultat pour cette recherche." if process_count > 0 and not normalized_query.is_empty() else "Aucune fenêtre ouverte."
 		list.add_child(empty_label)
 	var summary := Label.new()
-	summary.text = "Résultats : %d / %d fenêtres · CPU et mémoire réels indisponibles dans cette simulation." % [visible_count, process_count]
+	summary.text = "Résultats : %d / %d · Actives : %d · Réduites : %d · CPU et mémoire réels indisponibles." % [visible_count, process_count, running_count, minimized_count]
 	summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	summary.add_theme_color_override("font_color", Color("596780"))
 	list.add_child(summary)
