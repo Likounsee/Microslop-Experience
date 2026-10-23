@@ -92,8 +92,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 					active_window = child
 					break
 		if is_instance_valid(active_window):
+			# Let tree_exited choose the next visible window so focus never gets stuck on the desktop.
 			active_window.queue_free()
-			_active_app_id = ""
 			_update_taskbar_indicators()
 		key_event.accept()
 		return
@@ -2004,6 +2004,20 @@ func _cycle_app_window() -> void:
 		next_window.emit_signal("window_activated")
 	_update_taskbar_indicators()
 
+func _activate_topmost_visible_window() -> void:
+	_active_app_id = ""
+	if is_instance_valid(_window_layer):
+		var children := _window_layer.get_children()
+		for i in range(children.size() - 1, -1, -1):
+			var candidate = children[i]
+			if candidate is Control and candidate.visible and candidate.has_meta("app_id"):
+				candidate.move_to_front()
+				_active_app_id = str(candidate.get_meta("app_id"))
+				if candidate.has_signal("window_activated"):
+					candidate.emit_signal("window_activated")
+				break
+	_update_taskbar_indicators()
+
 func _find_app_window(app_id: String) -> Control:
 
 	if not is_instance_valid(_window_layer):
@@ -3204,10 +3218,9 @@ func _open_window(title: String, message: String, window_size := Vector2(520, 30
 	app.tree_exited.connect(func():
 
 		if _active_app_id == app_id:
-
-			_active_app_id = ""
-
-		_update_taskbar_indicators()
+			_activate_topmost_visible_window()
+		else:
+			_update_taskbar_indicators()
 
 	)
 
