@@ -381,6 +381,9 @@ func _run_tests() -> void:
 	_check(not store.load_evidence().has("failed_atomic_evidence"), "failed atomic decision does not persist evidence")
 	_check(not store.save_progress(1), "refuse to overwrite unreadable save location")
 	_check(not store.reset_cinematic_progress(), "refuse cinematic reset when save location is unreadable")
+	_check(not store.save_report_draft("Must not replace an unreadable save."), "refuse report draft write when save location is unreadable")
+	_check(not store.save_report_review("Must not be reviewed without persistence.", 2), "refuse report review when save location is unreadable")
+	_check(not store.save_report_ending("Must not finalize an unreadable save.", "published"), "refuse final report write when save location is unreadable")
 	_check(store.mission_step == previous_step, "failed save does not change in-memory progress")
 	_check(DirAccess.dir_exists_absolute(absolute_path), "preserve unreadable save location")
 	if DirAccess.dir_exists_absolute(absolute_path):
