@@ -227,7 +227,7 @@ func _run_tests() -> void:
 	_check(DirAccess.copy_absolute(absolute_path, backup_path) == OK, "copy valid save into backup before corruption test")
 	var corrupt_primary := FileAccess.open(absolute_path, FileAccess.WRITE)
 	if corrupt_primary != null:
-		corrupt_primary.store_string("[campaign\\nmission_step = broken")
+		corrupt_primary.store_string("[campaign\nmission_step = broken")
 		corrupt_primary.close()
 	_check(store.load_case_answer("backup_recovery_fixture") == 42, "recover valid backup when primary save is malformed")
 	_check(FileAccess.file_exists(absolute_path), "malformed primary is replaced by recovered valid save")
@@ -236,7 +236,7 @@ func _run_tests() -> void:
 	# A stale corrupt backup must not block saving when the primary is still valid.
 	var corrupt_backup := FileAccess.open(backup_path, FileAccess.WRITE)
 	if corrupt_backup != null:
-		corrupt_backup.store_string("[campaign\\nmission_step = broken")
+		corrupt_backup.store_string("[campaign\nmission_step = broken")
 		corrupt_backup.close()
 	_check(store.save_case_answer("save_with_corrupt_backup", 73), "replace corrupt stale backup when primary save is valid")
 	_check(store.load_case_answer("backup_recovery_fixture") == 42, "keep existing data while replacing corrupt stale backup")
