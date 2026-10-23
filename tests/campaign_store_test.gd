@@ -240,6 +240,17 @@ func _run_tests() -> void:
 		_check(not final_evidence.has("report_studio_revision_requested"), "finalizing changed report removes revision marker")
 		_check(final_evidence.has("evidence_test"), "finalizing changed report preserves unrelated evidence")
 
+	# The short-report rejection (outcome 0) must use the same revision marker and clear duplicates.
+	_check(store.save_report_review("Short report rejected by the committee.", 0), "save short-report rejection outcome")
+	_check(store.load_case_answer("report_studio_reviewed") == 0, "persist short-report rejection outcome")
+	var rejected_review_config := ConfigFile.new()
+	_check(rejected_review_config.load(TEST_SAVE_PATH) == OK, "reload short-report rejection markers")
+	if rejected_review_config.load(TEST_SAVE_PATH) == OK:
+		var rejected_evidence: Array = rejected_review_config.get_value("campaign", "evidence", [])
+		_check(rejected_evidence.has("report_studio_revision_requested"), "short-report rejection stores revision marker")
+		_check(not rejected_evidence.has("report_studio_reviewed"), "short-report rejection removes accepted marker")
+		_check(rejected_evidence.count("report_studio_revision_requested") == 1, "short-report rejection stores one revision marker")
+
 	# A wrong-typed evidence field is normalized before a new evidence ID is written.
 	config.set_value("campaign", "evidence", "not-an-array")
 	_check(config.save(TEST_SAVE_PATH) == OK, "seed malformed evidence field")
