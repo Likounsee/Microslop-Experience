@@ -224,6 +224,21 @@ func _run_tests() -> void:
 		_check(not revised_evidence.has("report_studio_reviewed"), "stale acceptance marker removed")
 		_check(revised_evidence.has("evidence_test"), "revision review preserves unrelated evidence")
 
+	# Duplicate or contradictory review evidence must be collapsed to one authoritative marker.
+	var duplicate_review_fixture := ConfigFile.new()
+	_check(duplicate_review_fixture.load(TEST_SAVE_PATH) == OK, "load save before duplicate review marker fixture")
+	if duplicate_review_fixture.load(TEST_SAVE_PATH) == OK:
+		duplicate_review_fixture.set_value("campaign", "evidence", ["evidence_test", "report_studio_reviewed", "report_studio_reviewed", "report_studio_revision_requested", "report_studio_revision_requested"])
+		_check(duplicate_review_fixture.save(TEST_SAVE_PATH) == OK, "seed duplicate and contradictory review markers")
+	_check(store.save_report_review("Report with a clear revision request.", 1), "rewrite duplicated review markers atomically")
+	var unique_review_fixture := ConfigFile.new()
+	_check(unique_review_fixture.load(TEST_SAVE_PATH) == OK, "reload normalized review markers")
+	if unique_review_fixture.load(TEST_SAVE_PATH) == OK:
+		var unique_review_evidence: Array = unique_review_fixture.get_value("campaign", "evidence", [])
+		_check(unique_review_evidence.count("report_studio_revision_requested") == 1, "review keeps exactly one revision marker")
+		_check(unique_review_evidence.count("report_studio_reviewed") == 0, "review removes all contradictory acceptance markers")
+		_check(unique_review_evidence.has("evidence_test"), "review marker normalization preserves unrelated evidence")
+
 	# Saving an unchanged draft must keep its still-valid review.
 	_check(store.save_report_draft("Report to revise."), "save unchanged reviewed draft")
 	_check(store.load_case_answer("report_studio_reviewed") == 1, "unchanged draft preserves review outcome")
