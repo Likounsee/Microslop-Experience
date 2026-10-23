@@ -81,6 +81,9 @@ func _is_valid_setting(key: String, candidate: Variant) -> bool:
 func save_settings() -> bool:
 	var config := ConfigFile.new()
 	for key in values.keys():
+		if not _is_valid_setting(str(key), values[key]):
+			push_warning("Refusing to save invalid setting: %s" % key)
+			return false
 		config.set_value("settings", key, values[key])
 
 	var temporary_path := settings_path + TEMP_SUFFIX
