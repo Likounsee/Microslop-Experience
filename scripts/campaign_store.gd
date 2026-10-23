@@ -8,6 +8,16 @@ const CAMPAIGN_VERSION := 2
 
 var mission_step: int = MIN_MISSION_STEP
 
+## Returns only unique, non-empty evidence IDs from potentially malformed save data.
+func _normalized_evidence(raw: Variant) -> Array:
+	var evidence: Array = []
+	if not (raw is Array):
+		return evidence
+	for item in raw:
+		if item is String and not item.strip_edges().is_empty() and not evidence.has(item):
+			evidence.append(item)
+	return evidence
+
 func load_progress() -> int:
 	var config := ConfigFile.new()
 	var error := config.load(SAVE_PATH)
@@ -72,7 +82,7 @@ func save_evidence(evidence_id: String) -> bool:
 		push_warning("Impossible de relire la sauvegarde avant d'enregistrer les indices ORCHID.")
 		return false
 	var raw: Variant = config.get_value("campaign", "evidence", [])
-	var evidence: Array = raw if raw is Array else []
+	var evidence := _normalized_evidence(raw)
 	if not evidence.has(evidence_id):
 		evidence.append(evidence_id)
 	config.set_value("campaign", "evidence", evidence)
@@ -89,13 +99,7 @@ func load_evidence() -> Array:
 	if config.load(SAVE_PATH) != OK:
 		return []
 	var raw: Variant = config.get_value("campaign", "evidence", [])
-	if not (raw is Array):
-		return []
-	var evidence: Array = []
-	for item in raw:
-		if item is String and not item.strip_edges().is_empty() and not evidence.has(item):
-			evidence.append(item)
-	return evidence
+	return _normalized_evidence(raw)
 
 
 ## Saves the latest answer for a named ORCHID evidence puzzle.
@@ -167,7 +171,7 @@ func save_report_review(draft: String, outcome: int) -> bool:
 	answers["report_studio_reviewed"] = outcome
 	config.set_value("campaign", "case_answers", answers)
 	var raw_evidence: Variant = config.get_value("campaign", "evidence", [])
-	var evidence: Array = raw_evidence if raw_evidence is Array else []
+	var evidence := _normalized_evidence(raw_evidence)
 	var evidence_id := "report_studio_reviewed" if outcome == 2 else "report_studio_revision_requested"
 	# Rebuild the two mutually exclusive review markers to remove stale or duplicate entries.
 	evidence.erase("report_studio_reviewed")
@@ -237,12 +241,11 @@ func reset_cinematic_progress() -> bool:
 
 	var raw_evidence: Variant = config.get_value("campaign", "evidence", [])
 	var kept_evidence: Array = []
-	if raw_evidence is Array:
-		for item in raw_evidence:
-			var evidence_id := str(item)
-			if evidence_id.begins_with("cinematic_scene_") or evidence_id.begins_with("cinematic_choice_evidence_") or evidence_id == "cinematic_outcome_calculated" or evidence_id.begins_with("orchid_cinematic_"):
-				continue
-			kept_evidence.append(item)
+	for item in _normalized_evidence(raw_evidence):
+		var evidence_id: String = item
+		if evidence_id.begins_with("cinematic_scene_") or evidence_id.begins_with("cinematic_choice_evidence_") or evidence_id == "cinematic_outcome_calculated" or evidence_id.begins_with("orchid_cinematic_"):
+			continue
+		kept_evidence.append(item)
 	config.set_value("campaign", "evidence", kept_evidence)
 
 	# The sequence currently has 39 scenes (indices 0..38). Clear every slot,
