@@ -8279,16 +8279,10 @@ func _input(event: InputEvent) -> void:
 
 func _close_active_window() -> void:
 	var active_window := _get_active_visible_window()
-	if is_instance_valid(active_window):
-		active_window.queue_free()
+	if not is_instance_valid(active_window):
 		return
-	if not is_instance_valid(_window_layer):
-		return
-	for index in range(_window_layer.get_child_count() - 1, -1, -1):
-		var window := _window_layer.get_child(index)
-		if window is Control and window.visible:
-			window.queue_free()
-			return
+	active_window.queue_free()
+	_update_taskbar_indicators()
 
 func _is_pointer_over_window(pointer: Vector2) -> bool:
 
@@ -8808,9 +8802,7 @@ func _toggle_quick_link_menu() -> void:
 	)
 	var separator := HSeparator.new()
 	items.add_child(separator)
-	_add_quick_link_action(items, "Gestionnaire des tâches", func():
-		_open_window("Gestionnaire des tâches", "Processus\n\nMicroslop Experience     En cours d’exécution\nUtilisation CPU : —\nUtilisation mémoire : —", Vector2(500, 320))
-	)
+	_add_quick_link_action(items, "Gestionnaire des tâches", _open_task_manager)
 	_add_quick_link_action(items, "Paramètres", _open_settings)
 	_add_quick_link_action(items, "Explorateur de fichiers", _open_files)
 	_add_quick_link_action(items, "Bureau", _toggle_show_desktop)
