@@ -2674,8 +2674,9 @@ func _filter_pinned_apps(query: String) -> void:
 		if is_instance_valid(button):
 
 			var app_name := str(button.get_meta("app_name", ""))
+			var search_terms := str(button.get_meta("search_terms", ""))
 
-			button.visible = normalized_query.is_empty() or app_name.contains(normalized_query)
+			button.visible = normalized_query.is_empty() or app_name.contains(normalized_query) or search_terms.contains(normalized_query)
 
 			if button.visible:
 
