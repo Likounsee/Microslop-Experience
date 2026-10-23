@@ -257,6 +257,27 @@ func _run_tests() -> void:
 		_check(not final_evidence.has("report_studio_revision_requested"), "finalizing changed report removes revision marker")
 		_check(final_evidence.has("evidence_test"), "finalizing changed report preserves unrelated evidence")
 
+	# Recover from a wrong-typed saved draft without trusting its stale review metadata.
+	var malformed_draft_fixture := ConfigFile.new()
+	_check(malformed_draft_fixture.load(TEST_SAVE_PATH) == OK, "load save before malformed report draft fixture")
+	if malformed_draft_fixture.load(TEST_SAVE_PATH) == OK:
+		malformed_draft_fixture.set_value("campaign", "report_draft", 123)
+		var malformed_answers: Dictionary = malformed_draft_fixture.get_value("campaign", "case_answers", {})
+		malformed_answers["report_studio_reviewed"] = 2
+		malformed_draft_fixture.set_value("campaign", "case_answers", malformed_answers)
+		malformed_draft_fixture.set_value("campaign", "evidence", ["report_studio_reviewed", "report_studio_revision_requested", "evidence_test"])
+		_check(malformed_draft_fixture.save(TEST_SAVE_PATH) == OK, "seed malformed draft with stale review metadata")
+	_check(store.save_report_draft("Recovered report after malformed data."), "replace malformed report draft")
+	_check(store.load_report_draft() == "Recovered report after malformed data.", "load recovered report draft")
+	_check(store.load_case_answer("report_studio_reviewed") == -1, "malformed draft recovery clears stale review outcome")
+	var recovered_draft_fixture := ConfigFile.new()
+	_check(recovered_draft_fixture.load(TEST_SAVE_PATH) == OK, "reload recovered report draft metadata")
+	if recovered_draft_fixture.load(TEST_SAVE_PATH) == OK:
+		var recovered_draft_evidence: Array = recovered_draft_fixture.get_value("campaign", "evidence", [])
+		_check(not recovered_draft_evidence.has("report_studio_reviewed"), "malformed draft recovery removes accepted marker")
+		_check(not recovered_draft_evidence.has("report_studio_revision_requested"), "malformed draft recovery removes revision marker")
+		_check(recovered_draft_evidence.has("evidence_test"), "malformed draft recovery preserves unrelated evidence")
+
 	# The short-report rejection (outcome 0) must use the same revision marker and clear duplicates.
 	_check(store.save_report_review("Short report rejected by the committee.", 0), "save short-report rejection outcome")
 	_check(store.load_case_answer("report_studio_reviewed") == 0, "persist short-report rejection outcome")
