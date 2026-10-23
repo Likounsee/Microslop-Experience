@@ -4530,6 +4530,16 @@ func _open_orchid_report_studio() -> void:
 			cross_app_report += "La concordance entre applications aide à orienter la vérification, sans établir l’identité d’un responsable ni l’intention initiale."
 			paragraphs.append(cross_app_report)
 			selected_count += 1
+		var recycle_log_inspected := evidence.has("recycle_bin_orchid_log_inspected")
+		var recycle_log_restored := evidence.has("recycle_bin_orchid_log_restored")
+		if recycle_log_inspected or recycle_log_restored:
+			var recycle_report := "PIÈCE DE LA CORBEILLE — JOURNAL ORCHID\n"
+			if recycle_log_restored:
+				recycle_report += "Le journal ORCHID a été restauré depuis la corbeille simulée et enregistré dans le dossier d’enquête. Il indique un écart entre DEV_RING_INTERNAL et la cible STABLE, sans référence d’approbation visible. Cette trace ne permet pas d’identifier qui a déclenché le déploiement ni de déterminer si l’écart était intentionnel.\n"
+			else:
+				recycle_report += "Le journal ORCHID a été inspecté dans la corbeille simulée, mais aucune restauration n’est enregistrée. Il peut orienter les vérifications ; traitez son contenu comme une piste consultée, pas comme une pièce restaurée dans le dossier.\n"
+			paragraphs.append(recycle_report)
+			selected_count += 1
 		if selected_count == 0:
 			paragraphs.append("Aucun élément n’a été sélectionné. Choisissez au moins une section avant de transmettre une conclusion.")
 		paragraphs.append("CONCLUSION PROVISOIRE\nLes traces justifient une revue documentée. Les causes exactes et les responsabilités individuelles ne sont pas établies par ce seul dossier.")
@@ -5568,6 +5578,7 @@ func _open_orchid_decision_board() -> void:
 			{"name":"Recommandations", "ids":["audit_wifi","audit_exit","audit_answer"]},
 			{"name":"Conformité", "ids":["compliance_channel","compliance_approval","compliance_notice"]}
 		]
+		groups.append({"name":"Journal ORCHID de la corbeille", "ids":["recycle_bin_orchid_log_inspected", "recycle_bin_orchid_log_restored"]})
 		var lines := PackedStringArray(["ÉTAT DES PREUVES"])
 		for group in groups:
 			var count := 0
@@ -5575,6 +5586,14 @@ func _open_orchid_decision_board() -> void:
 				if evidence.has(evidence_id):
 					count += 1
 			lines.append("%s : %d / %d" % [group["name"], count, group["ids"].size()])
+		var restored_log := evidence.has("recycle_bin_orchid_log_restored")
+		var inspected_log := evidence.has("recycle_bin_orchid_log_inspected")
+		if restored_log:
+			lines.append("Journal de la corbeille : restauré et versé au dossier.")
+		elif inspected_log:
+			lines.append("Journal de la corbeille : consulté, mais pas restauré.")
+		else:
+			lines.append("Journal de la corbeille : non examiné.")
 		evidence_status.text = "\n".join(lines)
 	refresh_status.call()
 	var refresh := Button.new()
@@ -5591,9 +5610,28 @@ func _open_orchid_decision_board() -> void:
 		choice.text = str(option[0])
 		choice.custom_minimum_size = Vector2(0, 42)
 		choice.pressed.connect(func():
-			CampaignStore.save_case_answer("incident_committee_decision", options.find(option))
-			CampaignStore.save_evidence(str(option[1]))
-			report.text = "DÉCISION ENREGISTRÉE\n\n%s\n\nCette décision ne modifie pas les faits déjà collectés. Elle fixe la manière dont le dossier sera traité." % option[2]
+			var saved_decision := CampaignStore.save_case_answer("incident_committee_decision", options.find(option))
+			var saved_marker := CampaignStore.save_evidence(str(option[1]))
+			if not saved_decision or not saved_marker:
+				report.text = "ÉCHEC DE SAUVEGARDE\n\nLa décision ou son marqueur de dossier n’a pas pu être enregistré. Actualisez les preuves et réessayez."
+				return
+			var evidence_now: Array = CampaignStore.load_evidence()
+			var trace_count := 0
+			for required_id in ["night_rule", "night_download", "night_install", "night_activation", "night_notification"]:
+				if evidence_now.has(required_id):
+					trace_count += 1
+			var compliance_count := 0
+			for required_id in ["compliance_channel", "compliance_approval", "compliance_notice"]:
+				if evidence_now.has(required_id):
+					compliance_count += 1
+			var evidence_assessment := "Couverture technique : %d/5 traces de chronologie et %d/3 contrôles de conformité." % [trace_count, compliance_count]
+			if evidence_now.has("recycle_bin_orchid_log_restored"):
+				evidence_assessment += "\nLe journal restauré renforce la piste d’un écart de canal sans identifier un responsable."
+			elif evidence_now.has("recycle_bin_orchid_log_inspected"):
+				evidence_assessment += "\nLe journal de la corbeille a été consulté mais pas restauré ; son intégration au dossier reste incomplète."
+			else:
+				evidence_assessment += "\nLe journal de la corbeille n’a pas été examiné ; la provenance reste à compléter."
+			report.text = "DÉCISION ENREGISTRÉE\n\n%s\n\n%s\n\nCette décision ne modifie pas les faits déjà collectés. Elle fixe la manière dont le dossier sera traité." % [option[2], evidence_assessment]
 			for child in content.get_children():
 				if child is Button and child != refresh:
 					child.disabled = true
