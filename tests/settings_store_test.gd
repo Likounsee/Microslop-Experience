@@ -51,7 +51,7 @@ func _run_tests() -> void:
 	var malformed_primary := FileAccess.open(absolute_path, FileAccess.WRITE)
 	_check(malformed_primary != null, "create malformed primary settings fixture")
 	if malformed_primary != null:
-		malformed_primary.store_string("[settings\\nvsync = broken")
+		malformed_primary.store_string("[settings\nvsync = broken")
 		malformed_primary.close()
 	var recovery_store = SettingsStoreScript.new()
 	recovery_store.settings_path = TEST_SETTINGS_PATH
