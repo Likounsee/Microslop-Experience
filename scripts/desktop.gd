@@ -4346,9 +4346,28 @@ func _open_orchid_archive() -> void:
 	var publish := Button.new()
 	publish.text = "Publier le rapport (et déclencher une dernière interruption)"
 	publish.pressed.connect(func():
-		CampaignStore.save_ending("published")
+		if not CampaignStore.save_ending("published"):
+			report.text += "\n\nÉCHEC : la conclusion n’a pas été enregistrée. Le rapport reste ouvert ; réessayez avant de fermer cette fenêtre."
+			return
+		var ending_note := "FIN — RAPPORT TRANSMIS. Microslop confirme que votre signalement est important et vous propose 14 articles sur la productivité."
+		var committee_decision := CampaignStore.load_case_answer("incident_committee_decision")
+		var ending_evidence: Array = CampaignStore.load_evidence()
+		var trace_count := 0
+		for trace_id in ["night_rule", "night_download", "night_install", "night_activation", "night_notification"]:
+			if ending_evidence.has(trace_id):
+				trace_count += 1
+		if committee_decision == 0:
+			ending_note += "\nLe rapport suit l’orientation d’escalade du comité. Couverture chronologique : %d/5." % trace_count
+		elif committee_decision == 1:
+			ending_note += "\nVous transmettez malgré l’orientation de surveillance : documentez la raison et gardez les limites de preuve visibles."
+		elif committee_decision == 2:
+			ending_note += "\nVous transmettez malgré la clôture votée : la transmission rouvre de fait la demande de vérification."
+		else:
+			ending_note += "\nAucune décision de comité n’est enregistrée ; la transmission est faite sans mandat formalisé dans ce dossier."
+		if not ending_evidence.has("compliance_approval"):
+			ending_note += "\nLa référence d’approbation reste introuvable : le signalement demande une vérification, il ne désigne pas de responsable."
+		report.text += "\n\n" + ending_note
 		_show_notification("Rapport transmis", "Le rapport ORCHID a été placé dans la file de signalement. Une notification sponsorisée vient d’être priorisée devant lui.")
-		report.text += "\n\nFIN — RAPPORT TRANSMIS. Microslop confirme que votre signalement est important et vous propose 14 articles sur la productivité."
 		publish.disabled = true
 		keep.disabled = true
 	)
@@ -4356,9 +4375,22 @@ func _open_orchid_archive() -> void:
 	keep = Button.new()
 	keep.text = "Conserver une copie locale"
 	keep.pressed.connect(func():
-		CampaignStore.save_ending("preserved")
+		if not CampaignStore.save_ending("preserved"):
+			report.text += "\n\nÉCHEC : la conclusion n’a pas été enregistrée. La copie reste dans cette fenêtre ; réessayez avant de fermer."
+			return
+		var ending_note := "FIN — COPIE CONSERVÉE. Le rapport existe toujours, même si le navigateur refuse de le recommander."
+		var committee_decision := CampaignStore.load_case_answer("incident_committee_decision")
+		var ending_evidence: Array = CampaignStore.load_evidence()
+		if committee_decision == 0:
+			ending_note += "\nL’escalade proposée n’est pas transmise depuis ce choix final : la copie reste une pièce locale et le suivi externe n’est pas confirmé."
+		elif committee_decision == 1:
+			ending_note += "\nCette fin est cohérente avec la surveillance avant publication ; prévoyez une reproduction contrôlée avant de partager le rapport."
+		elif committee_decision == 2:
+			ending_note += "\nLa copie permet de réexaminer la clôture si de nouveaux éléments apparaissent."
+		if not ending_evidence.has("recycle_bin_orchid_log_restored"):
+			ending_note += "\nLe journal de la corbeille n’a pas été restauré dans le dossier ; la provenance demeure une piste à compléter."
+		report.text += "\n\n" + ending_note
 		_show_notification("Copie enregistrée", "Le rapport est conservé dans votre archive fictive. Microslop a enregistré que vous avez choisi de garder une preuve.")
-		report.text += "\n\nFIN — COPIE CONSERVÉE. Le rapport existe toujours, même si le navigateur refuse de le recommander."
 		publish.disabled = true
 		keep.disabled = true
 	)
