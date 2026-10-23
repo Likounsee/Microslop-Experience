@@ -51,6 +51,14 @@ func _run_tests() -> void:
 	_check(store.load_case_answer("atomic_choice") == 2, "load atomically saved choice")
 	_check(store.load_case_answer("atomic_score") == -3, "load atomically saved score")
 	_check(store.load_evidence().has("atomic_choice_evidence"), "load evidence from atomic decision")
+	# Simulate closing and reopening the application: a fresh store must recover the whole committed decision.
+	var resumed_store = CampaignStoreScript.new()
+	resumed_store.save_path = TEST_SAVE_PATH
+	root.add_child(resumed_store)
+	_check(resumed_store.load_case_answer("atomic_choice") == 2, "resume recovers atomic choice in a fresh store")
+	_check(resumed_store.load_case_answer("atomic_score") == -3, "resume recovers atomic score in a fresh store")
+	_check(resumed_store.load_evidence().has("atomic_choice_evidence"), "resume recovers matching evidence in a fresh store")
+	resumed_store.queue_free()
 	_check(not store.save_case_answers_with_evidence({}, "invalid_atomic_evidence"), "reject empty atomic answer batch")
 	_check(not store.save_case_answers_with_evidence({"atomic_invalid": 1001}, "invalid_atomic_evidence"), "reject out-of-range atomic answer")
 	_check(store.save_evidence("evidence_test"), "save evidence")
@@ -149,6 +157,15 @@ func _run_tests() -> void:
 		_check(reset_result.get_value("campaign", "ending", "") == "preserved", "cinematic reset preserves campaign ending")
 		_check(reset_result.get_value("campaign", "mission_step", -1) == 4, "cinematic reset preserves mission progress")
 
+	# Reset is safe to retry after reopening; it must not damage unrelated campaign state.
+	_check(store.reset_cinematic_progress(), "cinematic reset is idempotent on retry")
+	var retry_result := ConfigFile.new()
+	_check(retry_result.load(TEST_SAVE_PATH) == OK, "reload save after reset retry")
+	if retry_result.load(TEST_SAVE_PATH) == OK:
+		_check(retry_result.get_value("campaign", "mission_step", -1) == 4, "reset retry preserves mission progress")
+		_check(retry_result.get_value("campaign", "report_draft", "") == "Keep this unrelated report draft.", "reset retry preserves report draft")
+		_check(retry_result.get_value("campaign", "quick_settings_mode", "") == "normal", "reset retry preserves restored setting")
+
 	# A directory at the save path simulates a location ConfigFile cannot read or overwrite.
 	if FileAccess.file_exists(absolute_path):
 		DirAccess.remove_absolute(absolute_path)
@@ -159,6 +176,7 @@ func _run_tests() -> void:
 	_check(store.load_case_answer("failed_atomic_choice") == -1, "failed atomic decision does not persist its answer")
 	_check(not store.load_evidence().has("failed_atomic_evidence"), "failed atomic decision does not persist evidence")
 	_check(not store.save_progress(1), "refuse to overwrite unreadable save location")
+	_check(not store.reset_cinematic_progress(), "refuse cinematic reset when save location is unreadable")
 	_check(store.mission_step == previous_step, "failed save does not change in-memory progress")
 	_check(DirAccess.dir_exists_absolute(absolute_path), "preserve unreadable save location")
 	if DirAccess.dir_exists_absolute(absolute_path):
