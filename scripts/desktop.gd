@@ -92,6 +92,25 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		key_event.accept()
 		return
 
+	# Ctrl+W closes the active simulated app, matching common Windows app behavior.
+	if key_event.keycode == KEY_W and key_event.ctrl_pressed:
+		_close_active_window()
+		key_event.accept()
+		return
+
+	# F11 toggles maximize for the active window; Shift+F10 opens its context menu.
+	if key_event.keycode == KEY_F11:
+		var fullscreen_target := _get_active_visible_window()
+		if is_instance_valid(fullscreen_target):
+			fullscreen_target.call("_toggle_maximize")
+			fullscreen_target.move_to_front()
+		key_event.accept()
+		return
+	if key_event.keycode == KEY_F10 and key_event.shift_pressed:
+		_toggle_window_system_menu()
+		key_event.accept()
+		return
+
 	# Win+Shift+S opens the capture utility before regular Win+S search.
 	if key_event.meta_pressed and key_event.shift_pressed and key_event.keycode == KEY_S:
 		_open_snipping_tool()
@@ -8251,19 +8270,16 @@ func _input(event: InputEvent) -> void:
 			_advance_mission("Progression de la campagne avancée manuellement pour le prototype.")
 
 func _close_active_window() -> void:
-
-	if not is_instance_valid(_window_layer):
-
+	var active_window := _get_active_visible_window()
+	if is_instance_valid(active_window):
+		active_window.queue_free()
 		return
-
+	if not is_instance_valid(_window_layer):
+		return
 	for index in range(_window_layer.get_child_count() - 1, -1, -1):
-
 		var window := _window_layer.get_child(index)
-
 		if window is Control and window.visible:
-
 			window.queue_free()
-
 			return
 
 func _is_pointer_over_window(pointer: Vector2) -> bool:
