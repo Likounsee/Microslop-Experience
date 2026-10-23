@@ -142,3 +142,6 @@ Nouveau parcours jouable en dix étapes, du triage du signalement à la passatio
 
 
 Les décisions des parcours ORCHID (cinématique, sprint, workflow et exercice de crise) enregistrent désormais leurs réponses et leur marqueur de preuve dans une seule écriture de sauvegarde. En cas d’échec disque, l’interface n’applique pas le score local ni ne valide le choix comme enregistré. La suite de tests couvre aussi les écritures atomiques et leur échec.
+
+
+Les effets secondaires des décisions du workflow et de l’exercice de crise sont maintenant inclus dans la même écriture que le choix, le score et la preuve. L’avancement vers l’étape suivante vérifie aussi le succès de la sauvegarde avant de modifier l’interface : une panne disque ne fait plus avancer un parcours à tort.
