@@ -124,6 +124,36 @@ func save_report_draft(draft: String) -> bool:
 	return true
 
 
+
+## Commits the report text, review outcome and matching evidence in one config write.
+## This avoids reporting a completed review when only part of the state was saved.
+func save_report_review(draft: String, outcome: int) -> bool:
+	if outcome < 0 or outcome > 2:
+		return false
+	var config := ConfigFile.new()
+	var load_error := config.load(SAVE_PATH)
+	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
+		push_warning("Impossible de relire la sauvegarde avant la revue ORCHID.")
+		return false
+	config.set_value("campaign", "report_draft", draft)
+	var raw_answers: Variant = config.get_value("campaign", "case_answers", {})
+	var answers: Dictionary = raw_answers if raw_answers is Dictionary else {}
+	answers["report_studio_reviewed"] = outcome
+	config.set_value("campaign", "case_answers", answers)
+	var raw_evidence: Variant = config.get_value("campaign", "evidence", [])
+	var evidence: Array = raw_evidence if raw_evidence is Array else []
+	var evidence_id := "report_studio_reviewed" if outcome == 2 else "report_studio_revision_requested"
+	if not evidence.has(evidence_id):
+		evidence.append(evidence_id)
+	config.set_value("campaign", "evidence", evidence)
+	config.set_value("campaign", "version", CAMPAIGN_VERSION)
+	var error := config.save(SAVE_PATH)
+	if error != OK:
+		push_warning("Impossible d'enregistrer la revue complète du rapport ORCHID : %s" % error)
+		return false
+	return true
+
+
 func load_report_draft() -> String:
 	var config := ConfigFile.new()
 	if config.load(SAVE_PATH) != OK:
