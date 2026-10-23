@@ -2,7 +2,10 @@ extends Node
 ## Centralized settings storage for Microslop Experience.
 
 const SETTINGS_PATH := "user://settings.cfg"
+const TEMP_SUFFIX := ".tmp"
+const BACKUP_SUFFIX := ".bak"
 
+var settings_path: String = SETTINGS_PATH
 var values: Dictionary = {
 	"display_mode": "Fenêtré",
 	"resolution": Vector2i(1280, 720),
@@ -20,7 +23,7 @@ func _ready() -> void:
 
 func load_settings() -> void:
 	var config := ConfigFile.new()
-	var error := config.load(SETTINGS_PATH)
+	var error := config.load(settings_path)
 	if error != OK:
 		return
 	for key in values.keys():
@@ -50,13 +53,63 @@ func _is_valid_setting(key: String, candidate: Variant) -> bool:
 		_:
 			return false
 
-func save_settings() -> void:
+func save_settings() -> bool:
 	var config := ConfigFile.new()
 	for key in values.keys():
 		config.set_value("settings", key, values[key])
-	var error := config.save(SETTINGS_PATH)
+
+	var temporary_path := settings_path + TEMP_SUFFIX
+	var backup_path := settings_path + BACKUP_SUFFIX
+	var error := config.save(temporary_path)
 	if error != OK:
-		push_warning("Unable to save settings: %s" % error)
+		push_warning("Unable to write temporary settings: %s" % error)
+		return false
+
+	var verification := ConfigFile.new()
+	error = verification.load(temporary_path)
+	if error != OK:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(temporary_path))
+		push_warning("Temporary settings failed verification: %s" % error)
+		return false
+	for key in values.keys():
+		if not verification.has_section_key("settings", key) or verification.get_value("settings", key) != values[key]:
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(temporary_path))
+			push_warning("Temporary settings did not preserve value: %s" % key)
+			return false
+
+	var absolute_target := ProjectSettings.globalize_path(settings_path)
+	var absolute_temporary := ProjectSettings.globalize_path(temporary_path)
+	var absolute_backup := ProjectSettings.globalize_path(backup_path)
+	var had_previous := FileAccess.file_exists(absolute_target)
+	if had_previous:
+		# Never discard a backup while the current settings file is unreadable.
+		var current := ConfigFile.new()
+		error = current.load(settings_path)
+		if error != OK:
+			DirAccess.remove_absolute(absolute_temporary)
+			push_warning("Refusing to replace unreadable settings; existing file preserved.")
+			return false
+		if FileAccess.file_exists(absolute_backup):
+			error = DirAccess.remove_absolute(absolute_backup)
+			if error != OK:
+				DirAccess.remove_absolute(absolute_temporary)
+				push_warning("Unable to remove stale settings backup: %s" % error)
+				return false
+		error = DirAccess.rename_absolute(absolute_target, absolute_backup)
+		if error != OK:
+			DirAccess.remove_absolute(absolute_temporary)
+			push_warning("Unable to preserve previous settings: %s" % error)
+			return false
+
+	error = DirAccess.rename_absolute(absolute_temporary, absolute_target)
+	if error != OK:
+		if had_previous and FileAccess.file_exists(absolute_backup):
+			DirAccess.rename_absolute(absolute_backup, absolute_target)
+		push_warning("Unable to replace settings file: %s" % error)
+		return false
+	if FileAccess.file_exists(absolute_backup):
+		DirAccess.remove_absolute(absolute_backup)
+	return true
 
 func set_value_and_save(key: String, value: Variant) -> void:
 	# Validate writes as well as reads: UI callbacks or future features must not
@@ -69,8 +122,10 @@ func set_value_and_save(key: String, value: Variant) -> void:
 		return
 	if values[key] == value:
 		return
+	var previous_value: Variant = values[key]
 	values[key] = value
-	save_settings()
+	if not save_settings():
+		values[key] = previous_value
 
 func apply_display_settings() -> void:
 	var mode: String = str(values.get("display_mode", "Fenêtré"))
