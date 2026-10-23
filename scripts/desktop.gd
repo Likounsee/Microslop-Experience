@@ -79,7 +79,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 
 	# Common Windows shortcuts: Win+D shows the desktop, Win+E opens Explorer,
-	# Win+I opens Settings, and Alt+F4 closes the focused app.
+	# Win+I opens Settings, Win+Arrow manages the focused window, and Alt+F4 closes it.
 	if key_event.meta_pressed:
 		match key_event.keycode:
 			KEY_D:
@@ -94,14 +94,26 @@ func _unhandled_key_input(event: InputEvent) -> void:
 				_open_settings()
 				key_event.accept()
 				return
+			KEY_UP:
+				var active_window := _get_active_visible_window()
+				if is_instance_valid(active_window) and not bool(active_window.get("_is_maximized")):
+					active_window.call("_toggle_maximize")
+					active_window.move_to_front()
+				key_event.accept()
+				return
+			KEY_DOWN:
+				var active_window := _get_active_visible_window()
+				if is_instance_valid(active_window):
+					if bool(active_window.get("_is_maximized")):
+						active_window.call("_toggle_maximize")
+					else:
+						active_window.call("_animate_minimize")
+						_activate_topmost_visible_window(str(active_window.get_meta("app_id")))
+				key_event.accept()
+				return
 
 	if key_event.keycode == KEY_F4 and key_event.alt_pressed:
-		var active_window: Control
-		if is_instance_valid(_window_layer):
-			for child in _window_layer.get_children():
-				if child is Control and child.has_meta("app_id") and str(child.get_meta("app_id")) == _active_app_id and child.visible:
-					active_window = child
-					break
+		var active_window := _get_active_visible_window()
 		if is_instance_valid(active_window):
 			# Let tree_exited choose the next visible window so focus never gets stuck on the desktop.
 			active_window.queue_free()
@@ -130,6 +142,15 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			_start_open = false
 			key_event.accept()
 		return
+
+func _get_active_visible_window() -> Control:
+	if not is_instance_valid(_window_layer) or _active_app_id.is_empty():
+		return null
+	for i in range(_window_layer.get_child_count() - 1, -1, -1):
+		var child = _window_layer.get_child(i)
+		if child is Control and child.visible and child.has_meta("app_id") and str(child.get_meta("app_id")) == _active_app_id:
+			return child as Control
+	return null
 
 func _notification(what: int) -> void:
 
