@@ -192,7 +192,8 @@ func save_report_ending(draft: String, ending: String) -> bool:
 
 ## Persists optional ORCHID evidence IDs without disturbing mission progress or ending.
 func save_evidence(evidence_id: String) -> bool:
-	if evidence_id.strip_edges().is_empty():
+	var normalized_id := evidence_id.strip_edges()
+	if normalized_id.is_empty():
 		return false
 	var config := ConfigFile.new()
 	var load_error := _load_config(config)
@@ -201,8 +202,8 @@ func save_evidence(evidence_id: String) -> bool:
 		return false
 	var raw: Variant = config.get_value("campaign", "evidence", [])
 	var evidence := _normalized_evidence(raw)
-	if not evidence.has(evidence_id):
-		evidence.append(evidence_id)
+	if not evidence.has(normalized_id):
+		evidence.append(normalized_id)
 	config.set_value("campaign", "evidence", evidence)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
 	var error := _save_config_atomic(config)
