@@ -4654,6 +4654,19 @@ func _open_orchid_report_studio() -> void:
 						decision_section += "\nALERTE DE CLÔTURE PRÉMATURÉE : approbation manquante : %s ; chronologie : %d/5. Garder ces lacunes explicitement dans le compte rendu." % ["oui" if approval_missing else "non", trace_count]
 			paragraphs.append(decision_section)
 			selected_count += 1
+		var reconstruction_evidence: Array = CampaignStore.load_evidence()
+		var reconstructed_examined := CampaignStore.load_case_answer("orchid_casebook_examined_count")
+		var reconstructed_findings := CampaignStore.load_case_answer("orchid_casebook_findings_count")
+		var has_reconstruction_data := reconstructed_examined >= 0 or reconstructed_findings >= 0
+		if reconstruction_evidence.has("orchid_casebook_reconstructed") or has_reconstruction_data:
+			var reconstruction_section := "CARNET ORCHID — ÉTAT DE RECONSTITUTION\n"
+			if reconstruction_evidence.has("orchid_casebook_reconstructed") and reconstructed_examined >= 0 and reconstructed_findings >= 0:
+				reconstruction_section += "La sauvegarde indique qu’une reconstitution a été enregistrée : %d élément(s) examiné(s), %d constat(s) consignés. Ces compteurs décrivent l’état du parcours ; ils ne prouvent pas à eux seuls que chaque constat a été confirmé par une source originale.\n" % [reconstructed_examined, reconstructed_findings]
+				reconstruction_section += "Suite requise : relier chaque constat à sa pièce, noter les contradictions et conserver les inconnues avant toute conclusion définitive."
+			else:
+				reconstruction_section += "Des données de reconstitution sont présentes, mais le marqueur de complétion ou un compteur manque. Traiter ce résumé comme incomplet et rouvrir le carnet avant de conclure."
+			paragraphs.append(reconstruction_section)
+			selected_count += 1
 		if selected_count == 0:
 			paragraphs.append("Aucun élément n’a été sélectionné. Choisissez au moins une section avant de transmettre une conclusion.")
 		paragraphs.append("CONCLUSION PROVISOIRE\nLes traces justifient une revue documentée. Les causes exactes et les responsabilités individuelles ne sont pas établies par ce seul dossier.")
