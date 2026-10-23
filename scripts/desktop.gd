@@ -553,6 +553,7 @@ func _build_desktop() -> void:
 	_build_taskbar()
 
 	_build_notification_center()
+	_load_notification_history()
 
 	_build_start_menu()
 
@@ -1374,6 +1375,7 @@ func _toggle_notification_center() -> void:
 func _clear_notification_history() -> void:
 
 	_notification_history.clear()
+	_save_notification_history()
 
 	if not is_instance_valid(_notification_center):
 
@@ -1565,6 +1567,7 @@ func _dismiss_notification(index: int) -> void:
 	if index < 0 or index >= _notification_history.size():
 		return
 	_notification_history.remove_at(index)
+	_save_notification_history()
 	_refresh_notification_center()
 
 func _build_quick_settings() -> void:
@@ -7908,6 +7911,44 @@ func _get_window_content(app: Control) -> VBoxContainer:
 
 	return body.get_child(0) as VBoxContainer
 
+func _load_notification_history() -> void:
+	const HISTORY_PATH := "user://notification_history.json"
+	_notification_history.clear()
+	if not FileAccess.file_exists(HISTORY_PATH):
+		return
+	var file := FileAccess.open(HISTORY_PATH, FileAccess.READ)
+	if file == null:
+		push_warning("Impossible de lire l’historique des notifications.")
+		return
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	file.close()
+	if not parsed is Array:
+		push_warning("Historique des notifications invalide : le fichier sera recréé.")
+		return
+	for entry in parsed:
+		if not entry is Dictionary:
+			continue
+		var title := str(entry.get("title", "")).strip_edges()
+		var message := str(entry.get("message", "")).strip_edges()
+		var time := str(entry.get("time", ""))
+		if title.is_empty() or message.is_empty():
+			continue
+		_notification_history.append({"title": title, "message": message, "time": time})
+	while _notification_history.size() > 20:
+		_notification_history.pop_front()
+	_refresh_notification_center()
+
+
+func _save_notification_history() -> void:
+	const HISTORY_PATH := "user://notification_history.json"
+	var file := FileAccess.open(HISTORY_PATH, FileAccess.WRITE)
+	if file == null:
+		push_warning("Impossible d’enregistrer l’historique des notifications.")
+		return
+	file.store_string(JSON.stringify(_notification_history, "\t"))
+	file.close()
+
+
 func _show_notification(title: String, message: String) -> void:
 
 	if not is_instance_valid(_notification_layer):
@@ -7926,6 +7967,7 @@ func _show_notification(title: String, message: String) -> void:
 		_notification_history.append({"title": title, "message": message, "time": Time.get_time_string_from_system().substr(0, 5)})
 		while _notification_history.size() > 20:
 			_notification_history.pop_front()
+		_save_notification_history()
 		_refresh_notification_center()
 		CampaignStore.save_evidence("control_promo_digest")
 		return
@@ -7935,6 +7977,7 @@ func _show_notification(title: String, message: String) -> void:
 
 		_notification_history.pop_front()
 
+	_save_notification_history()
 	_refresh_notification_center()
 
 	var card := PanelContainer.new()
