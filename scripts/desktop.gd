@@ -3864,12 +3864,12 @@ func _render_orchid_task_sprint(app: Control, state: Dictionary) -> void:
 		var replay := Button.new()
 		replay.text = "Recommencer le sprint"
 		replay.pressed.connect(func():
-			CampaignStore.save_case_answer("orchid_sprint_stage", 0)
-			CampaignStore.save_case_answer("orchid_sprint_score", 0)
-			CampaignStore.save_case_answer("orchid_sprint_interruptions", 0)
+			var reset_answers: Dictionary = {"orchid_sprint_stage": 0, "orchid_sprint_score": 0, "orchid_sprint_interruptions": 0}
 			for i in range(data.size()):
-				CampaignStore.save_case_answer("orchid_sprint_choice_%02d" % i, -1)
-				CampaignStore.save_evidence("orchid_sprint_stage_%02d" % i)
+				reset_answers["orchid_sprint_choice_%02d" % i] = -1
+			if not CampaignStore.reset_case_progress(reset_answers, ["orchid_sprint_stage_", "orchid_sprint_choice_", "sprint_"]):
+				_show_notification("Réinitialisation impossible", "La sauvegarde a échoué ; le sprint terminé reste intact.")
+				return
 			state["stage"] = 0
 			state["score"] = 0
 			state["interrupted"] = 0
@@ -4036,10 +4036,12 @@ func _render_orchid_workflow_board(app: Control, state: Dictionary) -> void:
 		var replay := Button.new()
 		replay.text = "Recommencer le dossier transversal"
 		replay.pressed.connect(func():
-			CampaignStore.save_case_answer("orchid_workflow_stage", 0)
-			CampaignStore.save_case_answer("orchid_workflow_score", 0)
+			var reset_answers: Dictionary = {"orchid_workflow_stage": 0, "orchid_workflow_score": 0}
 			for i in range(steps.size()):
-				CampaignStore.save_case_answer("orchid_workflow_choice_%02d" % i, -1)
+				reset_answers["orchid_workflow_choice_%02d" % i] = -1
+			if not CampaignStore.reset_case_progress(reset_answers, ["orchid_workflow_step_", "orchid_workflow_choice_"]):
+				_show_notification("Réinitialisation impossible", "La sauvegarde a échoué ; le dossier terminé reste intact.")
+				return
 			state["stage"] = 0
 			state["score"] = 0
 			_render_orchid_workflow_board(app, state)
@@ -4223,10 +4225,12 @@ func _render_orchid_crisis_tabletop(app: Control, state: Dictionary) -> void:
 		var replay := Button.new()
 		replay.text = "Rejouer l’exercice de crise"
 		replay.pressed.connect(func():
-			CampaignStore.save_case_answer("orchid_crisis_stage", 0)
-			CampaignStore.save_case_answer("orchid_crisis_score", 0)
+			var reset_answers: Dictionary = {"orchid_crisis_stage": 0, "orchid_crisis_score": 0}
 			for i in range(scenarios.size()):
-				CampaignStore.save_case_answer("orchid_crisis_choice_%02d" % i, -1)
+				reset_answers["orchid_crisis_choice_%02d" % i] = -1
+			if not CampaignStore.reset_case_progress(reset_answers, ["orchid_crisis_decision_", "orchid_crisis_choice_", "crisis_"]):
+				_show_notification("Réinitialisation impossible", "La sauvegarde a échoué ; l’exercice terminé reste intact.")
+				return
 			state["stage"] = 0
 			state["score"] = 0
 			_render_orchid_crisis_tabletop(app, state)
