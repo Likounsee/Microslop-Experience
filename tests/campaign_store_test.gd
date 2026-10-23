@@ -138,6 +138,14 @@ func _run_tests() -> void:
 	_check(store.save_report_ending("Final report retained with conclusion.", "published"), "save final report and ending atomically")
 	_check(store.load_report_draft() == "Final report retained with conclusion.", "final ending stores report draft")
 	_check(store.load_ending() == "published", "final report ending is persisted")
+	var complete_final_text := "Final report retained with conclusion.\n\nFIN — RAPPORT TRANSMIS. La vérification reste ouverte."
+	_check(store.save_report_ending(complete_final_text, "published"), "save full final report including ending note")
+	var final_reopen = CampaignStoreScript.new()
+	final_reopen.save_path = TEST_SAVE_PATH
+	root.add_child(final_reopen)
+	_check(final_reopen.load_report_draft() == complete_final_text, "full final report and ending note survive fresh store reload")
+	_check(final_reopen.load_ending() == "published", "published ending survives fresh store reload")
+	final_reopen.queue_free()
 	_check(not store.save_report_ending("Must not overwrite the valid final report.", "unknown"), "reject invalid atomic final ending")
 	_check(store.load_report_draft() == "Final report retained with conclusion.", "invalid final ending preserves prior report")
 	_check(store.load_ending() == "published", "invalid final ending preserves prior conclusion")
