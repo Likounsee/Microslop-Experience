@@ -135,6 +135,22 @@ func _run_tests() -> void:
 	_check(store.save_ending("preserved"), "replace ending with preserved outcome")
 	_check(store.load_ending() == "preserved", "load updated ending")
 
+	# The ending is a durable campaign decision, not a side effect of the last save operation.
+	_check(store.save_evidence("ending_persistence_evidence"), "save evidence after choosing ending")
+	_check(store.save_case_answer("ending_persistence_answer", 2), "save case answer after choosing ending")
+	_check(store.save_report_draft("A draft saved after the ending."), "save report draft after choosing ending")
+	_check(store.load_ending() == "preserved", "ending survives unrelated evidence, answer, and draft writes")
+
+	# Corrupt or wrong-typed ending values must not be presented as a valid conclusion.
+	var ending_fixture := ConfigFile.new()
+	_check(ending_fixture.load(TEST_SAVE_PATH) == OK, "load save to seed malformed ending")
+	if ending_fixture.load(TEST_SAVE_PATH) == OK:
+		ending_fixture.set_value("campaign", "ending", 123)
+		_check(ending_fixture.save(TEST_SAVE_PATH) == OK, "seed wrong-typed ending")
+	_check(store.load_ending() == "", "reject wrong-typed saved ending")
+	_check(store.save_ending("preserved"), "restore valid ending after malformed-data test")
+	_check(store.load_ending() == "preserved", "valid ending can be saved after malformed-data test")
+
 	_check(store.save_report_review("A factual report with limits and actions.", 2), "save accepted report review")
 	_check(not store.save_report_review("Invalid outcome must not replace this report.", 3), "reject invalid report review outcome")
 	_check(store.load_report_draft() == "A factual report with limits and actions.", "invalid review leaves saved report unchanged")
