@@ -119,6 +119,10 @@ func load_progress() -> int:
 		# The previous tutorial ended at step 3. Reopen the update clue so returning players can reach the new story chapter.
 		if saved_version < CAMPAIGN_VERSION and mission_step >= 3:
 			mission_step = 2
+		if saved_version < CAMPAIGN_VERSION:
+			# Persist the migration once while retaining unrelated campaign data.
+			if not save_progress(mission_step):
+				push_warning("La migration de progression ORCHID n’a pas pu être enregistrée.")
 	return mission_step
 
 func save_progress(step: int) -> bool:
