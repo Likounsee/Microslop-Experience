@@ -1969,7 +1969,10 @@ func _show_taskbar_preview(app_id: String, source_button: Button, glyph: String)
 	var thumbnail_content := CenterContainer.new()
 	thumbnail.add_child(thumbnail_content)
 	var thumbnail_label := Label.new()
+	var is_app_visible := app.visible
 	thumbnail_label.text = glyph + "\n" + str(app.get_meta("window_title", "Application"))
+	if not is_app_visible:
+		thumbnail_label.text += "\nRéduite dans la barre des tâches"
 	thumbnail_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	thumbnail_label.add_theme_color_override("font_color", Color("526681"))
 	thumbnail_label.add_theme_font_size_override("font_size", 11)
@@ -1981,10 +1984,10 @@ func _show_taskbar_preview(app_id: String, source_button: Button, glyph: String)
 	var status_dot := Label.new()
 	status_dot.text = "●"
 	status_dot.add_theme_font_size_override("font_size", 9)
-	status_dot.add_theme_color_override("font_color", Color("1683e8"))
+	status_dot.add_theme_color_override("font_color", Color("1683e8") if is_app_visible else Color("8b98aa"))
 	preview_status.add_child(status_dot)
 	var status_label := Label.new()
-	status_label.text = "Fenêtre ouverte"
+	status_label.text = "Fenêtre ouverte" if is_app_visible else "Application réduite"
 	status_label.add_theme_font_size_override("font_size", 10)
 	status_label.add_theme_color_override("font_color", Color("65758d"))
 	preview_status.add_child(status_label)
