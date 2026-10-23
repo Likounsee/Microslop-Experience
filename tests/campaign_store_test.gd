@@ -204,6 +204,17 @@ func _run_tests() -> void:
 		_check(not evidence.has("report_studio_revision_requested"), "opposite review marker removed")
 		_check(evidence.has("evidence_test"), "report review preserves unrelated evidence")
 
+	# Editing a reviewed report must invalidate the previous outcome and its markers atomically.
+	_check(store.save_report_draft("Edited after review."), "save edited draft after accepted review")
+	_check(store.load_report_draft() == "Edited after review.", "load edited draft after review invalidation")
+	_check(store.load_case_answer("report_studio_reviewed") == -1, "editing draft clears stale review outcome")
+	_check(config.load(TEST_SAVE_PATH) == OK, "reload save after draft review invalidation")
+	if config.load(TEST_SAVE_PATH) == OK:
+		var invalidated_evidence: Array = config.get_value("campaign", "evidence", [])
+		_check(not invalidated_evidence.has("report_studio_reviewed"), "editing draft removes stale accepted marker")
+		_check(not invalidated_evidence.has("report_studio_revision_requested"), "editing draft removes stale revision marker")
+		_check(invalidated_evidence.has("evidence_test"), "editing draft preserves unrelated evidence")
+
 	_check(store.save_report_review("Report to revise.", 1), "save revised report review after acceptance")
 	_check(config.load(TEST_SAVE_PATH) == OK, "reload revised report review")
 	if config.load(TEST_SAVE_PATH) == OK:
