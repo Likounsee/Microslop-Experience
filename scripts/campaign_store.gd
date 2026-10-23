@@ -131,6 +131,37 @@ func load_report_draft() -> String:
 	return str(config.get_value("campaign", "report_draft", ""))
 
 
+## Restarts only the cinematic thread, leaving the wider ORCHID case file intact.
+## Scene markers and choice keys are cleared together so resume cannot jump to the ending.
+func reset_cinematic_progress() -> bool:
+	var config := ConfigFile.new()
+	var load_error := config.load(SAVE_PATH)
+	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
+		push_warning("Impossible de relire la sauvegarde avant de relancer la séquence ORCHID.")
+		return false
+	var raw_evidence: Variant = config.get_value("campaign", "evidence", [])
+	var kept_evidence: Array = []
+	if raw_evidence is Array:
+		for item in raw_evidence:
+			var evidence_id := str(item)
+			if not evidence_id.begins_with("cinematic_scene_") and not evidence_id.begins_with("cinematic_choice_evidence_") and evidence_id != "cinematic_outcome_calculated":
+				kept_evidence.append(item)
+	config.set_value("campaign", "evidence", kept_evidence)
+	for scene_index in range(36):
+		var choice_key := "cinematic_choice_%02d" % scene_index
+		if config.has_section_key("campaign", choice_key):
+			config.erase_section_key("campaign", choice_key)
+	for key in ["cinematic_outcome_score"]:
+		if config.has_section_key("campaign", key):
+			config.erase_section_key("campaign", key)
+	config.set_value("campaign", "version", CAMPAIGN_VERSION)
+	var save_error := config.save(SAVE_PATH)
+	if save_error != OK:
+		push_warning("Impossible de réinitialiser la séquence ORCHID : %s" % save_error)
+		return false
+	return true
+
+
 func load_ending() -> String:
 	var config := ConfigFile.new()
 	if config.load(SAVE_PATH) != OK:
