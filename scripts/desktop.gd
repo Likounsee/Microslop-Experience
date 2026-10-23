@@ -6734,6 +6734,43 @@ func _open_settings() -> void:
 
 	content.add_child(volume)
 
+	var music_volume_label := Label.new()
+	music_volume_label.text = "Volume de la musique"
+	music_volume_label.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(music_volume_label)
+
+	var music_volume := HSlider.new()
+	music_volume.min_value = 0.0
+	music_volume.max_value = 100.0
+	music_volume.step = 1.0
+	music_volume.value = float(SettingsStore.values.get("music_volume", 0.7)) * 100.0
+	music_volume.custom_minimum_size.x = 220
+	music_volume.value_changed.connect(func(value: float):
+		if not SettingsStore.set_value_and_save("music_volume", value / 100.0):
+			music_volume.value = float(SettingsStore.values.get("music_volume", 0.7)) * 100.0
+			_show_notification("Paramètre non enregistré", "Le volume de musique précédent a été restauré.")
+		SettingsStore.apply_audio_settings()
+	)
+	content.add_child(music_volume)
+
+	var sfx_volume_label := Label.new()
+	sfx_volume_label.text = "Volume des effets sonores"
+	sfx_volume_label.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(sfx_volume_label)
+
+	var sfx_volume := HSlider.new()
+	sfx_volume.min_value = 0.0
+	sfx_volume.max_value = 100.0
+	sfx_volume.step = 1.0
+	sfx_volume.value = float(SettingsStore.values.get("sfx_volume", 0.85)) * 100.0
+	sfx_volume.custom_minimum_size.x = 220
+	sfx_volume.value_changed.connect(func(value: float):
+		if not SettingsStore.set_value_and_save("sfx_volume", value / 100.0):
+			sfx_volume.value = float(SettingsStore.values.get("sfx_volume", 0.85)) * 100.0
+			_show_notification("Paramètre non enregistré", "Le volume des effets précédent a été restauré.")
+		SettingsStore.apply_audio_settings()
+	)
+	content.add_child(sfx_volume)
 
 	_add_settings_section(content, "Préférences", "Personnalisez votre expérience")
 
