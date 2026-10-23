@@ -81,6 +81,20 @@ func _run_tests() -> void:
 	var reset_fixture := ConfigFile.new()
 	_check(reset_fixture.load(TEST_SAVE_PATH) == OK, "load save before cinematic reset fixture")
 	reset_fixture.set_value("campaign", "evidence", ["evidence_to_keep", "cinematic_scene_02", "cinematic_choice_evidence_02", "orchid_cinematic_shared", "cinematic_outcome_calculated"])
+	# Real gameplay stores these decisions in case_answers, not as top-level keys.
+	reset_fixture.set_value("campaign", "case_answers", {
+		"case_test": 2,
+		"cinematic_choice_02": 1,
+		"cinematic_choice_38": 2,
+		"cinematic_outcome_score": 17,
+		"orchid_lea_support_status": 1,
+		"orchid_report_quality": 1,
+		"orchid_sample_protocol": 1,
+		"orchid_release_guardrail": 1,
+		"orchid_results_claim": 0,
+		"orchid_final_prompt_choice": 0,
+		"orchid_cinematic_focus_pause": 1
+	})
 	reset_fixture.set_value("campaign", "cinematic_choice_02", 1)
 	reset_fixture.set_value("campaign", "cinematic_choice_38", 2)
 	reset_fixture.set_value("campaign", "cinematic_outcome_score", 17)
@@ -103,6 +117,18 @@ func _run_tests() -> void:
 		_check(not reset_result.has_section_key("campaign", "cinematic_choice_02"), "cinematic reset clears early choice")
 		_check(not reset_result.has_section_key("campaign", "cinematic_choice_38"), "cinematic reset clears epilogue choice")
 		_check(not reset_result.has_section_key("campaign", "cinematic_outcome_score"), "cinematic reset clears outcome score")
+		var reset_answers: Dictionary = reset_result.get_value("campaign", "case_answers", {})
+		_check(not reset_answers.has("cinematic_choice_02"), "cinematic reset clears persisted early answer")
+		_check(not reset_answers.has("cinematic_choice_38"), "cinematic reset clears persisted epilogue answer")
+		_check(not reset_answers.has("cinematic_outcome_score"), "cinematic reset clears persisted outcome score")
+		_check(not reset_answers.has("orchid_lea_support_status"), "cinematic reset clears derived testimony status")
+		_check(not reset_answers.has("orchid_report_quality"), "cinematic reset clears derived report status")
+		_check(not reset_answers.has("orchid_sample_protocol"), "cinematic reset clears derived sampling status")
+		_check(not reset_answers.has("orchid_release_guardrail"), "cinematic reset clears derived release guardrail")
+		_check(not reset_answers.has("orchid_results_claim"), "cinematic reset clears derived results claim")
+		_check(not reset_answers.has("orchid_final_prompt_choice"), "cinematic reset clears final prompt choice")
+		_check(not reset_answers.has("orchid_cinematic_focus_pause"), "cinematic reset clears cinematic focus pause choice")
+		_check(reset_answers.get("case_test", -1) == 2, "cinematic reset preserves unrelated case answer")
 		_check(reset_result.get_value("campaign", "quick_settings_mode", "") == "normal", "cinematic reset restores pre-cinematic shared setting")
 		_check(not reset_result.has_section_key("campaign", "cinematic_only_temporary_flag"), "cinematic reset removes keys created by cinematic")
 		_check(not reset_result.has_section_key("campaign", "cinematic_baseline"), "cinematic reset clears baseline snapshot")
