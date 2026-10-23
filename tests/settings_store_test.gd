@@ -50,6 +50,69 @@ func _run_tests() -> void:
 	reloaded.settings_path = TEST_SETTINGS_PATH
 	root.add_child(reloaded)
 	_check(reloaded.values["fps_limit"] == 120, "fresh store loads persisted setting")
+	# Exercise the full whitelist, including type checks and both ends of ranges.
+	var valid_cases: Array[Array] = [
+		["display_mode", "Fenêtré"],
+		["display_mode", "Plein écran sans bordures"],
+		["display_mode", "Plein écran exclusif"],
+		["resolution", Vector2i(1280, 720)],
+		["resolution", Vector2i(1600, 900)],
+		["resolution", Vector2i(1920, 1080)],
+		["vsync", true],
+		["vsync", false],
+		["fps_limit", 0],
+		["fps_limit", 240],
+		["master_volume", 0.0],
+		["master_volume", 1.0],
+		["music_volume", 0.0],
+		["music_volume", 1.0],
+		["sfx_volume", 0.0],
+		["sfx_volume", 1.0],
+		["language", "Français"],
+		["language", "English"],
+	]
+	for test_case in valid_cases:
+		_check(store._is_valid_setting(str(test_case[0]), test_case[1]), "accept valid %s value %s" % [test_case[0], test_case[1]])
+
+	var invalid_cases: Array[Array] = [
+		["display_mode", "Maximisé"],
+		["display_mode", true],
+		["resolution", Vector2i(1024, 768)],
+		["resolution", "1920x1080"],
+		["vsync", 1],
+		["fps_limit", 121],
+		["fps_limit", -1],
+		["fps_limit", 60.0],
+		["master_volume", -0.01],
+		["master_volume", 1.01],
+		["music_volume", "0.5"],
+		["sfx_volume", null],
+		["language", "Deutsch"],
+		["unknown_setting", 1],
+	]
+	for test_case in invalid_cases:
+		_check(not store._is_valid_setting(str(test_case[0]), test_case[1]), "reject invalid %s value %s" % [test_case[0], test_case[1]])
+
+	# Verify that every supported setting survives an actual save/reload cycle.
+	var round_trip_values: Dictionary = {
+		"display_mode": "Plein écran sans bordures",
+		"resolution": Vector2i(1600, 900),
+		"vsync": false,
+		"fps_limit": 60,
+		"master_volume": 0.25,
+		"music_volume": 0.35,
+		"sfx_volume": 0.45,
+		"language": "English",
+	}
+	for key in round_trip_values:
+		_check(store.set_value_and_save(str(key), round_trip_values[key]), "persist %s setting" % key)
+	var round_trip_store = SettingsStoreScript.new()
+	round_trip_store.settings_path = TEST_SETTINGS_PATH
+	root.add_child(round_trip_store)
+	for key in round_trip_values:
+		_check(round_trip_store.values[key] == round_trip_values[key], "reload persisted %s setting" % key)
+	round_trip_store.queue_free()
+
 	_check(not reloaded.set_value_and_save("fps_limit", 121), "invalid setting reports persistence failure")
 	_check(reloaded.values["fps_limit"] == 120, "invalid setting is rejected without changing value")
 	_check(reloaded.save_settings(), "replace an existing settings file")
