@@ -94,6 +94,13 @@ func _unhandled_key_input(event: InputEvent) -> void:
 				_open_settings()
 				key_event.accept()
 				return
+			KEY_M:
+				if key_event.shift_pressed:
+					_restore_all_minimized_windows()
+				else:
+					_minimize_all_windows()
+				key_event.accept()
+				return
 			KEY_LEFT:
 				var active_window_left := _get_active_visible_window()
 				if is_instance_valid(active_window_left):
@@ -165,6 +172,33 @@ func _get_active_visible_window() -> Control:
 		if child is Control and child.visible and child.has_meta("app_id") and str(child.get_meta("app_id")) == _active_app_id:
 			return child as Control
 	return null
+
+
+func _minimize_all_windows() -> void:
+	if not is_instance_valid(_window_layer):
+		return
+	var windows := _window_layer.get_children()
+	for window in windows:
+		if window is Control and window.visible and window.has_method("_animate_minimize"):
+			window.call("_animate_minimize")
+	_active_app_id = ""
+	_update_taskbar_indicators()
+
+
+func _restore_all_minimized_windows() -> void:
+	if not is_instance_valid(_window_layer):
+		return
+	var windows := _window_layer.get_children()
+	for window in windows:
+		if window is Control and not window.visible and window.has_meta("app_id") and window.has_method("restore_from_taskbar"):
+			window.call("restore_from_taskbar")
+			window.move_to_front()
+			_active_app_id = str(window.get_meta("app_id"))
+	if not _active_app_id.is_empty():
+		var active_window := _get_active_visible_window()
+		if is_instance_valid(active_window) and active_window.has_signal("window_activated"):
+			active_window.emit_signal("window_activated")
+	_update_taskbar_indicators()
 
 func _notification(what: int) -> void:
 
