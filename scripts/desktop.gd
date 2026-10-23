@@ -6027,6 +6027,16 @@ func _open_orchid_casebook() -> void:
 		var conclusion := "RECONSTITUTION PROVISOIRE · %d / %d pièces examinées\n\n" % [examined, entries.size()]
 		conclusion += "\n\n".join(findings)
 		conclusion += "\n\nCONCLUSION ET LIMITES\nLes éléments lus permettent d’étayer uniquement les constats ci-dessus. Une pièce non examinée n’est pas utilisée comme preuve dans cette reconstitution. Ne déduisez ni lecture effective de fichiers ni responsabilité individuelle à partir d’une notification, d’un compteur ou d’un écart de canal seuls. Ouvrez les pièces restantes puis relancez la reconstitution pour compléter l’analyse."
+		# Persist the actual reconstruction outcome so the report and later sessions can
+		# distinguish examined evidence from a reconstruction the player really ran.
+		var findings_count := findings.size()
+		if CampaignStore.save_case_answers_with_evidence({
+			"orchid_casebook_examined_count": examined,
+			"orchid_casebook_findings_count": findings_count
+		}, "orchid_casebook_reconstructed"):
+			conclusion += "\n\nÉTAT : reconstitution enregistrée dans le dossier ORCHID."
+		else:
+			conclusion += "\n\nÉCHEC DE SAUVEGARDE : cette reconstitution n’a pas été enregistrée. Vérifiez l’espace de sauvegarde et réessayez."
 		detail.text = conclusion
 	)
 	content.add_child(theory)
