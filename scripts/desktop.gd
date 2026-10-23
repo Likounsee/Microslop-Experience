@@ -4544,6 +4544,20 @@ func _render_orchid_cinematic_scene(app: Control, state: Dictionary) -> void:
 		ending.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		ending.custom_minimum_size = Vector2(0, 210)
 		content.add_child(ending)
+		var replay_button := Button.new()
+		replay_button.text = "Rejouer la séquence depuis le début"
+		replay_button.tooltip_text = "Efface uniquement les choix et marqueurs de cette séquence ; vos autres preuves ORCHID restent conservées."
+		replay_button.custom_minimum_size = Vector2(0, 42)
+		replay_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		replay_button.pressed.connect(func():
+			if CampaignStore.reset_cinematic_progress():
+				state["stage"] = 0
+				_show_notification("Séquence ORCHID réinitialisée", "Les choix de la cinématique peuvent être rejoués. Les autres preuves et votre rapport sont conservés.")
+				_render_orchid_cinematic_scene(app, state)
+			else:
+				_show_notification("Réinitialisation impossible", "La sauvegarde n’a pas pu être modifiée. Votre progression n’a pas été réinitialisée.")
+		)
+		content.add_child(replay_button)
 		var archive_button := Button.new()
 		archive_button.text = "Retourner à l’archive ORCHID"
 		archive_button.pressed.connect(_open_orchid_archive)
