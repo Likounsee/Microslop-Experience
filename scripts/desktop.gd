@@ -1547,7 +1547,25 @@ func _refresh_notification_center() -> void:
 
 		content.add_child(body)
 
+		var actions := HBoxContainer.new()
+		actions.alignment = BoxContainer.ALIGNMENT_END
+		var dismiss_button := Button.new()
+		dismiss_button.text = "Ignorer"
+		dismiss_button.tooltip_text = "Supprimer cette notification de l’historique"
+		dismiss_button.add_theme_font_size_override("font_size", 10)
+		dismiss_button.add_theme_stylebox_override("normal", _flat_style(Color("f0f4fa"), 6))
+		dismiss_button.add_theme_stylebox_override("hover", _flat_style(Color("e1eafa"), 6))
+		dismiss_button.pressed.connect(_dismiss_notification.bind(i))
+		actions.add_child(dismiss_button)
+		content.add_child(actions)
+
 		entries.add_child(card)
+
+func _dismiss_notification(index: int) -> void:
+	if index < 0 or index >= _notification_history.size():
+		return
+	_notification_history.remove_at(index)
+	_refresh_notification_center()
 
 func _build_quick_settings() -> void:
 
