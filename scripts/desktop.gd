@@ -37,6 +37,7 @@ var _desktop_context_menu: PanelContainer
 var _desktop_icon_context_menu: PanelContainer
 var _context_desktop_icon: Button
 var _quick_link_menu: PanelContainer
+var _window_system_menu: PanelContainer
 var _task_view_panel: PanelContainer
 var _taskbar_preview: PanelContainer
 var _taskbar_preview_tween: Tween
@@ -76,6 +77,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	# Ctrl+Shift+Esc opens the simulated Task Manager directly.
 	if key_event.keycode == KEY_ESCAPE and key_event.ctrl_pressed and key_event.shift_pressed:
 		_open_task_manager()
+		key_event.accept()
+		return
+
+	# Alt+Space opens the active window system menu.
+	if key_event.keycode == KEY_SPACE and key_event.alt_pressed:
+		_toggle_window_system_menu()
 		key_event.accept()
 		return
 
@@ -210,7 +217,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			key_event.accept()
 			return
 		var had_overlay := false
-		for overlay in [_start_menu, _quick_settings_panel, _calendar_panel, _notification_center, _task_view_panel, _desktop_context_menu, _desktop_icon_context_menu, _quick_link_menu]:
+		for overlay in [_start_menu, _quick_settings_panel, _calendar_panel, _notification_center, _task_view_panel, _desktop_context_menu, _desktop_icon_context_menu, _quick_link_menu, _window_system_menu]:
 			if is_instance_valid(overlay) and overlay.visible:
 				overlay.hide()
 				had_overlay = true
@@ -8473,6 +8480,72 @@ func _focus_task_view_app(app_window: Control) -> void:
 		_task_view_panel.queue_free()
 		_task_view_panel = null
 
+
+func _toggle_window_system_menu() -> void:
+	if is_instance_valid(_window_system_menu):
+		_window_system_menu.queue_free()
+		_window_system_menu = null
+		return
+	var app := _get_active_visible_window()
+	if not is_instance_valid(app):
+		return
+	_window_system_menu = PanelContainer.new()
+	_window_system_menu.name = "WindowSystemMenu"
+	_window_system_menu.z_index = 130
+	_window_system_menu.custom_minimum_size = Vector2(220, 0)
+	var menu_style := _flat_style(Color("f5f7fb"), 10)
+	menu_style.border_color = Color("d4ddeb")
+	menu_style.set_border_width_all(1)
+	menu_style.shadow_color = Color(0.02, 0.04, 0.10, 0.30)
+	menu_style.shadow_size = 18
+	_window_system_menu.add_theme_stylebox_override("panel", menu_style)
+	var actions := VBoxContainer.new()
+	actions.add_theme_constant_override("separation", 2)
+	_window_system_menu.add_child(actions)
+	var is_maximized := bool(app.get("_is_maximized")) or str(app.get("_snap_mode")) != ""
+	if is_maximized:
+		_add_window_system_action(actions, "Restaurer", func():
+			if is_instance_valid(app):
+				app.call("_toggle_maximize")
+		)
+	_add_window_system_action(actions, "Réduire", func():
+		if is_instance_valid(app):
+			var app_id := str(app.get_meta("app_id", ""))
+			app.call("_animate_minimize")
+			if _active_app_id == app_id:
+				_active_app_id = ""
+				_activate_topmost_visible_window(app_id)
+			_update_taskbar_indicators()
+	)
+	if not is_maximized:
+		_add_window_system_action(actions, "Agrandir", func():
+			if is_instance_valid(app):
+				app.call("_toggle_maximize")
+		)
+	_add_window_system_action(actions, "Fermer", func():
+		if is_instance_valid(app):
+			app.queue_free()
+			_update_taskbar_indicators()
+	)
+	add_child(_window_system_menu)
+	_window_system_menu.position = app.position + Vector2(8, 34)
+	_window_system_menu.move_to_front()
+
+func _add_window_system_action(parent: VBoxContainer, caption: String, callback: Callable) -> void:
+	var button := Button.new()
+	button.text = caption
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.custom_minimum_size = Vector2(204, 34)
+	button.add_theme_color_override("font_color", Color("24344d"))
+	button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 6))
+	button.add_theme_stylebox_override("hover", _flat_style(Color("dce8f8"), 6))
+	button.pressed.connect(func():
+		if is_instance_valid(_window_system_menu):
+			_window_system_menu.queue_free()
+			_window_system_menu = null
+		callback.call()
+	)
+	parent.add_child(button)
 
 func _toggle_quick_link_menu() -> void:
 
