@@ -61,8 +61,8 @@ func _run_tests() -> void:
 	_check(not FileAccess.file_exists(absolute_path + ".bak"), "consume backup after successful recovery")
 
 	# If neither copy parses, preserve both for later diagnosis and use defaults.
-	var malformed_primary_text := "[settings\\nprimary = broken"
-	var malformed_backup_text := "[settings\\nbackup = broken"
+	var malformed_primary_text := "[settings\nprimary = broken"
+	var malformed_backup_text := "[settings\nbackup = broken"
 	var damaged_primary_file := FileAccess.open(absolute_path, FileAccess.WRITE)
 	if damaged_primary_file != null:
 		damaged_primary_file.store_string(malformed_primary_text)
