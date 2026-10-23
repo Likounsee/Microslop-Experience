@@ -159,3 +159,7 @@ Le bilan du sprint affiche désormais le même dénominateur maximal (26 points)
 ### Vérification et remplacement des sauvegardes ORCHID
 
 Le magasin de campagne écrit désormais les modifications dans un fichier temporaire voisin, relit ce fichier pour vérifier qu'il est interprétable, puis remplace la sauvegarde existante en conservant temporairement une copie de secours. Si le remplacement échoue, il tente de restaurer l'ancienne sauvegarde et signale l'échec au lieu de confirmer la transaction. Les tests de `CampaignStore` vérifient aussi le nettoyage des fichiers temporaires et de secours après une écriture réussie. La suite headless doit être exécutée par la CI ; ces changements ne remplacent pas une vérification manuelle des parcours dans Godot.
+
+### Récupération après interruption d'une sauvegarde
+
+La couche de persistance distingue maintenant le code d'erreur du résultat de sauvegarde : un enregistrement réussi renvoie `OK`, et non un booléen interprété comme une erreur. À la lecture, si le fichier principal est absent ou illisible, le magasin vérifie le fichier `.bak` et restaure une copie valide laissée par une interruption entre la mise à l'abri de l'ancien fichier et son remplacement. Un test de régression simule cet arrêt en déplaçant la sauvegarde principale vers le fichier de secours, puis vérifie la récupération des données. Cette couverture est ajoutée à la suite headless, mais son exécution CI reste à confirmer.
