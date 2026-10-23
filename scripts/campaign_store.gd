@@ -33,8 +33,8 @@ func _load_config(config: ConfigFile) -> Error:
 		if remove_error != OK:
 			return remove_error
 	var restore_error := DirAccess.rename_absolute(backup_path, target_path)
-		if restore_error != OK:
-			return restore_error
+	if restore_error != OK:
+		return restore_error
 	return config.load(save_path)
 
 
