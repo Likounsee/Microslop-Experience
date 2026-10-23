@@ -160,6 +160,26 @@ func save_ending(ending: String) -> bool:
 		return false
 	return true
 
+## Commits the final report draft and ending together so a conclusion cannot be saved
+## without retaining the report that the player chose to submit or preserve.
+func save_report_ending(draft: String, ending: String) -> bool:
+	if ending not in ["published", "preserved"]:
+		return false
+	var config := ConfigFile.new()
+	var load_error := _load_config(config)
+	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
+		push_warning("Impossible de relire la sauvegarde avant d'enregistrer le rapport final ORCHID.")
+		return false
+	config.set_value("campaign", "report_draft", draft)
+	config.set_value("campaign", "ending", ending)
+	config.set_value("campaign", "version", CAMPAIGN_VERSION)
+	var save_error := _save_config_atomic(config)
+	if save_error != OK:
+		push_warning("Impossible d'enregistrer ensemble le rapport et sa conclusion ORCHID : %s" % save_error)
+		return false
+	return true
+
+
 ## Persists optional ORCHID evidence IDs without disturbing mission progress or ending.
 func save_evidence(evidence_id: String) -> bool:
 	if evidence_id.strip_edges().is_empty():
