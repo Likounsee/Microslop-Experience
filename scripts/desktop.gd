@@ -7154,17 +7154,20 @@ func _refresh_task_manager_processes(list: VBoxContainer, task_manager: Control)
 		process_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		row.add_child(process_label)
 		var switch_button := Button.new()
-		switch_button.text = "Basculer" if not process_window.visible else "Afficher"
-		switch_button.disabled = not process_window.visible
+		switch_button.text = "Restaurer" if not process_window.visible else "Afficher"
+		switch_button.disabled = process_window.visible and app_id == _active_app_id
 		switch_button.pressed.connect(func():
 			if is_instance_valid(process_window):
 				if process_window.has_method("restore_from_taskbar") and not process_window.visible:
 					process_window.call("restore_from_taskbar")
+				process_window.show()
 				process_window.move_to_front()
 				_active_app_id = app_id
 				if process_window.has_signal("window_activated"):
 					process_window.emit_signal("window_activated")
 				_update_taskbar_indicators()
+				if is_instance_valid(list) and is_instance_valid(task_manager):
+					_refresh_task_manager_processes(list, task_manager)
 		)
 		row.add_child(switch_button)
 		var end_button := Button.new()
@@ -7219,11 +7222,11 @@ func _open_snipping_tool() -> void:
 		if directory_error != OK:
 			status.text = "Impossible de créer le dossier de captures (erreur %d)." % directory_error
 			return
-		var timestamp := Time.get_datetime_string_from_system().replace(":", "-").replace("T", "_")
+		var timestamp := Time.get_datetime_string_from_system().replace(":", "-").replace("T", "_") + "_" + str(Time.get_ticks_msec())
 		var file_path := "user://captures/capture_%s.png" % timestamp
 		var save_error := image.save_png(file_path)
 		if save_error == OK:
-			status.text = "Capture enregistrée :\\n%s" % file_path
+			status.text = "Capture enregistrée :\n%s" % file_path
 		else:
 			status.text = "Échec de l’enregistrement PNG (erreur %d)." % save_error
 	)
