@@ -72,6 +72,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if not key_event.pressed or key_event.echo:
 		return
 
+	# Alt+Tab cycles through open simulated app windows, like the Windows desktop.
+	if key_event.keycode == KEY_TAB and key_event.alt_pressed:
+		_cycle_app_window()
+		key_event.accept()
+		return
+
 	# Common Windows shortcuts: Win+E opens Explorer, Alt+F4 closes the focused app.
 	if key_event.keycode == KEY_E and key_event.meta_pressed:
 		_open_files()
@@ -1966,6 +1972,37 @@ func _hide_taskbar_preview() -> void:
 	_taskbar_preview = null
 	_taskbar_preview_tween = null
 
+
+func _cycle_app_window() -> void:
+	if not is_instance_valid(_window_layer):
+		return
+	var windows: Array[Control] = []
+	for child in _window_layer.get_children():
+		if child is Control and child.has_meta("app_id") and child.visible:
+			windows.append(child as Control)
+	if windows.is_empty():
+		return
+	if windows.size() == 1:
+		windows[0].move_to_front()
+		_active_app_id = str(windows[0].get_meta("app_id"))
+		if windows[0].has_signal("window_activated"):
+			windows[0].emit_signal("window_activated")
+		_update_taskbar_indicators()
+		return
+
+	# The active window is the current destination; advance to the next visible one.
+	var active_index := -1
+	for i in range(windows.size()):
+		if str(windows[i].get_meta("app_id")) == _active_app_id:
+			active_index = i
+			break
+	var next_index := (active_index + 1) % windows.size()
+	var next_window := windows[next_index]
+	next_window.move_to_front()
+	_active_app_id = str(next_window.get_meta("app_id"))
+	if next_window.has_signal("window_activated"):
+		next_window.emit_signal("window_activated")
+	_update_taskbar_indicators()
 
 func _find_app_window(app_id: String) -> Control:
 
