@@ -3930,26 +3930,35 @@ func _render_orchid_task_sprint(app: Control, state: Dictionary) -> void:
 		option.disabled = saved >= 0 and saved < task["options"].size()
 		option.pressed.connect(func():
 			var score_delta := int(task["scores"][i])
-			CampaignStore.save_case_answer("orchid_sprint_choice_%02d" % stage, i)
-			state["score"] = int(state.get("score", 0)) + score_delta
-			CampaignStore.save_case_answer("orchid_sprint_score", int(state["score"]))
+			var next_score := int(state.get("score", 0)) + score_delta
+			var next_interruptions := int(state.get("interrupted", 0))
+			var answers_to_save: Dictionary = {
+				"orchid_sprint_choice_%02d" % stage: i,
+				"orchid_sprint_score": next_score
+			}
+			var evidence_id := "orchid_sprint_choice_%02d" % stage
 			if stage == 1 and i == 2:
-				CampaignStore.save_case_answer("orchid_notification_mode", 2)
-				CampaignStore.save_evidence("sprint_digest_policy_applied")
-				_show_notification("ORCHID · mode digest activé", "Les promotions restent dans l’historique ; les alertes système continuent de passer.")
+				answers_to_save["orchid_notification_mode"] = 2
+				evidence_id = "sprint_digest_policy_applied"
 			elif stage == 1 and i == 1:
-				CampaignStore.save_case_answer("orchid_notification_mode", 0)
-				CampaignStore.save_evidence("sprint_promo_opened")
-				state["interrupted"] = int(state.get("interrupted", 0)) + 1
-				CampaignStore.save_case_answer("orchid_sprint_interruptions", int(state["interrupted"]))
-				_show_notification("Suggestion personnalisée", "La promotion s’ouvre pendant la relecture ; son retour compte comme engagement, pas comme réussite.")
+				answers_to_save["orchid_notification_mode"] = 0
+				next_interruptions += 1
+				evidence_id = "sprint_promo_opened"
 			elif task.has("promo") and bool(task["promo"][i]):
-				state["interrupted"] = int(state.get("interrupted", 0)) + 1
-				CampaignStore.save_case_answer("orchid_sprint_interruptions", int(state["interrupted"]))
+				next_interruptions += 1
+			if next_interruptions != int(state.get("interrupted", 0)):
+				answers_to_save["orchid_sprint_interruptions"] = next_interruptions
+			if not CampaignStore.save_case_answers_with_evidence(answers_to_save, evidence_id):
+				_show_notification("Décision non enregistrée", "La sauvegarde a échoué ; votre score et l’étape actuelle restent inchangés.")
+				return
+			state["score"] = next_score
+			state["interrupted"] = next_interruptions
+			if stage == 1 and i == 2:
+				_show_notification("ORCHID · mode digest activé", "Les promotions restent dans l’historique ; les alertes système continuent de passer.")
+			elif (stage == 1 and i == 1) or (task.has("promo") and bool(task["promo"][i])):
 				_show_notification("Suggestion personnalisée", "Une recommandation sponsorisée réclame votre attention pendant une tâche. Le centre de contrôle ORCHID décide si elle apparaît.")
 			else:
 				_show_notification("Tâche enregistrée", "Votre action a été conservée dans la simulation de travail.")
-			CampaignStore.save_evidence("orchid_sprint_choice_%02d" % stage)
 			feedback.text = str(task["feedback"][i]) + "\n\nImpact sur le score de qualité : %+d. Score actuel : %d." % [score_delta, int(state["score"])]
 			for node in content.get_children():
 				if node is Button and node != next:
@@ -4113,10 +4122,14 @@ func _render_orchid_workflow_board(app: Control, state: Dictionary) -> void:
 		option.pressed.connect(func():
 			var delta := int(step["delta"][i])
 			var new_score := score + delta
-			CampaignStore.save_case_answer("orchid_workflow_choice_%02d" % stage, i)
-			CampaignStore.save_case_answer("orchid_workflow_score", new_score)
-			CampaignStore.save_case_answer("orchid_workflow_stage", stage)
-			CampaignStore.save_evidence("orchid_workflow_step_%02d" % stage)
+			var answers_to_save: Dictionary = {
+				"orchid_workflow_choice_%02d" % stage: i,
+				"orchid_workflow_score": new_score,
+				"orchid_workflow_stage": stage
+			}
+			if not CampaignStore.save_case_answers_with_evidence(answers_to_save, "orchid_workflow_step_%02d" % stage):
+				_show_notification("Décision non enregistrée", "La sauvegarde a échoué ; le score et l’étape restent inchangés.")
+				return
 			state["score"] = new_score
 			feedback.text = str(step["feedback"][i]) + "\n\nImpact : %+d · Score cumulé : %d/20." % [delta, new_score]
 			var effect := str(step.get("effect", ["none","none","none"])[i])
@@ -4257,10 +4270,14 @@ func _render_orchid_crisis_tabletop(app: Control, state: Dictionary) -> void:
 		option.pressed.connect(func():
 			var delta := int(scenario["delta"][i])
 			var updated_score := int(state.get("score", 0)) + delta
-			CampaignStore.save_case_answer("orchid_crisis_choice_%02d" % stage, i)
-			CampaignStore.save_case_answer("orchid_crisis_score", updated_score)
-			CampaignStore.save_case_answer("orchid_crisis_stage", stage)
-			CampaignStore.save_evidence("orchid_crisis_decision_%02d" % stage)
+			var answers_to_save: Dictionary = {
+				"orchid_crisis_choice_%02d" % stage: i,
+				"orchid_crisis_score": updated_score,
+				"orchid_crisis_stage": stage
+			}
+			if not CampaignStore.save_case_answers_with_evidence(answers_to_save, "orchid_crisis_decision_%02d" % stage):
+				_show_notification("Décision non enregistrée", "La sauvegarde a échoué ; le score et l’étape restent inchangés.")
+				return
 			state["score"] = updated_score
 			feedback.text = str(scenario["feedback"][i]) + "\n\nImpact : %+d · Score cumulé : %d/24." % [delta, updated_score]
 			if stage == 1 and i == 0:
@@ -4827,8 +4844,12 @@ func _render_orchid_cinematic_scene(app: Control, state: Dictionary) -> void:
 func _choose_orchid_cinematic_option(stage: int, choice: int, continue_button: Button, option_count: int) -> void:
 	if choice < 0 or choice >= option_count:
 		return
-	CampaignStore.save_case_answer("cinematic_choice_%02d" % stage, choice)
-	CampaignStore.save_evidence("cinematic_choice_evidence_%02d" % stage)
+	if not CampaignStore.save_case_answers_with_evidence(
+		{"cinematic_choice_%02d" % stage: choice},
+		"cinematic_choice_evidence_%02d" % stage
+	):
+		_show_notification("Choix non enregistré", "La sauvegarde n’a pas confirmé cette décision. Libérez de l’espace ou vérifiez le dossier de sauvegarde, puis réessayez.")
+		return
 	continue_button.disabled = false
 	var feedback := "Votre réaction a été conservée. La scène suivante montrera les conséquences possibles de ce choix."
 	if choice == 0:
