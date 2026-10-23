@@ -127,6 +127,39 @@ func save_case_answer(case_id: String, answer: int) -> bool:
 	return true
 
 
+## Commits related case answers and their evidence marker in one save-file write.
+## Prevents a choice from appearing recorded when its supporting evidence failed to persist.
+func save_case_answers_with_evidence(answers_to_save: Dictionary, evidence_id: String) -> bool:
+	if answers_to_save.is_empty() or evidence_id.strip_edges().is_empty():
+		return false
+	for case_id in answers_to_save:
+		var answer: Variant = answers_to_save[case_id]
+		if not (case_id is String) or case_id.strip_edges().is_empty():
+			return false
+		if typeof(answer) != TYPE_INT or answer < MIN_CASE_ANSWER or answer > MAX_CASE_ANSWER:
+			return false
+	var config := ConfigFile.new()
+	var load_error := config.load(save_path)
+	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
+		push_warning("Impossible de relire la sauvegarde avant d'enregistrer la décision ORCHID.")
+		return false
+	var raw_answers: Variant = config.get_value("campaign", "case_answers", {})
+	var persisted_answers: Dictionary = raw_answers if raw_answers is Dictionary else {}
+	for case_id in answers_to_save:
+		persisted_answers[case_id] = answers_to_save[case_id]
+	config.set_value("campaign", "case_answers", persisted_answers)
+	var evidence := _normalized_evidence(config.get_value("campaign", "evidence", []))
+	if not evidence.has(evidence_id):
+		evidence.append(evidence_id)
+	config.set_value("campaign", "evidence", evidence)
+	config.set_value("campaign", "version", CAMPAIGN_VERSION)
+	var save_error := config.save(save_path)
+	if save_error != OK:
+		push_warning("Impossible d'enregistrer la décision ORCHID et sa preuve : %s" % save_error)
+		return false
+	return true
+
+
 func load_case_answer(case_id: String) -> int:
 	var config := ConfigFile.new()
 	if config.load(save_path) != OK:
