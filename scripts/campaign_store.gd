@@ -133,34 +133,54 @@ func load_report_draft() -> String:
 
 ## Restarts only the cinematic thread, leaving the wider ORCHID case file intact.
 ## Scene markers and choice keys are cleared together so resume cannot jump to the ending.
+## Restarts only the cinematic thread, clearing all of its choices and derived flags.
+## Other evidence, the report draft, ending, and mission progress remain untouched.
 func reset_cinematic_progress() -> bool:
 	var config := ConfigFile.new()
 	var load_error := config.load(SAVE_PATH)
 	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
 		push_warning("Impossible de relire la sauvegarde avant de relancer la séquence ORCHID.")
 		return false
+
 	var raw_evidence: Variant = config.get_value("campaign", "evidence", [])
 	var kept_evidence: Array = []
 	if raw_evidence is Array:
 		for item in raw_evidence:
 			var evidence_id := str(item)
-			if not evidence_id.begins_with("cinematic_scene_") and not evidence_id.begins_with("cinematic_choice_evidence_") and evidence_id != "cinematic_outcome_calculated":
-				kept_evidence.append(item)
+			if evidence_id.begins_with("cinematic_scene_") or evidence_id.begins_with("cinematic_choice_evidence_") or evidence_id == "cinematic_outcome_calculated" or evidence_id.begins_with("orchid_cinematic_"):
+				continue
+			kept_evidence.append(item)
 	config.set_value("campaign", "evidence", kept_evidence)
-	for scene_index in range(36):
+
+	# The sequence currently has 39 scenes (indices 0..38). Clear every slot,
+	# including late-epilogue decisions, rather than silently retaining old branches.
+	for scene_index in range(39):
 		var choice_key := "cinematic_choice_%02d" % scene_index
 		if config.has_section_key("campaign", choice_key):
 			config.erase_section_key("campaign", choice_key)
-	for key in ["cinematic_outcome_score"]:
+
+	# These answers are direct consequences written by cinematic choices.
+	# Remove them together so a replay does not inherit its previous branch state.
+	for key in [
+		"cinematic_outcome_score",
+		"orchid_lea_support_status",
+		"orchid_cinematic_focus_pause",
+		"orchid_report_quality",
+		"orchid_sample_protocol",
+		"orchid_release_guardrail",
+		"orchid_results_claim",
+		"orchid_final_prompt_choice",
+		"orchid_notification_mode"
+	]:
 		if config.has_section_key("campaign", key):
 			config.erase_section_key("campaign", key)
+
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
 	var save_error := config.save(SAVE_PATH)
 	if save_error != OK:
 		push_warning("Impossible de réinitialiser la séquence ORCHID : %s" % save_error)
 		return false
 	return true
-
 
 func load_ending() -> String:
 	var config := ConfigFile.new()
