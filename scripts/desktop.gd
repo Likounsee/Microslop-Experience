@@ -105,6 +105,22 @@ func _unhandled_key_input(event: InputEvent) -> void:
 				_minimize_other_windows()
 				key_event.accept()
 				return
+			KEY_1:
+				_activate_taskbar_app_shortcut("browser")
+				key_event.accept()
+				return
+			KEY_2:
+				_activate_taskbar_app_shortcut("files")
+				key_event.accept()
+				return
+			KEY_3:
+				_activate_taskbar_app_shortcut("settings")
+				key_event.accept()
+				return
+			KEY_4:
+				_activate_taskbar_app_shortcut("update")
+				key_event.accept()
+				return
 			KEY_LEFT:
 				var active_window_left := _get_active_visible_window()
 				if is_instance_valid(active_window_left):
@@ -176,6 +192,12 @@ func _get_active_visible_window() -> Control:
 		if child is Control and child.visible and child.has_meta("app_id") and str(child.get_meta("app_id")) == _active_app_id:
 			return child as Control
 	return null
+
+
+func _activate_taskbar_app_shortcut(app_id: String) -> void:
+	var button := _taskbar_app_buttons.get(app_id) as Button
+	if is_instance_valid(button) and button.visible and not button.disabled:
+		button.emit_signal("pressed")
 
 
 func _minimize_all_windows() -> void:
