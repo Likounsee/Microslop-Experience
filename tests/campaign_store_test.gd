@@ -150,6 +150,17 @@ func _run_tests() -> void:
 	_check(store.save_report_draft("A draft saved after the ending."), "save report draft after choosing ending")
 	_check(store.load_ending() == "preserved", "ending survives unrelated evidence, answer, and draft writes")
 
+	# A fresh store instance models closing and reopening the game after the final choice.
+	var reopened_store = CampaignStoreScript.new()
+	reopened_store.save_path = TEST_SAVE_PATH
+	root.add_child(reopened_store)
+	_check(reopened_store.load_report_draft() == "A draft saved after the ending.", "reopened campaign restores latest report draft")
+	_check(reopened_store.load_ending() == "preserved", "reopened campaign restores final ending")
+	_check(reopened_store.load_case_answer("ending_persistence_answer") == 2, "reopened campaign preserves committee answer")
+	_check(reopened_store.load_evidence().has("ending_persistence_evidence"), "reopened campaign preserves ending-related evidence")
+	_check(reopened_store.load_progress() == 4, "reopened campaign preserves mission progress alongside ending")
+	reopened_store.queue_free()
+
 	# Corrupt or wrong-typed ending values must not be presented as a valid conclusion.
 	var ending_fixture := ConfigFile.new()
 	_check(ending_fixture.load(TEST_SAVE_PATH) == OK, "load save to seed malformed ending")
