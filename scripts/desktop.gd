@@ -7003,11 +7003,11 @@ func _open_task_manager() -> void:
 	refresh_button.pressed.connect(func():
 		if is_instance_valid(app):
 			var refreshed_content := _get_window_content(app)
-				if refreshed_content != null:
-					for child in refreshed_content.get_children():
-						if child is Label and child.text.begins_with("Processus"):
-							child.text = "Processus\n\nMicroslop Experience     En cours d’exécution\nBureau Windows simulé     En cours d’exécution\nUtilisation CPU : non mesurée\nUtilisation mémoire : non mesurée\n\nDernière actualisation : maintenant"
-							break
+			if refreshed_content != null:
+				for child in refreshed_content.get_children():
+					if child is Label and child.text.begins_with("Processus"):
+						child.text = "Processus\n\nMicroslop Experience     En cours d’exécution\nBureau Windows simulé     En cours d’exécution\nUtilisation CPU : non mesurée\nUtilisation mémoire : non mesurée\n\nDernière actualisation : maintenant"
+						break
 	)
 	content.add_child(refresh_button)
 
