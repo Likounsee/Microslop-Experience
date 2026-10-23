@@ -86,9 +86,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		key_event.accept()
 		return
 
-	# Alt+Tab cycles through open simulated app windows, like the Windows desktop.
+	# Alt+Tab cycles through open simulated app windows; Shift reverses the order.
 	if key_event.keycode == KEY_TAB and key_event.alt_pressed:
-		_cycle_app_window()
+		_cycle_app_window(key_event.shift_pressed)
 		key_event.accept()
 		return
 
@@ -2206,7 +2206,7 @@ func _hide_taskbar_preview() -> void:
 	_taskbar_preview_tween = null
 
 
-func _cycle_app_window() -> void:
+func _cycle_app_window(reverse: bool = false) -> void:
 	if not is_instance_valid(_window_layer):
 		return
 	var windows: Array[Control] = []
@@ -2215,21 +2215,15 @@ func _cycle_app_window() -> void:
 			windows.append(child as Control)
 	if windows.is_empty():
 		return
-	if windows.size() == 1:
-		windows[0].move_to_front()
-		_active_app_id = str(windows[0].get_meta("app_id"))
-		if windows[0].has_signal("window_activated"):
-			windows[0].emit_signal("window_activated")
-		_update_taskbar_indicators()
-		return
-
-	# The active window is the current destination; advance to the next visible one.
 	var active_index := -1
 	for i in range(windows.size()):
 		if str(windows[i].get_meta("app_id")) == _active_app_id:
 			active_index = i
 			break
-	var next_index := (active_index + 1) % windows.size()
+	if windows.size() == 1:
+		active_index = 0
+	var direction := -1 if reverse else 1
+	var next_index := posmod(active_index + direction, windows.size())
 	var next_window := windows[next_index]
 	next_window.move_to_front()
 	_active_app_id = str(next_window.get_meta("app_id"))
