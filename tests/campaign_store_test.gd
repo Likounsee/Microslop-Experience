@@ -64,6 +64,17 @@ func _run_tests() -> void:
 	_check(resume_snapshot["orchid_crisis_stage"] == 3, "batch loader restores another journey from same snapshot")
 	_check(resume_snapshot["missing_snapshot_key"] == -1, "batch loader uses missing-answer sentinel")
 	_check(store.load_case_answers([]).is_empty(), "batch loader handles empty request")
+	var snapshot_fixture := ConfigFile.new()
+	_check(snapshot_fixture.load(TEST_SAVE_PATH) == OK, "load save to seed malformed snapshot values")
+	if snapshot_fixture.load(TEST_SAVE_PATH) == OK:
+		var snapshot_answers: Dictionary = snapshot_fixture.get_value("campaign", "case_answers", {})
+		snapshot_answers["bad_type_snapshot"] = "12"
+		snapshot_answers["bad_range_snapshot"] = 1001
+		snapshot_fixture.set_value("campaign", "case_answers", snapshot_answers)
+		_check(snapshot_fixture.save(TEST_SAVE_PATH) == OK, "save malformed snapshot fixtures")
+	var malformed_snapshot := store.load_case_answers(["bad_type_snapshot", "bad_range_snapshot"])
+	_check(malformed_snapshot["bad_type_snapshot"] == -1, "batch loader rejects wrong-typed saved answer")
+	_check(malformed_snapshot["bad_range_snapshot"] == -1, "batch loader rejects out-of-range saved answer")
 	# Simulate closing and reopening the application: a fresh store must recover the whole committed decision.
 	var resumed_store = CampaignStoreScript.new()
 	resumed_store.save_path = TEST_SAVE_PATH
