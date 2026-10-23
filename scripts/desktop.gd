@@ -92,6 +92,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		key_event.accept()
 		return
 
+	# Win+Shift+S opens the capture utility before regular Win+S search.
+	if key_event.meta_pressed and key_event.shift_pressed and key_event.keycode == KEY_S:
+		_open_snipping_tool()
+		key_event.accept()
+		return
+
 	# Common Windows shortcuts: Win+D shows the desktop, Win+E opens Explorer,
 	# Win+I opens Settings, Win+Arrow manages the focused window, and Alt+F4 closes it.
 	if key_event.meta_pressed:
@@ -7011,6 +7017,49 @@ func _open_task_manager() -> void:
 						break
 	)
 	content.add_child(refresh_button)
+
+func _open_snipping_tool() -> void:
+	var app := _open_window("Outil Capture d’écran", "Capturez le bureau simulé et enregistrez l’image dans les données locales du jeu.", Vector2(500, 270))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	for child in content.get_children():
+		child.queue_free()
+	var explanation := Label.new()
+	explanation.text = "La capture porte sur l’image actuelle de la fenêtre du jeu. Le fichier PNG sera enregistré dans user://captures."
+	explanation.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	explanation.add_theme_color_override("font_color", Color("34445d"))
+	content.add_child(explanation)
+	var status := Label.new()
+	status.name = "CaptureStatus"
+	status.text = "Aucune capture enregistrée pour cette session."
+	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	status.add_theme_color_override("font_color", Color("596780"))
+	content.add_child(status)
+	var capture_button := Button.new()
+	capture_button.text = "Capturer et enregistrer le bureau"
+	capture_button.pressed.connect(func():
+		if not is_instance_valid(app):
+			return
+		var image := get_viewport().get_texture().get_image()
+		if image.is_empty():
+			status.text = "Capture impossible : l’image du bureau est vide."
+			return
+		var captures_dir := OS.get_user_data_dir().path_join("captures")
+		var directory_error := DirAccess.make_dir_recursive_absolute(captures_dir)
+		if directory_error != OK:
+			status.text = "Impossible de créer le dossier de captures (erreur %d)." % directory_error
+			return
+		var timestamp := Time.get_datetime_string_from_system().replace(":", "-").replace("T", "_")
+		var file_path := "user://captures/capture_%s.png" % timestamp
+		var save_error := image.save_png(file_path)
+		if save_error == OK:
+			status.text = "Capture enregistrée :\\n%s" % file_path
+		else:
+			status.text = "Échec de l’enregistrement PNG (erreur %d)." % save_error
+	)
+	content.add_child(capture_button)
+
 
 func _open_search() -> void:
 	var evidence: Array = CampaignStore.load_evidence()
