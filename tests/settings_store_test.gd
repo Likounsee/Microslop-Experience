@@ -38,6 +38,8 @@ func _run_tests() -> void:
 	store.values["fps_limit"] = 0
 
 	_check(store.set_value_and_save("fps_limit", 120), "valid setting update reports successful persistence")
+	_check(store.set_value_and_save("fps_limit", 120), "unchanged valid setting reports success")
+	_check(not store.set_value_and_save("unknown_setting", 1), "unknown setting reports persistence failure")
 	_check(store.values["fps_limit"] == 120, "valid setting update is retained after save")
 	var reloaded = SettingsStoreScript.new()
 	reloaded.settings_path = TEST_SETTINGS_PATH
