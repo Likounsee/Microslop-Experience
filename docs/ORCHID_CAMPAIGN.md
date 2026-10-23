@@ -339,7 +339,7 @@ Validation : le contrôle automatique Godot doit être vérifié sur le commit c
 
 ### Lecture défensive des données de campagne
 
-Les fonctions de lecture valident maintenant aussi les valeurs sauvegardées : une version de campagne d’un type inattendu retombe sur la valeur historique par défaut, les réponses de dossier hors de la plage autorisée sont ignorées, et un brouillon ou une conclusion de type invalide n’est pas exposé à l’interface. Le chargement des preuves filtre les identifiants vides ou dupliqués. La capture de l’état initial cinématique accepte également une sauvegarde dont la section de référence a un type inattendu, sans provoquer de conversion de dictionnaire invalide.
+Les fonctions de lecture valident maintenant aussi les valeurs sauvegardées : une version de campagne d’un type inattendu retombe sur la valeur historique par défaut, les réponses de dossier hors de la plage autorisée sont ignorées, et un brouillon ou une conclusion de type invalide n’est pas exposé à l’interface. Le chargement et les opérations d’écriture sur les preuves partagent désormais la même normalisation : seuls les identifiants non vides et uniques sont conservés, y compris lors d’une revue de rapport ou d’une réinitialisation cinématique. La capture de l’état initial cinématique accepte également une sauvegarde dont la section de référence a un type inattendu, sans provoquer de conversion de dictionnaire invalide.
 
 Ces protections limitent les erreurs de type sur des sauvegardes altérées ; elles ne remplacent pas une validation complète du fichier ni un test de reprise en jeu.
 
