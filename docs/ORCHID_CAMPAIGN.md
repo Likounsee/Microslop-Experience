@@ -332,6 +332,6 @@ Validation restante : la CI Godot doit confirmer l’analyse et le smoke test ap
 
 ### Revue répétée — preuve alignée sur le dernier résultat
 
-Lorsqu’un rapport est soumis plusieurs fois, la sauvegarde remplace maintenant aussi la preuve de revue devenue obsolète : une nouvelle acceptation retire l’ancienne preuve de demande de révision, et une nouvelle révision retire l’ancienne preuve d’acceptation. Les autres preuves du dossier ne sont pas modifiées. Le brouillon, le résultat et la preuve qui correspond à ce résultat restent écrits dans la même sauvegarde.
+Lorsqu’un rapport est soumis plusieurs fois, la sauvegarde reconstruit les marqueurs de revue exclusifs : une nouvelle acceptation retire les preuves d’acceptation ou de révision précédentes avant d’ajouter exactement une preuve d’acceptation ; un refus ou une demande de révision fait de même avec la preuve de révision. Cela élimine les marqueurs opposés obsolètes et les doublons historiques. Les autres preuves du dossier ne sont pas modifiées. Le brouillon, le résultat et la preuve qui correspond à ce résultat restent écrits dans la même sauvegarde.
 
 Validation : le contrôle automatique Godot doit être vérifié sur le commit correspondant. Le scénario à jouer manuellement consiste à soumettre un rapport incomplet, le corriger puis le soumettre à nouveau, et confirmer que le tableau et le dossier ne présentent plus l’ancien résultat comme s’il était encore courant.
