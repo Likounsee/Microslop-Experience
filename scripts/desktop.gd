@@ -4596,10 +4596,12 @@ func _open_orchid_report_studio() -> void:
 			var cross_app_report := "RECOUPEMENT DES APPLICATIONS\n"
 			if explorer_preserved:
 				cross_app_report += "Une copie locale du journal de télémétrie a été conservée. Elle indique que le compteur « 18 fichiers analysés » provenait du module de notification ; le journal consulté ne prouve pas un accès aux documents.\n"
-			elif explorer_escalated:
+			if explorer_escalated:
 				cross_app_report += "Un signalement a été transmis au canal de conformité. La référence d’approbation reste à rechercher.\n"
-			else:
-				cross_app_report += "Une recherche ORCHID a été effectuée dans le navigateur, mais aucune copie du journal n’est enregistrée comme conservée ou transmise. La recherche seule ne confirme pas les événements.\n"
+			if not explorer_preserved and not explorer_escalated:
+				cross_app_report += "Aucune conservation ni transmission du journal n’est enregistrée. La recherche seule ne confirme pas les événements.\n"
+			if explorer_preserved and explorer_escalated:
+				cross_app_report += "Les deux actions sont enregistrées : conservation locale et transmission. Vérifiez que la copie transmise correspond bien à la pièce conservée.\n"
 			if browser_searched:
 				cross_app_report += "Le navigateur a également été utilisé pour rechercher ORCHID ; ce résultat est une trace d’enquête, pas une source indépendante du journal.\n"
 			if browser_archive_opened:
