@@ -170,3 +170,6 @@ Les chemins de lecture des réponses, preuves, conclusions et brouillons passent
 ### Tolérance aux fichiers de secours obsolètes
 
 Lors d'une nouvelle écriture, le magasin valide d'abord la sauvegarde principale avant de remplacer un fichier `.bak` résiduel. Si le fichier principal est valide, un ancien fichier de secours corrompu est nettoyé au lieu de bloquer indéfiniment toute sauvegarde ; si le principal est illisible, le fichier de secours est conservé et l'écriture échoue sans l'écraser. Des tests de régression couvrent le nettoyage et la conservation des données existantes. L'exécution Godot/CI doit encore confirmer ces cas.
+
+
+Les tests vérifient aussi le scénario où la sauvegarde principale et le fichier `.bak` sont tous deux mal formés : la lecture échoue proprement et les deux fichiers sont conservés pour diagnostic, plutôt que supprimés au cours d'une tentative de récupération. Le test restaure ensuite son fixture valide avant de poursuivre les cas d'échec d'écriture.
