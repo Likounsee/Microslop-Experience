@@ -4367,6 +4367,8 @@ func _open_orchid_archive() -> void:
 		if not ending_evidence.has("compliance_approval"):
 			ending_note += "\nLa référence d’approbation reste introuvable : le signalement demande une vérification, il ne désigne pas de responsable."
 		report.text += "\n\n" + ending_note
+		if not CampaignStore.save_report_ending(report.text, "published"):
+			report.text += "\n\nAVERTISSEMENT : la conclusion est enregistrée, mais la dernière version du texte n’a pas pu être synchronisée dans la sauvegarde."
 		_show_notification("Rapport transmis", "Le rapport ORCHID a été placé dans la file de signalement. Une notification sponsorisée vient d’être priorisée devant lui.")
 		publish.disabled = true
 		keep.disabled = true
@@ -4390,6 +4392,8 @@ func _open_orchid_archive() -> void:
 		if not ending_evidence.has("recycle_bin_orchid_log_restored"):
 			ending_note += "\nLe journal de la corbeille n’a pas été restauré dans le dossier ; la provenance demeure une piste à compléter."
 		report.text += "\n\n" + ending_note
+		if not CampaignStore.save_report_ending(report.text, "preserved"):
+			report.text += "\n\nAVERTISSEMENT : la conclusion est enregistrée, mais la dernière version du texte n’a pas pu être synchronisée dans la sauvegarde."
 		_show_notification("Copie enregistrée", "Le rapport est conservé dans votre archive fictive. Microslop a enregistré que vous avez choisi de garder une preuve.")
 		publish.disabled = true
 		keep.disabled = true
