@@ -98,8 +98,12 @@ func _normalized_evidence(raw: Variant) -> Array:
 	if not (raw is Array):
 		return evidence
 	for item in raw:
-		if item is String and not item.strip_edges().is_empty() and not evidence.has(item):
-			evidence.append(item)
+		if not (item is String):
+			continue
+		var normalized_id: String = item.strip_edges()
+		if normalized_id.is_empty() or evidence.has(normalized_id):
+			continue
+		evidence.append(normalized_id)
 	return evidence
 
 func load_progress() -> int:
