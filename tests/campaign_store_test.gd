@@ -61,6 +61,25 @@ func _run_tests() -> void:
 	resumed_store.queue_free()
 	_check(not store.save_case_answers_with_evidence({}, "invalid_atomic_evidence"), "reject empty atomic answer batch")
 	_check(not store.save_case_answers_with_evidence({"atomic_invalid": 1001}, "invalid_atomic_evidence"), "reject out-of-range atomic answer")
+
+	# Reset a complete mini-game atomically, removing stale evidence while keeping other case files.
+	_check(store.save_case_answers_with_evidence({"orchid_sprint_stage": 13, "orchid_sprint_score": 18, "orchid_sprint_choice_00": 2}, "orchid_sprint_stage_00"), "seed completed sprint before atomic reset")
+	_check(store.save_evidence("unrelated_case_evidence"), "seed unrelated evidence before atomic reset")
+	_check(store.reset_case_progress({
+		"orchid_sprint_stage": 0,
+		"orchid_sprint_score": 0,
+		"orchid_sprint_interruptions": 0,
+		"orchid_sprint_choice_00": -1
+	}, ["orchid_sprint_stage_", "orchid_sprint_choice_", "sprint_"]), "reset mini-game answers and evidence atomically")
+	_check(store.load_case_answer("orchid_sprint_stage") == 0, "atomic reset restores stage zero")
+	_check(store.load_case_answer("orchid_sprint_score") == 0, "atomic reset clears mini-game score")
+	_check(store.load_case_answer("orchid_sprint_choice_00") == -1, "atomic reset clears previous choice")
+	_check(not store.load_evidence().has("orchid_sprint_stage_00"), "atomic reset removes stale stage evidence")
+	_check(not store.load_evidence().has("sprint_digest_policy_applied"), "atomic reset removes related effect evidence")
+	_check(store.load_evidence().has("unrelated_case_evidence"), "atomic reset preserves unrelated evidence")
+	_check(store.load_case_answer("atomic_choice") == 2, "atomic reset preserves unrelated case answers")
+	_check(not store.reset_case_progress({}, ["orchid_sprint_"]), "reject empty mini-game reset batch")
+	_check(not store.reset_case_progress({"bad_reset": 1001}, []), "reject out-of-range mini-game reset value")
 	_check(store.save_evidence("evidence_test"), "save evidence")
 	_check(store.load_evidence().has("evidence_test"), "load evidence")
 	_check(store.save_ending("published"), "save valid published ending")
