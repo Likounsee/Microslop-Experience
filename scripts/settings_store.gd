@@ -4,6 +4,10 @@ extends Node
 const SETTINGS_PATH := "user://settings.cfg"
 const TEMP_SUFFIX := ".tmp"
 const BACKUP_SUFFIX := ".bak"
+const REQUIRED_SETTING_KEYS := [
+	"display_mode", "resolution", "vsync", "fps_limit",
+	"master_volume", "music_volume", "sfx_volume", "language",
+]
 
 var settings_path: String = SETTINGS_PATH
 var values: Dictionary = {
@@ -80,6 +84,10 @@ func _is_valid_setting(key: String, candidate: Variant) -> bool:
 
 func save_settings() -> bool:
 	var config := ConfigFile.new()
+	for required_key in REQUIRED_SETTING_KEYS:
+		if not values.has(required_key):
+			push_warning("Refusing to save settings with missing key: %s" % required_key)
+			return false
 	for key in values.keys():
 		if not _is_valid_setting(str(key), values[key]):
 			push_warning("Refusing to save invalid setting: %s" % key)
