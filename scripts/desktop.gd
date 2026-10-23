@@ -4497,30 +4497,27 @@ func _open_orchid_report_studio() -> void:
 	var review := Button.new()
 	review.text = "Soumettre le brouillon au comité fictif"
 	review.pressed.connect(func():
-		# Persist the exact submitted text before changing the review state. A failed save must not look like a completed submission.
-		if not CampaignStore.save_report_draft(editor.text):
-			status.text = "Soumission interrompue : impossible de sauvegarder le brouillon. Aucun résultat de revue n’a été enregistré."
-			return
 		var normalized_report := editor.text.to_lower()
 		var word_count := normalized_report.replace("\r", " ").replace("\n", " ").replace("\t", " ").split(" ", false)
 		var has_limits := normalized_report.contains("limites") or normalized_report.contains("ne prouvent pas") or normalized_report.contains("pas établis") or normalized_report.contains("pas établies") or normalized_report.contains("reste inconnu")
 		var has_action := normalized_report.contains("mesures") or normalized_report.contains("demande") or normalized_report.contains("vérifier") or normalized_report.contains("contrôler") or normalized_report.contains("obtenir")
+		var outcome := 2
+		var review_message := "BROUILLON ACCEPTÉ POUR REVUE — le comité ouvre une demande de suivi. Ce n’est pas une validation définitive : la référence d’approbation et les journaux originaux restent à obtenir."
 		if word_count.size() < 55:
-			CampaignStore.save_case_answer("report_studio_reviewed", 0)
-			CampaignStore.save_evidence("report_studio_revision_requested")
-			status.text = "Le comité refuse le brouillon : il est trop court pour distinguer faits, limites et action demandée. Ajoutez du contenu, puis réessayez."
+			outcome = 0
+			review_message = "Le comité refuse le brouillon : il est trop court pour distinguer faits, limites et action demandée. Ajoutez du contenu, puis réessayez."
 		elif not has_limits:
-			CampaignStore.save_case_answer("report_studio_reviewed", 1)
-			CampaignStore.save_evidence("report_studio_revision_requested")
-			status.text = "Le comité demande une révision : les limites des preuves ne sont pas explicites. Ajoutez une section sur ce qui reste inconnu."
+			outcome = 1
+			review_message = "Le comité demande une révision : les limites des preuves ne sont pas explicites. Ajoutez une section sur ce qui reste inconnu."
 		elif not has_action:
-			CampaignStore.save_case_answer("report_studio_reviewed", 1)
-			CampaignStore.save_evidence("report_studio_revision_requested")
-			status.text = "Le comité demande une révision : le rapport décrit les faits mais ne propose aucune action vérifiable."
-		else:
-			CampaignStore.save_case_answer("report_studio_reviewed", 2)
-			CampaignStore.save_evidence("report_studio_reviewed")
-			status.text = "BROUILLON ACCEPTÉ POUR REVUE — le comité ouvre une demande de suivi. Ce n’est pas une validation définitive : la référence d’approbation et les journaux originaux restent à obtenir."
+			outcome = 1
+			review_message = "Le comité demande une révision : le rapport décrit les faits mais ne propose aucune action vérifiable."
+		# Draft, outcome and evidence are committed together; never show a result if persistence failed.
+		if not CampaignStore.save_report_review(editor.text, outcome):
+			status.text = "Soumission interrompue : impossible d’enregistrer le rapport et son résultat ensemble. Réessayez sans fermer cette fenêtre."
+			return
+		status.text = review_message
+		if outcome == 2:
 			_show_notification("Demande de suivi créée", "Le comité fictif a accepté le rapport pour revue, sans déclarer l’incident résolu.")
 	)
 	content.add_child(review)
