@@ -4469,15 +4469,15 @@ func _open_orchid_report_studio() -> void:
 		var explorer_escalated := evidence.has("explorer_orchid_file_escalated")
 		var browser_searched := evidence.has("browser_orchid_search_performed")
 		if explorer_preserved or explorer_escalated or browser_searched:
-			var cross_app_report := "RECoupement DES APPLICATIONS\\n"
+			var cross_app_report := "RECOUPEMENT DES APPLICATIONS\n"
 			if explorer_preserved:
-				cross_app_report += "Une copie locale du journal de télémétrie a été conservée. Elle indique que le compteur « 18 fichiers analysés » provenait du module de notification ; le journal consulté ne prouve pas un accès aux documents.\\n"
+				cross_app_report += "Une copie locale du journal de télémétrie a été conservée. Elle indique que le compteur « 18 fichiers analysés » provenait du module de notification ; le journal consulté ne prouve pas un accès aux documents.\n"
 			elif explorer_escalated:
-				cross_app_report += "Un signalement a été transmis au canal de conformité. La référence d’approbation reste à rechercher.\\n"
+				cross_app_report += "Un signalement a été transmis au canal de conformité. La référence d’approbation reste à rechercher.\n"
 			else:
-				cross_app_report += "Une recherche ORCHID a été effectuée dans le navigateur, mais aucune copie du journal n’est enregistrée comme conservée ou transmise. La recherche seule ne confirme pas les événements.\\n"
+				cross_app_report += "Une recherche ORCHID a été effectuée dans le navigateur, mais aucune copie du journal n’est enregistrée comme conservée ou transmise. La recherche seule ne confirme pas les événements.\n"
 			if browser_searched:
-				cross_app_report += "Le navigateur a également été utilisé pour rechercher ORCHID ; ce résultat est une trace d’enquête, pas une source indépendante du journal.\\n"
+				cross_app_report += "Le navigateur a également été utilisé pour rechercher ORCHID ; ce résultat est une trace d’enquête, pas une source indépendante du journal.\n"
 			cross_app_report += "La concordance entre applications aide à orienter la vérification, sans établir l’identité d’un responsable ni l’intention initiale."
 			paragraphs.append(cross_app_report)
 			selected_count += 1
