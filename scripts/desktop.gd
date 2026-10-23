@@ -4591,7 +4591,8 @@ func _open_orchid_report_studio() -> void:
 		var explorer_preserved := evidence.has("explorer_orchid_file_preserved")
 		var explorer_escalated := evidence.has("explorer_orchid_file_escalated")
 		var browser_searched := evidence.has("browser_orchid_search_performed")
-		if explorer_preserved or explorer_escalated or browser_searched:
+		var browser_archive_opened := evidence.has("browser_orchid_archive_opened")
+		if explorer_preserved or explorer_escalated or browser_searched or browser_archive_opened:
 			var cross_app_report := "RECOUPEMENT DES APPLICATIONS\n"
 			if explorer_preserved:
 				cross_app_report += "Une copie locale du journal de télémétrie a été conservée. Elle indique que le compteur « 18 fichiers analysés » provenait du module de notification ; le journal consulté ne prouve pas un accès aux documents.\n"
@@ -4601,6 +4602,10 @@ func _open_orchid_report_studio() -> void:
 				cross_app_report += "Une recherche ORCHID a été effectuée dans le navigateur, mais aucune copie du journal n’est enregistrée comme conservée ou transmise. La recherche seule ne confirme pas les événements.\n"
 			if browser_searched:
 				cross_app_report += "Le navigateur a également été utilisé pour rechercher ORCHID ; ce résultat est une trace d’enquête, pas une source indépendante du journal.\n"
+			if browser_archive_opened:
+				cross_app_report += "L’ouverture de l’archive interne est enregistrée séparément de la recherche. Son contenu constitue une source à examiner, mais ne remplace pas la vérification des journaux originaux.\n"
+			elif not browser_searched:
+				cross_app_report += "Aucune recherche navigateur n’est enregistrée : l’archive consultée ne doit pas être présentée comme un résultat de recherche.\n"
 			cross_app_report += "La concordance entre applications aide à orienter la vérification, sans établir l’identité d’un responsable ni l’intention initiale."
 			paragraphs.append(cross_app_report)
 			selected_count += 1
