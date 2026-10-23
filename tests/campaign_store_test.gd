@@ -233,6 +233,17 @@ func _run_tests() -> void:
 	_check(FileAccess.file_exists(absolute_path), "malformed primary is replaced by recovered valid save")
 	_check(not FileAccess.file_exists(backup_path), "corrupt-primary recovery cleans restored backup")
 
+	# A stale corrupt backup must not block saving when the primary is still valid.
+	var corrupt_backup := FileAccess.open(backup_path, FileAccess.WRITE)
+	if corrupt_backup != null:
+		corrupt_backup.store_string("[campaign\\nmission_step = broken")
+		corrupt_backup.close()
+	_check(store.save_case_answer("save_with_corrupt_backup", 73), "replace corrupt stale backup when primary save is valid")
+	_check(store.load_case_answer("backup_recovery_fixture") == 42, "keep existing data while replacing corrupt stale backup")
+	_check(store.load_case_answer("save_with_corrupt_backup") == 73, "load new answer after corrupt backup cleanup")
+	_check(not FileAccess.file_exists(backup_path), "successful save removes stale corrupt backup")
+	_check(not FileAccess.file_exists(absolute_path + ".tmp"), "successful save cleans temporary file after corrupt backup cleanup")
+
 	# A directory at the save path simulates a location ConfigFile cannot read or overwrite.
 	if FileAccess.file_exists(absolute_path):
 		DirAccess.remove_absolute(absolute_path)
