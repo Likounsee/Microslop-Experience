@@ -239,6 +239,8 @@ func _run_tests() -> void:
 		_check(unique_review_evidence.count("report_studio_reviewed") == 0, "review removes all contradictory acceptance markers")
 		_check(unique_review_evidence.has("evidence_test"), "review marker normalization preserves unrelated evidence")
 
+	_check(store.save_report_review("Report to revise.", 1), "restore review fixture for unchanged draft test")
+
 	# Saving an unchanged draft must keep its still-valid review.
 	_check(store.save_report_draft("Report to revise."), "save unchanged reviewed draft")
 	_check(store.load_case_answer("report_studio_reviewed") == 1, "unchanged draft preserves review outcome")
