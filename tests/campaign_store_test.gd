@@ -135,6 +135,15 @@ func _run_tests() -> void:
 	_check(store.save_ending("preserved"), "replace ending with preserved outcome")
 	_check(store.load_ending() == "preserved", "load updated ending")
 
+	_check(store.save_report_ending("Final report retained with conclusion.", "published"), "save final report and ending atomically")
+	_check(store.load_report_draft() == "Final report retained with conclusion.", "final ending stores report draft")
+	_check(store.load_ending() == "published", "final report ending is persisted")
+	_check(not store.save_report_ending("Must not overwrite the valid final report.", "unknown"), "reject invalid atomic final ending")
+	_check(store.load_report_draft() == "Final report retained with conclusion.", "invalid final ending preserves prior report")
+	_check(store.load_ending() == "published", "invalid final ending preserves prior conclusion")
+	_check(store.save_report_ending("Final copy kept locally.", "preserved"), "replace final report and ending atomically")
+	_check(store.load_report_draft() == "Final copy kept locally." and store.load_ending() == "preserved", "atomic final report update persists both fields")
+
 	# The ending is a durable campaign decision, not a side effect of the last save operation.
 	_check(store.save_evidence("ending_persistence_evidence"), "save evidence after choosing ending")
 	_check(store.save_case_answer("ending_persistence_answer", 2), "save case answer after choosing ending")
