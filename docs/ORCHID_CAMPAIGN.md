@@ -328,3 +328,10 @@ La revue du rapport ne se contente plus de chercher les mots génériques « lim
 Le tableau de synthèse affiche maintenant la taille et le nombre de mots du brouillon sauvegardé. Il signale aussi une incohérence éventuelle entre l’état de revue et les preuves associées, notamment pour aider à repérer d’anciennes sauvegardes ou un état partiel hérité. Les critères ne prouvent pas que le rapport est vrai : ils vérifient uniquement la présence d’éléments minimaux dans le texte.
 
 Validation restante : la CI Godot doit confirmer l’analyse et le smoke test après ces changements. Il reste nécessaire de tester dans l’interface les brouillons trop courts, incomplets et complets, puis de fermer et rouvrir le jeu pour vérifier la reprise des données.
+
+
+### Revue répétée — preuve alignée sur le dernier résultat
+
+Lorsqu’un rapport est soumis plusieurs fois, la sauvegarde remplace maintenant aussi la preuve de revue devenue obsolète : une nouvelle acceptation retire l’ancienne preuve de demande de révision, et une nouvelle révision retire l’ancienne preuve d’acceptation. Les autres preuves du dossier ne sont pas modifiées. Le brouillon, le résultat et la preuve qui correspond à ce résultat restent écrits dans la même sauvegarde.
+
+Validation : le contrôle automatique Godot doit être vérifié sur le commit correspondant. Le scénario à jouer manuellement consiste à soumettre un rapport incomplet, le corriger puis le soumettre à nouveau, et confirmer que le tableau et le dossier ne présentent plus l’ancien résultat comme s’il était encore courant.
