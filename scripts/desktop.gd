@@ -3967,8 +3967,10 @@ func _render_orchid_task_sprint(app: Control, state: Dictionary) -> void:
 		)
 		content.add_child(option)
 	next.pressed.connect(func():
+		if not CampaignStore.save_case_answer("orchid_sprint_stage", stage + 1):
+			_show_notification("Progression non enregistrée", "L’étape actuelle est conservée ; réessayez après avoir vérifié la sauvegarde.")
+			return
 		state["stage"] = stage + 1
-		CampaignStore.save_case_answer("orchid_sprint_stage", stage + 1)
 		_render_orchid_task_sprint(app, state)
 	)
 
@@ -4122,24 +4124,27 @@ func _render_orchid_workflow_board(app: Control, state: Dictionary) -> void:
 		option.pressed.connect(func():
 			var delta := int(step["delta"][i])
 			var new_score := score + delta
+			var effect := str(step.get("effect", ["none","none","none"])[i])
+			var evidence_id := "orchid_workflow_step_%02d" % stage
 			var answers_to_save: Dictionary = {
 				"orchid_workflow_choice_%02d" % stage: i,
 				"orchid_workflow_score": new_score,
 				"orchid_workflow_stage": stage
 			}
-			if not CampaignStore.save_case_answers_with_evidence(answers_to_save, "orchid_workflow_step_%02d" % stage):
-				_show_notification("Décision non enregistrée", "La sauvegarde a échoué ; le score et l’étape restent inchangés.")
+			if effect == "digest":
+				answers_to_save["orchid_notification_mode"] = 2
+				evidence_id = "workflow_digest_policy_applied"
+			elif effect == "unsafe":
+				answers_to_save["orchid_notification_mode"] = 0
+				evidence_id = "workflow_full_notifications_retained"
+			if not CampaignStore.save_case_answers_with_evidence(answers_to_save, evidence_id):
+				_show_notification("Décision non enregistrée", "La sauvegarde a échoué ; le score, l’étape et les réglages restent inchangés.")
 				return
 			state["score"] = new_score
 			feedback.text = str(step["feedback"][i]) + "\n\nImpact : %+d · Score cumulé : %d/20." % [delta, new_score]
-			var effect := str(step.get("effect", ["none","none","none"])[i])
 			if effect == "digest":
-				CampaignStore.save_case_answer("orchid_notification_mode", 2)
-				CampaignStore.save_evidence("workflow_digest_policy_applied")
 				_show_notification("ORCHID · mode digest", "Les promotions restent dans l’historique ; les alertes système restent autorisées.")
 			elif effect == "unsafe":
-				CampaignStore.save_case_answer("orchid_notification_mode", 0)
-				CampaignStore.save_evidence("workflow_full_notifications_retained")
 				_show_notification("ORCHID · réglage inchangé", "Les notifications continuent selon la politique standard.")
 			else:
 				_show_notification("Dossier ORCHID mis à jour", "Étape %02d enregistrée dans les preuves du dossier." % (stage + 1))
@@ -4150,8 +4155,10 @@ func _render_orchid_workflow_board(app: Control, state: Dictionary) -> void:
 		)
 		content.add_child(option)
 	next.pressed.connect(func():
+		if not CampaignStore.save_case_answer("orchid_workflow_stage", stage + 1):
+			_show_notification("Progression non enregistrée", "L’étape actuelle est conservée ; réessayez après avoir vérifié la sauvegarde.")
+			return
 		state["stage"] = stage + 1
-		CampaignStore.save_case_answer("orchid_workflow_stage", stage + 1)
 		_render_orchid_workflow_board(app, state)
 	)
 
@@ -4270,23 +4277,26 @@ func _render_orchid_crisis_tabletop(app: Control, state: Dictionary) -> void:
 		option.pressed.connect(func():
 			var delta := int(scenario["delta"][i])
 			var updated_score := int(state.get("score", 0)) + delta
+			var evidence_id := "orchid_crisis_decision_%02d" % stage
 			var answers_to_save: Dictionary = {
 				"orchid_crisis_choice_%02d" % stage: i,
 				"orchid_crisis_score": updated_score,
 				"orchid_crisis_stage": stage
 			}
-			if not CampaignStore.save_case_answers_with_evidence(answers_to_save, "orchid_crisis_decision_%02d" % stage):
-				_show_notification("Décision non enregistrée", "La sauvegarde a échoué ; le score et l’étape restent inchangés.")
+			if stage == 1 and i == 0:
+				answers_to_save["orchid_notification_mode"] = 2
+				evidence_id = "crisis_digest_policy_applied"
+			elif stage == 1 and i == 1:
+				answers_to_save["orchid_notification_mode"] = 1
+				evidence_id = "crisis_promo_block_policy_applied"
+			if not CampaignStore.save_case_answers_with_evidence(answers_to_save, evidence_id):
+				_show_notification("Décision non enregistrée", "La sauvegarde a échoué ; le score, l’étape et les réglages restent inchangés.")
 				return
 			state["score"] = updated_score
 			feedback.text = str(scenario["feedback"][i]) + "\n\nImpact : %+d · Score cumulé : %d/24." % [delta, updated_score]
 			if stage == 1 and i == 0:
-				CampaignStore.save_case_answer("orchid_notification_mode", 2)
-				CampaignStore.save_evidence("crisis_digest_policy_applied")
 				_show_notification("ORCHID en mode digest", "Les promotions restent dans l’historique pendant que les alertes système continuent de passer.")
 			elif stage == 1 and i == 1:
-				CampaignStore.save_case_answer("orchid_notification_mode", 1)
-				CampaignStore.save_evidence("crisis_promo_block_policy_applied")
 				_show_notification("Contrôle ORCHID renforcé", "Les notifications promotionnelles sont bloquées ; les alertes système restent autorisées.")
 			else:
 				_show_notification("Décision de crise enregistrée", "La décision %02d est conservée dans le dossier ORCHID." % (stage + 1))
@@ -4297,8 +4307,10 @@ func _render_orchid_crisis_tabletop(app: Control, state: Dictionary) -> void:
 		)
 		content.add_child(option)
 	next.pressed.connect(func():
+		if not CampaignStore.save_case_answer("orchid_crisis_stage", stage + 1):
+			_show_notification("Progression non enregistrée", "L’étape actuelle est conservée ; réessayez après avoir vérifié la sauvegarde.")
+			return
 		state["stage"] = stage + 1
-		CampaignStore.save_case_answer("orchid_crisis_stage", stage + 1)
 		_render_orchid_crisis_tabletop(app, state)
 	)
 
