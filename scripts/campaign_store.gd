@@ -223,7 +223,8 @@ func load_evidence() -> Array:
 
 ## Saves the latest answer for a named ORCHID evidence puzzle.
 func save_case_answer(case_id: String, answer: int) -> bool:
-	if case_id.strip_edges().is_empty() or answer < MIN_CASE_ANSWER or answer > MAX_CASE_ANSWER:
+	var normalized_id := case_id.strip_edges()
+	if normalized_id.is_empty() or answer < MIN_CASE_ANSWER or answer > MAX_CASE_ANSWER:
 		return false
 	var config := ConfigFile.new()
 	var load_error := _load_config(config)
@@ -232,7 +233,7 @@ func save_case_answer(case_id: String, answer: int) -> bool:
 		return false
 	var raw_answers: Variant = config.get_value("campaign", "case_answers", {})
 	var answers: Dictionary = raw_answers if raw_answers is Dictionary else {}
-	answers[case_id] = answer
+	answers[normalized_id] = answer
 	config.set_value("campaign", "case_answers", answers)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
 	var error := _save_config_atomic(config)
@@ -341,15 +342,16 @@ func load_case_answers(case_ids: Array[String]) -> Dictionary:
 
 
 func load_case_answer(case_id: String) -> int:
+	var normalized_id := case_id.strip_edges()
+	if normalized_id.is_empty():
+		return -1
 	var config := ConfigFile.new()
 	if _load_config(config) != OK:
-		return -1
-	if case_id.strip_edges().is_empty():
 		return -1
 	var raw: Variant = config.get_value("campaign", "case_answers", {})
 	if not (raw is Dictionary):
 		return -1
-	var answer: Variant = raw.get(case_id, -1)
+	var answer: Variant = raw.get(normalized_id, -1)
 	if typeof(answer) != TYPE_INT or answer < MIN_CASE_ANSWER or answer > MAX_CASE_ANSWER:
 		return -1
 	return answer
