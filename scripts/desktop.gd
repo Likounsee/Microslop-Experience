@@ -2062,15 +2062,7 @@ func _build_start_menu() -> void:
 
 	search.text_changed.connect(_filter_pinned_apps)
 
-	search.text_submitted.connect(func(query: String):
-
-		_start_menu.visible = false
-
-		_start_open = false
-
-		_open_window("Recherche Microslop", "Résultats pour : « %s »\n\nMicroslop AI — recommandé\nMicroslop Premium — SPONSORISÉ\nLe résultat que vous cherchiez (peut-être)." % query, Vector2(560, 300))
-
-	)
+	search.text_submitted.connect(_submit_start_search)
 
 	layout.add_child(search)
 
@@ -2630,6 +2622,35 @@ func _add_pinned_app(parent: GridContainer, glyph: String, caption: String, call
 	button.focus_mode = Control.FOCUS_NONE
 
 	parent.add_child(button)
+
+func _submit_start_search(query: String) -> void:
+	var normalized_query := _normalize_app_search_text(query)
+	if normalized_query.is_empty():
+		return
+
+	var matching_button: Button
+	var exact_match: Button
+	for button in _all_apps_entries:
+		if not is_instance_valid(button):
+			continue
+		var app_name := _normalize_app_search_text(str(button.get_meta("app_name", "")))
+		var search_terms := _normalize_app_search_text(str(button.get_meta("search_terms", "")))
+		if app_name == normalized_query:
+			exact_match = button
+			break
+		if app_name.contains(normalized_query) or search_terms.contains(normalized_query):
+			if not is_instance_valid(matching_button):
+				matching_button = button
+
+	var result_button := exact_match if is_instance_valid(exact_match) else matching_button
+	_start_menu.visible = false
+	_start_open = false
+	if is_instance_valid(result_button):
+		result_button.pressed.emit()
+		return
+
+	_open_window("Recherche Microslop", "Résultats pour : « %s »\n\nMicroslop AI — recommandé\nMicroslop Premium — SPONSORISÉ\nLe résultat que vous cherchiez (peut-être)." % query, Vector2(560, 300))
+
 
 func _app_search_terms(caption: String) -> String:
 	var aliases := ""
