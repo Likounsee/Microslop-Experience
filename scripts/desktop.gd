@@ -59,6 +59,7 @@ var _recent_app_title := ""
 var _recent_app_message := ""
 var _recent_app_size := Vector2(520, 300)
 var _taskbar_app_buttons: Dictionary = {}
+var _taskbar_focus_index := -1
 var _active_app_id := ""
 var _notification_center: PanelContainer
 var _notification_history: Array[Dictionary] = []
@@ -104,6 +105,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 				return
 			KEY_S:
 				_open_search()
+				key_event.accept()
+				return
+			KEY_T:
+				_cycle_taskbar_focus(key_event.shift_pressed)
 				key_event.accept()
 				return
 			KEY_TAB:
@@ -214,6 +219,21 @@ func _activate_taskbar_app_shortcut(app_id: String) -> void:
 	var button := _taskbar_app_buttons.get(app_id) as Button
 	if is_instance_valid(button) and button.visible and not button.disabled:
 		button.emit_signal("pressed")
+
+
+func _cycle_taskbar_focus(reverse: bool = false) -> void:
+	var available_buttons: Array[Button] = []
+	for app_id in ["browser", "files", "settings", "update"]:
+		var button := _taskbar_app_buttons.get(app_id) as Button
+		if is_instance_valid(button) and button.visible and not button.disabled:
+			available_buttons.append(button)
+	if available_buttons.is_empty():
+		return
+	if not has_focus():
+		_taskbar_focus_index = -1
+	var step := -1 if reverse else 1
+	_taskbar_focus_index = posmod(_taskbar_focus_index + step, available_buttons.size())
+	available_buttons[_taskbar_focus_index].grab_focus()
 
 
 func _minimize_all_windows() -> void:
@@ -1932,7 +1952,11 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 
 	button.add_theme_stylebox_override("pressed", _flat_style(Color(0.66, 0.79, 0.94, 0.88), 8))
 
-	button.focus_mode = Control.FOCUS_NONE
+	button.focus_mode = Control.FOCUS_ALL
+	var taskbar_focus_style := _flat_style(Color("e8f1fc"), 9)
+	taskbar_focus_style.set_border_width_all(2)
+	taskbar_focus_style.border_color = Color("2679d8")
+	button.add_theme_stylebox_override("focus", taskbar_focus_style)
 
 	button.set_meta("app_id", app_id)
 
