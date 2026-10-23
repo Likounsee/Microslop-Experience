@@ -34,3 +34,6 @@ jobs:
 
       - name: Test campaign persistence and malformed saves
         run: godot --headless --path . --script res://tests/campaign_store_test.gd
+
+      - name: Test atomic settings persistence and rollback
+        run: godot --headless --path . --script res://tests/settings_store_test.gd
