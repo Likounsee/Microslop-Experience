@@ -99,7 +99,7 @@ func _normalized_evidence(raw: Variant) -> Array:
 
 func load_progress() -> int:
 	var config := ConfigFile.new()
-	var error := config.load(save_path)
+	var error := _load_config(config)
 	if error != OK:
 		mission_step = MIN_MISSION_STEP
 		return mission_step
@@ -120,7 +120,7 @@ func save_progress(step: int) -> bool:
 	var next_step := clampi(step, MIN_MISSION_STEP, MAX_MISSION_STEP)
 	var config := ConfigFile.new()
 	# Refuse to overwrite an unreadable save; a missing save is valid for a new campaign.
-	var load_error := config.load(save_path)
+	var load_error := _load_config(config)
 	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
 		push_warning("Impossible de relire la sauvegarde avant d'enregistrer la progression.")
 		return false
@@ -139,7 +139,7 @@ func save_ending(ending: String) -> bool:
 	if ending not in ["published", "preserved"]:
 		return false
 	var config := ConfigFile.new()
-	var load_error := config.load(save_path)
+	var load_error := _load_config(config)
 	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
 		push_warning("Impossible de relire la sauvegarde avant d'enregistrer la conclusion ORCHID.")
 		return false
@@ -156,7 +156,7 @@ func save_evidence(evidence_id: String) -> bool:
 	if evidence_id.strip_edges().is_empty():
 		return false
 	var config := ConfigFile.new()
-	var load_error := config.load(save_path)
+	var load_error := _load_config(config)
 	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
 		push_warning("Impossible de relire la sauvegarde avant d'enregistrer les indices ORCHID.")
 		return false
@@ -175,7 +175,7 @@ func save_evidence(evidence_id: String) -> bool:
 
 func load_evidence() -> Array:
 	var config := ConfigFile.new()
-	if config.load(save_path) != OK:
+	if _load_config(config) != OK:
 		return []
 	var raw: Variant = config.get_value("campaign", "evidence", [])
 	return _normalized_evidence(raw)
@@ -186,7 +186,7 @@ func save_case_answer(case_id: String, answer: int) -> bool:
 	if case_id.strip_edges().is_empty() or answer < MIN_CASE_ANSWER or answer > MAX_CASE_ANSWER:
 		return false
 	var config := ConfigFile.new()
-	var load_error := config.load(save_path)
+	var load_error := _load_config(config)
 	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
 		push_warning("Impossible de relire la sauvegarde avant d'enregistrer la réponse ORCHID.")
 		return false
@@ -214,7 +214,7 @@ func save_case_answers_with_evidence(answers_to_save: Dictionary, evidence_id: S
 		if typeof(answer) != TYPE_INT or answer < MIN_CASE_ANSWER or answer > MAX_CASE_ANSWER:
 			return false
 	var config := ConfigFile.new()
-	var load_error := config.load(save_path)
+	var load_error := _load_config(config)
 	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
 		push_warning("Impossible de relire la sauvegarde avant d'enregistrer la décision ORCHID.")
 		return false
@@ -250,7 +250,7 @@ func reset_case_progress(answers_to_reset: Dictionary, evidence_prefixes: Array 
 		if not (prefix is String) or prefix.strip_edges().is_empty():
 			return false
 	var config := ConfigFile.new()
-	var load_error := config.load(save_path)
+	var load_error := _load_config(config)
 	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
 		push_warning("Impossible de relire la sauvegarde avant de réinitialiser le parcours ORCHID.")
 		return false
@@ -288,7 +288,7 @@ func load_case_answers(case_ids: Array[String]) -> Dictionary:
 	if case_ids.is_empty():
 		return result
 	var config := ConfigFile.new()
-	if config.load(save_path) != OK:
+	if _load_config(config) != OK:
 		return result
 	var raw: Variant = config.get_value("campaign", "case_answers", {})
 	if not (raw is Dictionary):
@@ -302,7 +302,7 @@ func load_case_answers(case_ids: Array[String]) -> Dictionary:
 
 func load_case_answer(case_id: String) -> int:
 	var config := ConfigFile.new()
-	if config.load(save_path) != OK:
+	if _load_config(config) != OK:
 		return -1
 	if case_id.strip_edges().is_empty():
 		return -1
@@ -318,7 +318,7 @@ func load_case_answer(case_id: String) -> int:
 ## Stores an editable report draft independently of the campaign ending and progress.
 func save_report_draft(draft: String) -> bool:
 	var config := ConfigFile.new()
-	var load_error := config.load(save_path)
+	var load_error := _load_config(config)
 	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
 		push_warning("Impossible de relire la sauvegarde avant d'enregistrer le brouillon ORCHID.")
 		return false
@@ -338,7 +338,7 @@ func save_report_review(draft: String, outcome: int) -> bool:
 	if outcome < 0 or outcome > 2:
 		return false
 	var config := ConfigFile.new()
-	var load_error := config.load(save_path)
+	var load_error := _load_config(config)
 	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
 		push_warning("Impossible de relire la sauvegarde avant la revue ORCHID.")
 		return false
@@ -365,7 +365,7 @@ func save_report_review(draft: String, outcome: int) -> bool:
 
 func load_report_draft() -> String:
 	var config := ConfigFile.new()
-	if config.load(save_path) != OK:
+	if _load_config(config) != OK:
 		return ""
 	var raw_draft: Variant = config.get_value("campaign", "report_draft", "")
 	return raw_draft if raw_draft is String else ""
@@ -378,7 +378,7 @@ func capture_cinematic_baseline(case_id: String) -> bool:
 	if case_id.strip_edges().is_empty():
 		return false
 	var config := ConfigFile.new()
-	var load_error := config.load(save_path)
+	var load_error := _load_config(config)
 	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
 		return false
 	var raw_baseline: Variant = config.get_value("campaign", "cinematic_baseline", {})
@@ -411,7 +411,7 @@ func restore_cinematic_baseline(config: ConfigFile) -> void:
 ## Other evidence, the report draft, ending, and mission progress remain untouched.
 func reset_cinematic_progress() -> bool:
 	var config := ConfigFile.new()
-	var load_error := config.load(save_path)
+	var load_error := _load_config(config)
 	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
 		push_warning("Impossible de relire la sauvegarde avant de relancer la séquence ORCHID.")
 		return false
@@ -464,7 +464,7 @@ func reset_cinematic_progress() -> bool:
 
 func load_ending() -> String:
 	var config := ConfigFile.new()
-	if config.load(save_path) != OK:
+	if _load_config(config) != OK:
 		return ""
 	var raw_ending: Variant = config.get_value("campaign", "ending", "")
 	if raw_ending is String and raw_ending in ["published", "preserved"]:
