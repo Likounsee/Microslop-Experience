@@ -7130,27 +7130,42 @@ func _open_task_manager() -> void:
 	description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	description.add_theme_color_override("font_color", Color("596780"))
 	content.add_child(description)
+	var search_row := HBoxContainer.new()
+	search_row.add_theme_constant_override("separation", 8)
+	content.add_child(search_row)
+	var search_edit := LineEdit.new()
+	search_edit.name = "TaskManagerSearch"
+	search_edit.placeholder_text = "Rechercher une application ou une fenêtre…"
+	search_edit.clear_button_enabled = true
+	search_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	search_row.add_child(search_edit)
+	var refresh_button := Button.new()
+	refresh_button.text = "Actualiser"
+	search_row.add_child(refresh_button)
 	var list := VBoxContainer.new()
 	list.name = "TaskManagerProcessList"
 	list.add_theme_constant_override("separation", 5)
 	content.add_child(list)
-	var refresh_button := Button.new()
-	refresh_button.text = "Actualiser"
 	refresh_button.pressed.connect(func():
 		if is_instance_valid(app) and is_instance_valid(list):
-			_refresh_task_manager_processes(list, app)
+			_refresh_task_manager_processes(list, app, search_edit.text)
 	)
-	content.add_child(refresh_button)
-	_refresh_task_manager_processes(list, app)
+	search_edit.text_changed.connect(func(query: String):
+		if is_instance_valid(app) and is_instance_valid(list):
+			_refresh_task_manager_processes(list, app, query)
+	)
+	_refresh_task_manager_processes(list, app, search_edit.text)
 
 
-func _refresh_task_manager_processes(list: VBoxContainer, task_manager: Control) -> void:
+func _refresh_task_manager_processes(list: VBoxContainer, task_manager: Control, filter_query: String = "") -> void:
 	for child in list.get_children():
 		list.remove_child(child)
 		child.queue_free()
 	if not is_instance_valid(_window_layer):
 		return
 	var process_count := 0
+	var visible_count := 0
+	var normalized_query := filter_query.strip_edges().to_lower()
 	for candidate in _window_layer.get_children():
 		if not candidate is Control or not candidate.has_meta("app_id"):
 			continue
@@ -7158,6 +7173,9 @@ func _refresh_task_manager_processes(list: VBoxContainer, task_manager: Control)
 		process_count += 1
 		var app_id := str(process_window.get_meta("app_id", ""))
 		var title := str(process_window.get_meta("window_title", app_id))
+		if not normalized_query.is_empty() and not (title.to_lower().contains(normalized_query) or app_id.to_lower().contains(normalized_query)):
+			continue
+		visible_count += 1
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 8)
 		list.add_child(row)
@@ -7198,12 +7216,12 @@ func _refresh_task_manager_processes(list: VBoxContainer, task_manager: Control)
 					_refresh_task_manager_processes(list, task_manager)
 		)
 		row.add_child(end_button)
-	if process_count == 0:
+	if visible_count == 0:
 		var empty_label := Label.new()
-		empty_label.text = "Aucune fenêtre ouverte."
+		empty_label.text = "Aucun résultat pour cette recherche." if process_count > 0 and not normalized_query.is_empty() else "Aucune fenêtre ouverte."
 		list.add_child(empty_label)
 	var summary := Label.new()
-	summary.text = "Fenêtres suivies : %d · CPU et mémoire réels : indisponibles dans cette simulation." % process_count
+	summary.text = "Résultats : %d / %d fenêtres · CPU et mémoire réels indisponibles dans cette simulation." % [visible_count, process_count]
 	summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	summary.add_theme_color_override("font_color", Color("596780"))
 	list.add_child(summary)
