@@ -33,6 +33,12 @@ func _run_tests() -> void:
 	_check(not store.save_case_answer("case_invalid", 3), "reject out-of-range answer")
 	_check(store.save_evidence("evidence_test"), "save evidence")
 	_check(store.load_evidence().has("evidence_test"), "load evidence")
+	_check(store.save_ending("published"), "save valid published ending")
+	_check(store.load_ending() == "published", "load published ending")
+	_check(not store.save_ending("unknown"), "reject unknown ending")
+	_check(store.load_ending() == "published", "invalid ending does not replace saved ending")
+	_check(store.save_ending("preserved"), "replace ending with preserved outcome")
+	_check(store.load_ending() == "preserved", "load updated ending")
 
 	_check(store.save_report_review("A factual report with limits and actions.", 2), "save accepted report review")
 	_check(store.load_report_draft() == "A factual report with limits and actions.", "load report draft")
@@ -42,6 +48,7 @@ func _run_tests() -> void:
 		var evidence: Array = config.get_value("campaign", "evidence", [])
 		_check(evidence.has("report_studio_reviewed"), "accepted review marker exists")
 		_check(not evidence.has("report_studio_revision_requested"), "opposite review marker removed")
+		_check(evidence.has("evidence_test"), "report review preserves unrelated evidence")
 
 	_check(store.save_report_review("Report to revise.", 1), "save revised report review after acceptance")
 	_check(config.load(TEST_SAVE_PATH) == OK, "reload revised report review")
@@ -49,6 +56,7 @@ func _run_tests() -> void:
 		var revised_evidence: Array = config.get_value("campaign", "evidence", [])
 		_check(revised_evidence.has("report_studio_revision_requested"), "revision marker replaces acceptance")
 		_check(not revised_evidence.has("report_studio_reviewed"), "stale acceptance marker removed")
+		_check(revised_evidence.has("evidence_test"), "revision review preserves unrelated evidence")
 
 	# A wrong-typed evidence field is normalized before a new evidence ID is written.
 	config.set_value("campaign", "evidence", "not-an-array")
@@ -62,7 +70,9 @@ func _run_tests() -> void:
 		DirAccess.remove_absolute(absolute_path)
 	var directory_error := DirAccess.make_dir_absolute(absolute_path)
 	_check(directory_error == OK, "create unreadable save location")
+	var previous_step := store.mission_step
 	_check(not store.save_progress(1), "refuse to overwrite unreadable save location")
+	_check(store.mission_step == previous_step, "failed save does not change in-memory progress")
 	_check(DirAccess.dir_exists_absolute(absolute_path), "preserve unreadable save location")
 	if DirAccess.dir_exists_absolute(absolute_path):
 		DirAccess.remove_absolute(absolute_path)
