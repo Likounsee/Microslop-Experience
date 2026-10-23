@@ -6968,6 +6968,73 @@ func _open_run_dialog() -> void:
 	command_edit.call_deferred("grab_focus")
 
 
+func _open_calculator() -> void:
+	var app := _open_window("Calculatrice", "Calculatrice Microslop", Vector2(380, 300))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	for child in content.get_children():
+		child.queue_free()
+	var explanation := Label.new()
+	explanation.text = "Calculs arithmétiques · utilisez +, -, *, / et les parenthèses."
+	explanation.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	explanation.add_theme_color_override("font_color", Color("596780"))
+	content.add_child(explanation)
+	var expression_edit := LineEdit.new()
+	expression_edit.name = "CalculatorExpression"
+	expression_edit.placeholder_text = "Ex. (12 + 8) * 3 / 2"
+	expression_edit.clear_button_enabled = true
+	expression_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_child(expression_edit)
+	var result_label := Label.new()
+	result_label.name = "CalculatorResult"
+	result_label.text = "Résultat : —"
+	result_label.add_theme_font_size_override("font_size", 20)
+	result_label.add_theme_color_override("font_color", Color("24344d"))
+	content.add_child(result_label)
+	var actions := HBoxContainer.new()
+	actions.alignment = BoxContainer.ALIGNMENT_END
+	content.add_child(actions)
+	var clear_button := Button.new()
+	clear_button.text = "Effacer"
+	clear_button.pressed.connect(func():
+		expression_edit.clear()
+		result_label.text = "Résultat : —"
+		expression_edit.grab_focus()
+	)
+	actions.add_child(clear_button)
+	var calculate_button := Button.new()
+	calculate_button.text = "Calculer"
+	calculate_button.pressed.connect(func():
+		_calculate_expression(expression_edit, result_label)
+	)
+	actions.add_child(calculate_button)
+	expression_edit.text_submitted.connect(func(_value: String):
+		_calculate_expression(expression_edit, result_label)
+	)
+	expression_edit.call_deferred("grab_focus")
+
+
+func _calculate_expression(expression_edit: LineEdit, result_label: Label) -> void:
+	var source := expression_edit.text.strip_edges()
+	if source.is_empty():
+		result_label.text = "Saisissez une expression."
+		return
+	var expression := Expression.new()
+	var parse_error := expression.parse(source)
+	if parse_error != OK:
+		result_label.text = "Expression invalide (position %d)." % expression.get_error_text().length()
+		return
+	var value: Variant = expression.execute([], null, false)
+	if expression.has_execute_failed() or not (value is int or value is float):
+		result_label.text = "Calcul impossible. Vérifiez l’expression."
+		return
+	if is_nan(float(value)) or is_inf(float(value)):
+		result_label.text = "Résultat non défini."
+		return
+	result_label.text = "Résultat : %s" % str(value)
+
+
 func _execute_run_command(command_edit: LineEdit, result_label: Label) -> void:
 	var command := command_edit.text.strip_edges().to_lower()
 	if command.is_empty():
@@ -6981,7 +7048,7 @@ func _execute_run_command(command_edit: LineEdit, result_label: Label) -> void:
 		"browser", "microslop-browser", "start https://":
 			_open_browser()
 		"calc", "calculator", "calculatrice":
-			_open_window("Calculatrice", "Calculatrice Microslop\n\nEntrez vos calculs dans cette maquette. Aucun calcul système n’est exécuté.", Vector2(360, 260))
+			_open_calculator()
 		"notepad", "notepad.exe", "bloc-notes":
 			_open_window("Bloc-notes", "Bloc-notes Microslop\n\nL’éditeur est simulé dans ce prototype.", Vector2(520, 360))
 		"taskmgr", "taskmgr.exe", "gestionnaire des tâches":
