@@ -6584,7 +6584,12 @@ func _open_settings() -> void:
 
 	display.item_selected.connect(func(index: int):
 
-		SettingsStore.set_value_and_save("display_mode", display.get_item_text(index))
+		if not SettingsStore.set_value_and_save("display_mode", display.get_item_text(index)):
+			for option_index in display.item_count:
+				if display.get_item_text(option_index) == SettingsStore.values.get("display_mode", "Fenêtré"):
+					display.select(option_index)
+					break
+			_show_notification("Paramètre non enregistré", "Le mode d’affichage précédent a été restauré.")
 		SettingsStore.apply_display_settings()
 
 	)
@@ -6619,7 +6624,12 @@ func _open_settings() -> void:
 
 	resolution.item_selected.connect(func(index: int):
 
-		SettingsStore.set_value_and_save("resolution", resolutions[index])
+		if not SettingsStore.set_value_and_save("resolution", resolutions[index]):
+			for option_index in resolutions.size():
+				if resolutions[option_index] == SettingsStore.values.get("resolution", Vector2i(1280, 720)):
+					resolution.select(option_index)
+					break
+			_show_notification("Paramètre non enregistré", "La résolution précédente a été restaurée.")
 		SettingsStore.apply_display_settings()
 
 	)
@@ -6637,7 +6647,9 @@ func _open_settings() -> void:
 
 	vsync.toggled.connect(func(enabled: bool):
 
-		SettingsStore.set_value_and_save("vsync", enabled)
+		if not SettingsStore.set_value_and_save("vsync", enabled):
+			vsync.set_pressed_no_signal(bool(SettingsStore.values.get("vsync", true)))
+			_show_notification("Paramètre non enregistré", "Le réglage V-Sync précédent a été restauré.")
 		SettingsStore.apply_display_settings()
 
 	)
@@ -6674,7 +6686,12 @@ func _open_settings() -> void:
 
 	fps_limit.item_selected.connect(func(index: int):
 
-		SettingsStore.set_value_and_save("fps_limit", fps_options[index])
+		if not SettingsStore.set_value_and_save("fps_limit", fps_options[index]):
+			for option_index in fps_options.size():
+				if fps_options[option_index] == SettingsStore.values.get("fps_limit", 0):
+					fps_limit.select(option_index)
+					break
+			_show_notification("Paramètre non enregistré", "La limite FPS précédente a été restaurée.")
 		SettingsStore.apply_display_settings()
 
 	)
@@ -6739,8 +6756,13 @@ func _open_settings() -> void:
 
 	language.item_selected.connect(func(index: int):
 
-		SettingsStore.set_value_and_save("language", language.get_item_text(index))
-
+		if not SettingsStore.set_value_and_save("language", language.get_item_text(index)):
+			for option_index in language.item_count:
+				if language.get_item_text(option_index) == SettingsStore.values.get("language", "Français"):
+					language.select(option_index)
+					break
+			_show_notification("Paramètre non enregistré", "La langue précédente a été restaurée.")
+			return
 		_show_notification("Langue enregistrée", "La traduction complète sera ajoutée dans une phase ultérieure.")
 
 	)
