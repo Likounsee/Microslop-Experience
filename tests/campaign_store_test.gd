@@ -76,6 +76,39 @@ func _run_tests() -> void:
 	var normalized := store.load_evidence()
 	_check(normalized.size() == 1 and normalized[0] == "evidence_after_malformed", "normalize malformed evidence")
 
+	# Replaying the cinematic must clear its own state while preserving the wider case file.
+	_check(store.save_report_draft("Keep this unrelated report draft."), "seed report draft before cinematic reset")
+	var reset_fixture := ConfigFile.new()
+	_check(reset_fixture.load(TEST_SAVE_PATH) == OK, "load save before cinematic reset fixture")
+	reset_fixture.set_value("campaign", "evidence", ["evidence_to_keep", "cinematic_scene_02", "cinematic_choice_evidence_02", "orchid_cinematic_shared", "cinematic_outcome_calculated"])
+	reset_fixture.set_value("campaign", "cinematic_choice_02", 1)
+	reset_fixture.set_value("campaign", "cinematic_choice_38", 2)
+	reset_fixture.set_value("campaign", "cinematic_outcome_score", 17)
+	reset_fixture.set_value("campaign", "quick_settings_mode", "digest")
+	reset_fixture.set_value("campaign", "cinematic_baseline", {
+		"quick_settings_mode": {"exists": true, "value": "normal"},
+		"cinematic_only_temporary_flag": {"exists": false, "value": null}
+	})
+	_check(reset_fixture.save(TEST_SAVE_PATH) == OK, "seed cinematic reset fixture")
+	_check(store.reset_cinematic_progress(), "reset cinematic progress")
+	_check(reset_fixture.load(TEST_SAVE_PATH) == OK, "reload save after cinematic reset")
+	if reset_fixture.load(TEST_SAVE_PATH) == OK:
+		var reset_evidence: Array = reset_fixture.get_value("campaign", "evidence", [])
+		_check(reset_evidence.has("evidence_to_keep"), "cinematic reset preserves unrelated evidence")
+		_check(not reset_evidence.has("cinematic_scene_02"), "cinematic reset removes scene evidence")
+		_check(not reset_evidence.has("cinematic_choice_evidence_02"), "cinematic reset removes choice evidence")
+		_check(not reset_evidence.has("orchid_cinematic_shared"), "cinematic reset removes namespaced cinematic evidence")
+		_check(not reset_evidence.has("cinematic_outcome_calculated"), "cinematic reset removes calculated outcome evidence")
+		_check(not reset_fixture.has_section_key("campaign", "cinematic_choice_02"), "cinematic reset clears early choice")
+		_check(not reset_fixture.has_section_key("campaign", "cinematic_choice_38"), "cinematic reset clears epilogue choice")
+		_check(not reset_fixture.has_section_key("campaign", "cinematic_outcome_score"), "cinematic reset clears outcome score")
+		_check(reset_fixture.get_value("campaign", "quick_settings_mode", "") == "normal", "cinematic reset restores pre-cinematic shared setting")
+		_check(not reset_fixture.has_section_key("campaign", "cinematic_only_temporary_flag"), "cinematic reset removes keys created by cinematic")
+		_check(not reset_fixture.has_section_key("campaign", "cinematic_baseline"), "cinematic reset clears baseline snapshot")
+		_check(reset_fixture.get_value("campaign", "report_draft", "") == "Keep this unrelated report draft.", "cinematic reset preserves report draft")
+		_check(reset_fixture.get_value("campaign", "ending", "") == "preserved", "cinematic reset preserves campaign ending")
+		_check(reset_fixture.get_value("campaign", "mission_step", -1) == 4, "cinematic reset preserves mission progress")
+
 	# A directory at the save path simulates a location ConfigFile cannot read or overwrite.
 	if FileAccess.file_exists(absolute_path):
 		DirAccess.remove_absolute(absolute_path)
