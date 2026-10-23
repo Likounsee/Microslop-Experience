@@ -70,7 +70,7 @@ func _run_tests() -> void:
 		DirAccess.remove_absolute(absolute_path)
 	var directory_error := DirAccess.make_dir_absolute(absolute_path)
 	_check(directory_error == OK, "create unreadable save location")
-	var previous_step := store.mission_step
+	var previous_step: int = store.mission_step
 	_check(not store.save_progress(1), "refuse to overwrite unreadable save location")
 	_check(store.mission_step == previous_step, "failed save does not change in-memory progress")
 	_check(DirAccess.dir_exists_absolute(absolute_path), "preserve unreadable save location")
