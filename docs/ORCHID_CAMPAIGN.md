@@ -288,3 +288,10 @@ Le panneau « État du dossier » expose aussi les décisions tardives : qualit�
 
 Validation : le workflow GitHub Actions a terminé avec succès sur le commit de correction de la sauvegarde ; le workflow du commit ajoutant les conséquences tardives était encore en attente lors de la dernière vérification. Aucun test manuel dans l’interface Godot n’a été effectué.
 
+
+
+### Enquête jouable — indice de télémétrie dans l’explorateur
+
+L’explorateur permet maintenant de rechercher « ORCHID » pour découvrir le fichier fictif `ORCHID_telemetry_review.txt`, volontairement absent de l’index habituel. Son contenu distingue le compteur affiché (« 18 fichiers analysés ») d’une opération réellement attestée : le journal fourni ne montre aucun accès aux documents, et l’approbation du déploiement est absente de la copie. Le joueur peut conserver la copie en signalant les limites de la preuve, transmettre l’indice au canal de conformité ou fermer sans conserver de copie supplémentaire. Chaque option écrit une réponse dédiée et des preuves persistantes dans la sauvegarde locale. Cette enquête complète le chapitre 1 et ne lance pas le contenu du DLC du chapitre 2.
+
+Validation : le commit de cette interaction a déclenché le workflow Godot CI ; son résultat doit être confirmé avant de considérer cette passe validée. Le lancement manuel et le test des trois choix dans l’interface restent à effectuer.
