@@ -184,10 +184,19 @@ func apply_display_settings() -> void:
 	Engine.max_fps = fps_limit if fps_limit > 0 else 0
 
 func apply_audio_settings() -> void:
-	var master_bus := AudioServer.get_bus_index("Master")
-	if master_bus >= 0:
-		AudioServer.set_bus_volume_db(master_bus, get_volume_db("master_volume"))
-		AudioServer.set_bus_mute(master_bus, float(values.get("master_volume", 0.8)) <= 0.0)
+	_apply_bus_volume("Master", "master_volume")
+	# Music and SFX buses are optional so projects without a custom audio layout
+	# keep working, while any dedicated buses automatically honour saved levels.
+	_apply_bus_volume("Music", "music_volume")
+	_apply_bus_volume("SFX", "sfx_volume")
+
+func _apply_bus_volume(bus_name: String, setting_key: String) -> void:
+	var bus_index := AudioServer.get_bus_index(bus_name)
+	if bus_index < 0:
+		return
+	var linear_value := clampf(float(values.get(setting_key, 0.8)), 0.0, 1.0)
+	AudioServer.set_bus_volume_db(bus_index, get_volume_db(setting_key))
+	AudioServer.set_bus_mute(bus_index, linear_value <= 0.0)
 
 func get_volume_db(key: String) -> float:
 	var linear_value := clampf(float(values.get(key, 0.8)), 0.0, 1.0)
