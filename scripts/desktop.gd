@@ -1827,7 +1827,7 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 		hover_tween.tween_property(icon_tile, "scale", Vector2(1.07, 1.07), 0.10)
 	)
 	button.mouse_exited.connect(func():
-		_hide_taskbar_preview()
+		_schedule_taskbar_preview_hide()
 		var hover_tween := create_tween()
 		hover_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		hover_tween.tween_property(icon_tile, "scale", Vector2.ONE, 0.12)
@@ -1990,9 +1990,32 @@ func _show_taskbar_preview(app_id: String, source_button: Button, glyph: String)
 	status_label.text = "Fenêtre ouverte" if is_app_visible else "Application réduite"
 	status_label.add_theme_font_size_override("font_size", 10)
 	status_label.add_theme_color_override("font_color", Color("65758d"))
+	status_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	preview_status.add_child(status_label)
+	var activate_button := Button.new()
+	activate_button.text = "Activer" if not is_app_visible else "Afficher"
+	activate_button.tooltip_text = "Afficher cette fenêtre"
+	activate_button.custom_minimum_size = Vector2(66, 26)
+	activate_button.add_theme_font_size_override("font_size", 10)
+	activate_button.pressed.connect(func():
+		var target_window := _find_app_window(app_id)
+		if not is_instance_valid(target_window):
+			_hide_taskbar_preview()
+			return
+		if not target_window.visible:
+			target_window.call("restore_from_taskbar")
+		target_window.move_to_front()
+		_active_app_id = app_id
+		if target_window.has_signal("window_activated"):
+			target_window.emit_signal("window_activated")
+		_update_taskbar_indicators()
+		_hide_taskbar_preview()
+	)
+	preview_status.add_child(activate_button)
 	layout.add_child(preview_status)
 
+	_taskbar_preview.mouse_filter = Control.MOUSE_FILTER_STOP
+	_taskbar_preview.mouse_exited.connect(_schedule_taskbar_preview_hide)
 	add_child(_taskbar_preview)
 	var button_rect := source_button.get_global_rect()
 	# The desktop Control fills the viewport, so global-rect coordinates map directly to its local space.
@@ -2009,6 +2032,16 @@ func _show_taskbar_preview(app_id: String, source_button: Button, glyph: String)
 	_taskbar_preview_tween.set_parallel(true)
 	_taskbar_preview_tween.tween_property(_taskbar_preview, "modulate:a", 1.0, 0.13)
 	_taskbar_preview_tween.tween_property(_taskbar_preview, "scale", Vector2.ONE, 0.13)
+
+
+func _schedule_taskbar_preview_hide() -> void:
+	# Give the pointer time to travel from the taskbar icon into its preview.
+	await get_tree().create_timer(0.18).timeout
+	if not is_instance_valid(_taskbar_preview):
+		return
+	if _taskbar_preview.get_global_rect().has_point(get_global_mouse_position()):
+		return
+	_hide_taskbar_preview()
 
 
 func _hide_taskbar_preview() -> void:
