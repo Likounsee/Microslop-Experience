@@ -358,3 +358,11 @@ La suite automatisée vérifie également que les deux conclusions autorisées (
 ### Rejeu cinématique — tests de non-régression
 
 La suite de persistance couvre maintenant aussi le rejeu de la cinématique : elle vérifie que les preuves et choix des 39 scènes, le score de conclusion et la capture de paramètres cinématiques sont retirés, tandis que les preuves non cinématiques, le brouillon du rapport, la conclusion de campagne et l'étape de mission restent conservés. Le test injecte un paramètre partagé modifié pendant la cinématique et confirme que sa valeur de départ est restaurée ; il contrôle également la suppression d'une clé temporaire qui n'existait pas avant la séquence. Ce test utilise la sauvegarde isolée de CI, pas le fichier de campagne du joueur.
+
+### Intégration navigateur–explorateur et progression fiable
+
+Les recherches du navigateur relisent maintenant les preuves au moment où la recherche est lancée, plutôt que de réutiliser uniquement l’état observé à l’ouverture de la fenêtre. Si le joueur conserve une copie du journal ou transmet l’indice à la conformité pendant que le navigateur reste ouvert, la recherche suivante reflète ce nouvel état et affiche la corroboration appropriée. Les résultats utilisent également de vrais retours à la ligne.
+
+L’avancement de la mission principale est désormais conditionné à la réussite de l’écriture sur disque. Si la sauvegarde échoue, l’étape visible reste inchangée et une notification explique l’échec au lieu de signaler une mission accomplie qui ne survivrait pas au redémarrage.
+
+Validation restante : vérifier la CI après ces changements et tester dans Godot le scénario où l’explorateur enregistre l’indice alors que le navigateur est déjà ouvert, ainsi que l’échec de sauvegarde de progression. Aucun lancement manuel Godot n’a été effectué dans cette passe.
