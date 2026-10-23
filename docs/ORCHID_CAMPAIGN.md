@@ -302,3 +302,10 @@ Validation : le commit de cette interaction a déclenché le workflow Godot CI ;
 Le navigateur ORCHID lit désormais les indices déjà sauvegardés dans la campagne. Si le joueur a conservé une copie locale du journal, les résultats de recherche rappellent le décalage entre le compteur « 18 fichiers analysés » et l’absence de preuve d’accès aux documents. Si le joueur a transmis le signalement, les résultats rappellent que l’approbation manquante doit encore être recherchée. Sans indice conservé ou transmis, le navigateur renvoie le joueur vers l’explorateur au lieu de présenter l’archive comme une preuve suffisante. Les recherches et l’ouverture de l’archive sont également enregistrées comme preuves distinctes. Cela crée un premier lien persistant entre deux applications du bureau, sans utiliser de données externes ni de télémétrie réelle.
 
 Validation : la CI du commit ajoutant le recoupement navigateur est en cours ; vérifier son résultat avant de considérer la modification validée. Les chemins de jeu et le rendu restent à tester manuellement dans Godot.
+
+
+### Studio de rapport — états de revue persistants
+
+La revue enregistre désormais un état distinct selon le résultat : brouillon trop court, révision demandée pour limites ou mesures manquantes, ou acceptation pour revue. Le tableau de campagne lit le dernier état enregistré plutôt que de se fier uniquement à la présence d’une ancienne preuve d’acceptation ; une révision ultérieure peut donc remplacer l’état affiché. La vérification des sections « limites » et « mesures » ignore la casse, et le comptage du texte inclut les mots répartis sur plusieurs lignes. Une acceptation reste une étape de suivi fictive, pas une résolution de l’incident.
+
+Validation : modification poussée sur `Microslop-Experience`. Vérifier la CI et effectuer un test en jeu dans Godot ; ce dernier n’a pas été exécuté dans cette passe.
