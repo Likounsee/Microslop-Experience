@@ -94,6 +94,20 @@ func _unhandled_key_input(event: InputEvent) -> void:
 				_open_settings()
 				key_event.accept()
 				return
+			KEY_LEFT:
+				var active_window_left := _get_active_visible_window()
+				if is_instance_valid(active_window_left):
+					active_window_left.call("_apply_snap_layout", "left")
+					active_window_left.move_to_front()
+				key_event.accept()
+				return
+			KEY_RIGHT:
+				var active_window_right := _get_active_visible_window()
+				if is_instance_valid(active_window_right):
+					active_window_right.call("_apply_snap_layout", "right")
+					active_window_right.move_to_front()
+				key_event.accept()
+				return
 			KEY_UP:
 				var active_window_up := _get_active_visible_window()
 				if is_instance_valid(active_window_up) and not bool(active_window_up.get("_is_maximized")):
