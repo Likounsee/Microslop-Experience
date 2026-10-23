@@ -67,6 +67,12 @@ func _run_tests() -> void:
 	store.values.erase("unexpected_setting")
 	var readable_after_unknown_key := ConfigFile.new()
 	_check(readable_after_unknown_key.load(TEST_SETTINGS_PATH) == OK, "unknown setting rejection preserves readable save")
+	store.values.erase("language")
+	_check(not store.save_settings(), "reject incomplete in-memory settings schema")
+	store.values["language"] = "Français"
+	var readable_after_missing_key := ConfigFile.new()
+	_check(readable_after_missing_key.load(TEST_SETTINGS_PATH) == OK, "missing setting rejection preserves readable save")
+	_check(readable_after_missing_key.get_value("settings", "language", "") == "Français", "missing setting rejection preserves previous language")
 
 	_check(store.set_value_and_save("fps_limit", 120), "valid setting update reports successful persistence")
 	_check(store.set_value_and_save("fps_limit", 120), "unchanged valid setting reports success")
