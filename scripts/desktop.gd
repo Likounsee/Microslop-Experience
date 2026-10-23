@@ -4587,6 +4587,35 @@ func _render_orchid_cinematic_scene(app: Control, state: Dictionary) -> void:
 	dialogue.custom_minimum_size = Vector2(0, 150)
 	dialogue.add_theme_color_override("font_color", Color("263247"))
 	content.add_child(dialogue)
+	var context_lines: Array[String] = []
+	if stage >= 10:
+		var file_choice := CampaignStore.load_case_answer("cinematic_choice_03")
+		if file_choice == 0:
+			context_lines.append("TRACE CONSERVÉE · Les dix-huit fichiers restent une observation à vérifier, pas une preuve d’accès à des documents personnels.")
+		elif file_choice == 1:
+			context_lines.append("TRACE MANQUANTE · La première alerte a été fermée sans vérification ; le dossier devra reconnaître cette limite.")
+		var support_choice := CampaignStore.load_case_answer("cinematic_choice_07")
+		if support_choice == 0:
+			context_lines.append("TÉMOIGNAGE · Le brouillon support est conservé avec prudence et peut être comparé aux journaux.")
+		elif support_choice == 1:
+			context_lines.append("TÉMOIGNAGE · La diffusion immédiate a précédé la vérification ; distinguez ce message des faits confirmés.")
+		var lea_choice := CampaignStore.load_case_answer("cinematic_choice_11")
+		if lea_choice == 0:
+			context_lines.append("LIEN AVEC LÉA · Vous avez proposé de comparer les heures et de garder les messages.")
+		elif lea_choice == 1:
+			context_lines.append("LIEN AVEC LÉA · Vous avez fermé la conversation ; les éléments qu’elle aurait pu partager ne sont pas dans votre dossier.")
+		var pause_choice := CampaignStore.load_case_answer("cinematic_choice_13")
+		if pause_choice == 0:
+			context_lines.append("SESSION · La pause locale a été demandée ; elle ne garantit pas que tous les composants la respecteront.")
+		elif pause_choice == 1:
+			context_lines.append("SESSION · Les suggestions ont été acceptées pour faire disparaître la fenêtre ; cela ne vaut pas consentement éclairé.")
+	if not context_lines.is_empty():
+		var context_panel := Label.new()
+		context_panel.text = "ÉTAT DU DOSSIER\n" + "\n".join(context_lines)
+		context_panel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		context_panel.custom_minimum_size = Vector2(0, 72)
+		context_panel.add_theme_color_override("font_color", Color("5b4b35"))
+		content.add_child(context_panel)
 	var continue_button := Button.new()
 	continue_button.text = "Scène suivante →"
 	continue_button.custom_minimum_size = Vector2(0, 42)
