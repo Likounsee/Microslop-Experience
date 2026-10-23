@@ -223,6 +223,16 @@ func _run_tests() -> void:
 	_check(FileAccess.file_exists(absolute_path), "backup recovery restores primary save file")
 	_check(not FileAccess.file_exists(backup_path), "backup recovery consumes restored backup")
 
+	# A syntactically corrupted primary must not hide a valid backup.
+	_check(DirAccess.copy_absolute(absolute_path, backup_path) == OK, "copy valid save into backup before corruption test")
+	var corrupt_primary := FileAccess.open(absolute_path, FileAccess.WRITE)
+	if corrupt_primary != null:
+		corrupt_primary.store_string("[campaign\\nmission_step = broken")
+		corrupt_primary.close()
+	_check(store.load_case_answer("backup_recovery_fixture") == 42, "recover valid backup when primary save is malformed")
+	_check(FileAccess.file_exists(absolute_path), "malformed primary is replaced by recovered valid save")
+	_check(not FileAccess.file_exists(backup_path), "corrupt-primary recovery cleans restored backup")
+
 	# A directory at the save path simulates a location ConfigFile cannot read or overwrite.
 	if FileAccess.file_exists(absolute_path):
 		DirAccess.remove_absolute(absolute_path)
