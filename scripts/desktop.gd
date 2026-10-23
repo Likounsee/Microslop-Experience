@@ -4464,6 +4464,23 @@ func _open_orchid_report_studio() -> void:
 			if toggles[i].button_pressed:
 				paragraphs.append(str(section_specs[i]["text"]))
 				selected_count += 1
+		var evidence: Array = CampaignStore.load_evidence()
+		var explorer_preserved := evidence.has("explorer_orchid_file_preserved")
+		var explorer_escalated := evidence.has("explorer_orchid_file_escalated")
+		var browser_searched := evidence.has("browser_orchid_search_performed")
+		if explorer_preserved or explorer_escalated or browser_searched:
+			var cross_app_report := "RECoupement DES APPLICATIONS\\n"
+			if explorer_preserved:
+				cross_app_report += "Une copie locale du journal de télémétrie a été conservée. Elle indique que le compteur « 18 fichiers analysés » provenait du module de notification ; le journal consulté ne prouve pas un accès aux documents.\\n"
+			elif explorer_escalated:
+				cross_app_report += "Un signalement a été transmis au canal de conformité. La référence d’approbation reste à rechercher.\\n"
+			else:
+				cross_app_report += "Une recherche ORCHID a été effectuée dans le navigateur, mais aucune copie du journal n’est enregistrée comme conservée ou transmise. La recherche seule ne confirme pas les événements.\\n"
+			if browser_searched:
+				cross_app_report += "Le navigateur a également été utilisé pour rechercher ORCHID ; ce résultat est une trace d’enquête, pas une source indépendante du journal.\\n"
+			cross_app_report += "La concordance entre applications aide à orienter la vérification, sans établir l’identité d’un responsable ni l’intention initiale."
+			paragraphs.append(cross_app_report)
+			selected_count += 1
 		if selected_count == 0:
 			paragraphs.append("Aucun élément n’a été sélectionné. Choisissez au moins une section avant de transmettre une conclusion.")
 		paragraphs.append("CONCLUSION PROVISOIRE\nLes traces justifient une revue documentée. Les causes exactes et les responsabilités individuelles ne sont pas établies par ce seul dossier.")
@@ -5255,6 +5272,7 @@ func _render_orchid_campaign_dashboard(summary: Label) -> void:
 		{"name":"Recommandations et classement", "ids":["audit_wifi", "audit_exit", "audit_answer", "audit_common_rule"]},
 		{"name":"Contrôles de conformité", "ids":["compliance_signature", "compliance_channel", "compliance_approval", "compliance_notice", "compliance_finding"]},
 		{"name":"Pièces annexes", "ids":["support_ticket", "survey_bias", "night_log_reconstructed", "incident_report"]},
+		{"name":"Recoupement explorateur / navigateur", "ids":["explorer_orchid_file_discovered", "explorer_orchid_file_opened", "explorer_orchid_file_preserved", "explorer_orchid_file_escalated", "browser_orchid_search_performed", "browser_orchid_archive_opened"]},
 		{"name":"Séquence narrative (39 scènes)", "ids":["cinematic_scene_00", "cinematic_scene_01", "cinematic_scene_02", "cinematic_scene_03", "cinematic_scene_04", "cinematic_scene_05", "cinematic_scene_06", "cinematic_scene_07", "cinematic_scene_08", "cinematic_scene_09", "cinematic_scene_10", "cinematic_scene_11", "cinematic_scene_12", "cinematic_scene_13", "cinematic_scene_14", "cinematic_scene_15", "cinematic_scene_16", "cinematic_scene_17", "cinematic_scene_18", "cinematic_scene_19", "cinematic_scene_20", "cinematic_scene_21", "cinematic_scene_22", "cinematic_scene_23", "cinematic_scene_24", "cinematic_scene_25", "cinematic_scene_26", "cinematic_scene_27", "cinematic_scene_28", "cinematic_scene_29", "cinematic_scene_30", "cinematic_scene_31", "cinematic_scene_32", "cinematic_scene_33", "cinematic_scene_34", "cinematic_scene_35", "cinematic_scene_38", "cinematic_scene_37", "cinematic_scene_36"]}, "cinematic_outcome_calculated"]},
 		{"name":"Parcours ORCHID (41 séquences)", "ids":["workday_stage_00", "workday_stage_01", "workday_stage_02", "workday_stage_03", "workday_stage_04", "workday_stage_05", "workday_stage_06", "workday_stage_07", "workday_stage_08", "workday_stage_09", "workday_stage_10", "workday_stage_11", "workday_stage_12", "workday_stage_13", "workday_stage_14", "workday_stage_15", "workday_stage_16", "workday_stage_17", "workday_stage_18", "workday_stage_19", "workday_stage_20", "workday_stage_21", "workday_stage_22", "workday_stage_23", "workday_stage_24", "workday_stage_25", "workday_stage_26", "workday_stage_27", "workday_stage_28", "workday_stage_29", "workday_stage_30", "workday_stage_31", "workday_stage_32", "workday_stage_33", "workday_stage_34", "workday_stage_35", "workday_stage_36", "workday_stage_37", "workday_stage_38", "workday_stage_39", "workday_stage_40"]},
 		{"name":"Enquête de terrain (12 défis)", "ids":["field_stage_00", "field_stage_01", "field_stage_02", "field_stage_03", "field_stage_04", "field_stage_05", "field_stage_06", "field_stage_07", "field_stage_08", "field_stage_09", "field_stage_10", "field_stage_11", "field_investigation_completed"]},
@@ -5302,6 +5320,23 @@ func _render_orchid_campaign_dashboard(summary: Label) -> void:
 	else:
 		lines.append("ÉVALUATION : enquête en cours. Examinez les traces et séparez les faits établis des hypothèses.")
 	lines.append("Indice de couverture du tableau : %d / %d catégories suivies." % [collected, possible])
+	lines.append("")
+	lines.append("RECoupement ENTRE APPLICATIONS")
+	var explorer_preserved := evidence.has("explorer_orchid_file_preserved")
+	var explorer_escalated := evidence.has("explorer_orchid_file_escalated")
+	var browser_searched := evidence.has("browser_orchid_search_performed")
+	if explorer_preserved and browser_searched:
+		lines.append("Copie locale conservée + recherche navigateur : deux actions sont tracées. Le contenu du journal doit encore être confronté aux sources originales.")
+	elif explorer_escalated and browser_searched:
+		lines.append("Signalement transmis + recherche navigateur : le suivi est engagé, mais l’approbation manquante reste à obtenir.")
+	elif explorer_preserved or explorer_escalated:
+		lines.append("Une action sur le journal est enregistrée. Effectuez une recherche ORCHID dans le navigateur pour documenter le recoupement.")
+	elif browser_searched:
+		lines.append("Recherche navigateur enregistrée, mais aucune conservation ni transmission du journal n’est enregistrée.")
+	else:
+		lines.append("Aucun recoupement entre explorateur et navigateur n’est enregistré pour le moment.")
+	var report_reviewed := evidence.has("report_studio_reviewed")
+	lines.append("REVUE DU RAPPORT : %s" % ("brouillon accepté pour revue (pas une résolution)" if report_reviewed else "pas encore accepté pour revue"))
 	summary.text = "\n".join(lines)
 
 
