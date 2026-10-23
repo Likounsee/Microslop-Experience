@@ -160,6 +160,50 @@ func save_case_answers_with_evidence(answers_to_save: Dictionary, evidence_id: S
 	return true
 
 
+## Resets a mini-game's saved answers and removes its stale evidence in one write.
+## The caller should update its in-memory state only after this returns true.
+func reset_case_progress(answers_to_reset: Dictionary, evidence_prefixes: Array = []) -> bool:
+	if answers_to_reset.is_empty():
+		return false
+	for case_id in answers_to_reset:
+		var answer: Variant = answers_to_reset[case_id]
+		if not (case_id is String) or case_id.strip_edges().is_empty():
+			return false
+		if typeof(answer) != TYPE_INT or answer < MIN_CASE_ANSWER or answer > MAX_CASE_ANSWER:
+			return false
+	for prefix in evidence_prefixes:
+		if not (prefix is String) or prefix.strip_edges().is_empty():
+			return false
+	var config := ConfigFile.new()
+	var load_error := config.load(save_path)
+	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
+		push_warning("Impossible de relire la sauvegarde avant de réinitialiser le parcours ORCHID.")
+		return false
+	var raw_answers: Variant = config.get_value("campaign", "case_answers", {})
+	var answers: Dictionary = raw_answers if raw_answers is Dictionary else {}
+	for case_id in answers_to_reset:
+		answers[case_id] = answers_to_reset[case_id]
+	config.set_value("campaign", "case_answers", answers)
+	var evidence := _normalized_evidence(config.get_value("campaign", "evidence", []))
+	var kept_evidence: Array = []
+	for item in evidence:
+		var evidence_id: String = item
+		var remove_evidence := false
+		for prefix in evidence_prefixes:
+			if evidence_id.begins_with(prefix):
+				remove_evidence = true
+				break
+		if not remove_evidence:
+			kept_evidence.append(evidence_id)
+	config.set_value("campaign", "evidence", kept_evidence)
+	config.set_value("campaign", "version", CAMPAIGN_VERSION)
+	var save_error := config.save(save_path)
+	if save_error != OK:
+		push_warning("Impossible de réinitialiser le parcours ORCHID : %s" % save_error)
+		return false
+	return true
+
+
 func load_case_answer(case_id: String) -> int:
 	var config := ConfigFile.new()
 	if config.load(save_path) != OK:
