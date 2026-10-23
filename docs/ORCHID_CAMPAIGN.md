@@ -335,3 +335,10 @@ Validation restante : la CI Godot doit confirmer l’analyse et le smoke test ap
 Lorsqu’un rapport est soumis plusieurs fois, la sauvegarde reconstruit les marqueurs de revue exclusifs : une nouvelle acceptation retire les preuves d’acceptation ou de révision précédentes avant d’ajouter exactement une preuve d’acceptation ; un refus ou une demande de révision fait de même avec la preuve de révision. Cela élimine les marqueurs opposés obsolètes et les doublons historiques. Les autres preuves du dossier ne sont pas modifiées. Le brouillon, le résultat et la preuve qui correspond à ce résultat restent écrits dans la même sauvegarde.
 
 Validation : le contrôle automatique Godot doit être vérifié sur le commit correspondant. Le scénario à jouer manuellement consiste à soumettre un rapport incomplet, le corriger puis le soumettre à nouveau, et confirmer que le tableau et le dossier ne présentent plus l’ancien résultat comme s’il était encore courant.
+
+
+### Sauvegardes de campagne — protection contre les fichiers illisibles
+
+Les écritures de progression, de conclusion, de preuves, de réponses et de brouillon relisent désormais le fichier existant avant de le modifier. Une sauvegarde absente reste autorisée pour une nouvelle partie, mais une erreur de lecture différente de « fichier introuvable » interrompt l’écriture au lieu de remplacer potentiellement les données par un fichier neuf. Les réponses de dossier dont la collection sauvegardée n’est pas un dictionnaire sont traitées comme une collection vide plutôt que de provoquer une conversion de type invalide. La progression en mémoire n’est actualisée qu’après la réussite de l’écriture sur disque.
+
+Validation restante : la CI vérifie l’import du projet et le démarrage headless ; la simulation d’un fichier de sauvegarde corrompu et le test de reprise après relance restent à effectuer manuellement.
