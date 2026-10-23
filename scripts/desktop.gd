@@ -4346,7 +4346,7 @@ func _open_orchid_archive() -> void:
 	var publish := Button.new()
 	publish.text = "Publier le rapport (et déclencher une dernière interruption)"
 	publish.pressed.connect(func():
-		if not CampaignStore.save_ending("published"):
+		if not CampaignStore.save_report_ending(report.text, "published"):
 			report.text += "\n\nÉCHEC : la conclusion n’a pas été enregistrée. Le rapport reste ouvert ; réessayez avant de fermer cette fenêtre."
 			return
 		var ending_note := "FIN — RAPPORT TRANSMIS. Microslop confirme que votre signalement est important et vous propose 14 articles sur la productivité."
@@ -4375,7 +4375,7 @@ func _open_orchid_archive() -> void:
 	keep = Button.new()
 	keep.text = "Conserver une copie locale"
 	keep.pressed.connect(func():
-		if not CampaignStore.save_ending("preserved"):
+		if not CampaignStore.save_report_ending(report.text, "preserved"):
 			report.text += "\n\nÉCHEC : la conclusion n’a pas été enregistrée. La copie reste dans cette fenêtre ; réessayez avant de fermer."
 			return
 		var ending_note := "FIN — COPIE CONSERVÉE. Le rapport existe toujours, même si le navigateur refuse de le recommander."
