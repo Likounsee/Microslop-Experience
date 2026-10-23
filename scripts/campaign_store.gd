@@ -7,6 +7,8 @@ var save_path: String = SAVE_PATH
 const MIN_MISSION_STEP := 0
 const MAX_MISSION_STEP := 5
 const CAMPAIGN_VERSION := 2
+const MIN_CASE_ANSWER := -1000
+const MAX_CASE_ANSWER := 1000
 
 var mission_step: int = MIN_MISSION_STEP
 
@@ -106,7 +108,7 @@ func load_evidence() -> Array:
 
 ## Saves the latest answer for a named ORCHID evidence puzzle.
 func save_case_answer(case_id: String, answer: int) -> bool:
-	if case_id.strip_edges().is_empty() or answer < 0 or answer > 2:
+	if case_id.strip_edges().is_empty() or answer < MIN_CASE_ANSWER or answer > MAX_CASE_ANSWER:
 		return false
 	var config := ConfigFile.new()
 	var load_error := config.load(save_path)
@@ -135,7 +137,7 @@ func load_case_answer(case_id: String) -> int:
 	if not (raw is Dictionary):
 		return -1
 	var answer: Variant = raw.get(case_id, -1)
-	if typeof(answer) != TYPE_INT or answer < 0 or answer > 2:
+	if typeof(answer) != TYPE_INT or answer < MIN_CASE_ANSWER or answer > MAX_CASE_ANSWER:
 		return -1
 	return answer
 
