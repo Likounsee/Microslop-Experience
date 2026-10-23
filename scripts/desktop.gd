@@ -107,6 +107,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 				_open_search()
 				key_event.accept()
 				return
+			KEY_R:
+				_open_run_dialog()
+				key_event.accept()
+				return
 			KEY_T:
 				_cycle_taskbar_focus(key_event.shift_pressed)
 				key_event.accept()
@@ -6903,6 +6907,80 @@ func _open_ai() -> void:
 		_show_notification("Microslop AI", "Merci pour votre confiance. Le dossier ORCHID est désormais plus difficile à retrouver.")
 	)
 	content.add_child(distract)
+
+
+func _open_run_dialog() -> void:
+	var app := _open_window("Exécuter", "Saisissez le nom d’une application, d’un dossier ou d’une commande Microslop.", Vector2(500, 260))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	for child in content.get_children():
+		child.queue_free()
+	var explanation := Label.new()
+	explanation.text = "Windows ouvrira l’application correspondant à votre commande."
+	explanation.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	explanation.add_theme_color_override("font_color", Color("34445d"))
+	content.add_child(explanation)
+	var command_edit := LineEdit.new()
+	command_edit.name = "RunCommand"
+	command_edit.placeholder_text = "explorer, ms-settings:, calc, notepad…"
+	command_edit.clear_button_enabled = true
+	command_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_child(command_edit)
+	var result_label := Label.new()
+	result_label.name = "RunResult"
+	result_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	result_label.add_theme_color_override("font_color", Color("596780"))
+	content.add_child(result_label)
+	var actions := HBoxContainer.new()
+	actions.alignment = BoxContainer.ALIGNMENT_END
+	content.add_child(actions)
+	var cancel_button := Button.new()
+	cancel_button.text = "Annuler"
+	cancel_button.pressed.connect(func():
+		app.queue_free()
+	)
+	actions.add_child(cancel_button)
+	var run_button := Button.new()
+	run_button.text = "OK"
+	run_button.pressed.connect(_execute_run_command.bind(command_edit, result_label))
+	actions.add_child(run_button)
+	command_edit.text_submitted.connect(func(_value: String):
+		_execute_run_command(command_edit, result_label)
+	)
+	command_edit.call_deferred("grab_focus")
+
+
+func _execute_run_command(command_edit: LineEdit, result_label: Label) -> void:
+	var command := command_edit.text.strip_edges().to_lower()
+	if command.is_empty():
+		result_label.text = "Saisissez une commande avant de continuer."
+		return
+	match command:
+		"explorer", "explorer.exe", "shell:mycomputerfolder":
+			_open_files()
+		"ms-settings:", "ms-settings", "settings", "systemsettings":
+			_open_settings()
+		"browser", "microslop-browser", "start https://":
+			_open_browser()
+		"calc", "calculator", "calculatrice":
+			_open_window("Calculatrice", "Calculatrice Microslop\n\nEntrez vos calculs dans cette maquette. Aucun calcul système n’est exécuté.", Vector2(360, 260))
+		"notepad", "notepad.exe", "bloc-notes":
+			_open_window("Bloc-notes", "Bloc-notes Microslop\n\nL’éditeur est simulé dans ce prototype.", Vector2(520, 360))
+		"taskmgr", "taskmgr.exe", "gestionnaire des tâches":
+			_open_window("Gestionnaire des tâches", "Applications ouvertes : %d\n\nPerformances simulées · CPU : 7 %% · Mémoire : 42 %%." % _window_layer.get_child_count(), Vector2(500, 320))
+		"control", "control.exe":
+			_open_window("Panneau de configuration", "Réseau et Internet\nMatériel et audio\nComptes utilisateur\nProgrammes\n\nPanneau de configuration simulé.", Vector2(500, 360))
+		"cmd", "cmd.exe", "powershell", "powershell.exe", "wt", "wt.exe":
+			_open_window("Terminal Microslop", "Terminal simulé\n\nLes commandes ne sont pas exécutées sur votre ordinateur.\nTapez une commande prise en charge dans la fenêtre Exécuter.", Vector2(560, 320))
+		"winver":
+			_open_window("À propos de Microslop", "Microslop Experience\nVersion de démonstration\n\nCette interface simule un bureau Windows 11 dans le jeu.", Vector2(420, 240))
+		"update", "ms-settings:windowsupdate":
+			_trigger_update()
+		"shell:recyclebinfolder", "recyclebin", "corbeille":
+			_open_recycle_bin()
+		_:
+			result_label.text = "Commande introuvable : « %s ». Essayez explorer, ms-settings:, calc, notepad, taskmgr ou winver." % command_edit.text.strip_edges()
 
 
 func _open_search() -> void:
