@@ -60,6 +60,30 @@ func _run_tests() -> void:
 	_check(FileAccess.file_exists(absolute_path), "restore recovered settings to primary path")
 	_check(not FileAccess.file_exists(absolute_path + ".bak"), "consume backup after successful recovery")
 
+	# If neither copy parses, preserve both for later diagnosis and use defaults.
+	var malformed_primary_text := "[settings\\nprimary = broken"
+	var malformed_backup_text := "[settings\\nbackup = broken"
+	var damaged_primary_file := FileAccess.open(absolute_path, FileAccess.WRITE)
+	if damaged_primary_file != null:
+		damaged_primary_file.store_string(malformed_primary_text)
+		damaged_primary_file.close()
+	var damaged_backup_file := FileAccess.open(absolute_path + ".bak", FileAccess.WRITE)
+	if damaged_backup_file != null:
+		damaged_backup_file.store_string(malformed_backup_text)
+		damaged_backup_file.close()
+	var damaged_store = SettingsStoreScript.new()
+	damaged_store.settings_path = TEST_SETTINGS_PATH
+	root.add_child(damaged_store)
+	_check(damaged_store.values["fps_limit"] == 0, "use defaults when both settings copies are malformed")
+	_check(FileAccess.get_file_as_string(absolute_path) == malformed_primary_text, "preserve malformed primary settings for diagnosis")
+	_check(FileAccess.get_file_as_string(absolute_path + ".bak") == malformed_backup_text, "preserve malformed backup settings for diagnosis")
+	var restore_fixture := FileAccess.open(absolute_path, FileAccess.WRITE)
+	if restore_fixture != null:
+		restore_fixture.store_string(saved_settings_text)
+		restore_fixture.close()
+	if FileAccess.file_exists(absolute_path + ".bak"):
+		DirAccess.remove_absolute(absolute_path + ".bak")
+
 	# A directory at the destination forces the final rename to fail. The in-memory
 	# value must roll back instead of claiming a setting was saved.
 	var blocked_path := TEST_SETTINGS_PATH + "_blocked"
@@ -84,6 +108,7 @@ func _run_tests() -> void:
 	store.queue_free()
 	reloaded.queue_free()
 	recovery_store.queue_free()
+	damaged_store.queue_free()
 	blocked_store.queue_free()
 	if failures.is_empty():
 		print("SettingsStore tests passed.")
