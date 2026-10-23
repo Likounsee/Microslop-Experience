@@ -345,12 +345,23 @@ func load_case_answer(case_id: String) -> int:
 
 
 ## Stores an editable report draft independently of the campaign ending and progress.
+## Editing a reviewed draft invalidates the previous review in the same atomic write.
 func save_report_draft(draft: String) -> bool:
 	var config := ConfigFile.new()
 	var load_error := _load_config(config)
 	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
 		push_warning("Impossible de relire la sauvegarde avant d'enregistrer le brouillon ORCHID.")
 		return false
+	var previous_draft: Variant = config.get_value("campaign", "report_draft", "")
+	if previous_draft is String and previous_draft != draft:
+		var raw_answers: Variant = config.get_value("campaign", "case_answers", {})
+		var answers: Dictionary = raw_answers if raw_answers is Dictionary else {}
+		answers.erase("report_studio_reviewed")
+		config.set_value("campaign", "case_answers", answers)
+		var evidence := _normalized_evidence(config.get_value("campaign", "evidence", []))
+		evidence.erase("report_studio_reviewed")
+		evidence.erase("report_studio_revision_requested")
+		config.set_value("campaign", "evidence", evidence)
 	config.set_value("campaign", "report_draft", draft)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
 	var error := _save_config_atomic(config)
