@@ -43,6 +43,13 @@ func _run_tests() -> void:
 		_check(evidence.has("report_studio_reviewed"), "accepted review marker exists")
 		_check(not evidence.has("report_studio_revision_requested"), "opposite review marker removed")
 
+	_check(store.save_report_review("Report to revise.", 1), "save revised report review after acceptance")
+	_check(config.load(TEST_SAVE_PATH) == OK, "reload revised report review")
+	if config.load(TEST_SAVE_PATH) == OK:
+		var revised_evidence: Array = config.get_value("campaign", "evidence", [])
+		_check(revised_evidence.has("report_studio_revision_requested"), "revision marker replaces acceptance")
+		_check(not revised_evidence.has("report_studio_reviewed"), "stale acceptance marker removed")
+
 	# A wrong-typed evidence field is normalized before a new evidence ID is written.
 	config.set_value("campaign", "evidence", "not-an-array")
 	_check(config.save(TEST_SAVE_PATH) == OK, "seed malformed evidence field")
