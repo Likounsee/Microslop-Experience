@@ -155,3 +155,7 @@ Le rejeu du sprint de travail, du dossier transversal et de l’exercice de cris
 À la reprise du sprint, du dossier transversal et du tabletop de crise, l’étape, le score et les compteurs associés sont maintenant lus depuis un même instantané de sauvegarde. Les valeurs restaurées sont bornées selon les limites de chaque parcours ; une entrée absente ou mal formée ne peut plus injecter un score arbitraire dans le bilan. Des tests headless vérifient la lecture groupée, les valeurs manquantes et la reprise des données enregistrées.
 
 Le bilan du sprint affiche désormais le même dénominateur maximal (26 points) dans toutes ses issues. Les tests de reprise couvrent aussi les réponses sauvegardées avec un type incorrect ou hors limites ; elles sont traitées comme absentes plutôt que réinjectées dans l’état de jeu.
+
+### Vérification et remplacement des sauvegardes ORCHID
+
+Le magasin de campagne écrit désormais les modifications dans un fichier temporaire voisin, relit ce fichier pour vérifier qu'il est interprétable, puis remplace la sauvegarde existante en conservant temporairement une copie de secours. Si le remplacement échoue, il tente de restaurer l'ancienne sauvegarde et signale l'échec au lieu de confirmer la transaction. Les tests de `CampaignStore` vérifient aussi le nettoyage des fichiers temporaires et de secours après une écriture réussie. La suite headless doit être exécutée par la CI ; ces changements ne remplacent pas une vérification manuelle des parcours dans Godot.
