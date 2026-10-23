@@ -229,7 +229,7 @@ func _run_tests() -> void:
 	_check(store.load_evidence().has("report_studio_revision_requested"), "unchanged draft preserves revision marker")
 
 	# Finalizing different text must not retain a review for the earlier draft.
-	_check(store.save_report_ending("Final report differs from reviewed text.", "published"), "save changed final report and ending atomically")
+	_check(store.save_report_ending("Final report differs from reviewed text.", "preserved"), "save changed final report and ending atomically")
 	_check(store.load_report_draft() == "Final report differs from reviewed text.", "load changed final report text")
 	_check(store.load_case_answer("report_studio_reviewed") == -1, "finalizing changed report clears stale review outcome")
 	_check(config.load(TEST_SAVE_PATH) == OK, "reload save after final report review invalidation")
