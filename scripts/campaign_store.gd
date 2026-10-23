@@ -133,6 +133,39 @@ func load_report_draft() -> String:
 
 ## Restarts only the cinematic thread, leaving the wider ORCHID case file intact.
 ## Scene markers and choice keys are cleared together so resume cannot jump to the ending.
+## Capture a pre-cinematic value once so replay can restore settings owned by other gameplay paths.
+func capture_cinematic_baseline(case_id: String) -> bool:
+	if case_id.strip_edges().is_empty():
+		return false
+	var config := ConfigFile.new()
+	var load_error := config.load(SAVE_PATH)
+	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
+		return false
+	var baseline: Dictionary = config.get_value("campaign", "cinematic_baseline", {})
+	if baseline.has(case_id):
+		return true
+	baseline[case_id] = {
+		"exists": config.has_section_key("campaign", case_id),
+		"value": config.get_value("campaign", case_id)
+	}
+	config.set_value("campaign", "cinematic_baseline", baseline)
+	return config.save(SAVE_PATH) == OK
+
+## Restores only values first changed by cinematic choices, preserving earlier workday settings.
+func restore_cinematic_baseline(config: ConfigFile) -> void:
+	var raw_baseline: Variant = config.get_value("campaign", "cinematic_baseline", {})
+	if raw_baseline is Dictionary:
+		for case_id in raw_baseline:
+			var snapshot: Variant = raw_baseline[case_id]
+			if not (snapshot is Dictionary):
+				continue
+			if bool(snapshot.get("exists", false)):
+				config.set_value("campaign", str(case_id), snapshot.get("value"))
+			elif config.has_section_key("campaign", str(case_id)):
+				config.erase_section_key("campaign", str(case_id))
+	if config.has_section_key("campaign", "cinematic_baseline"):
+		config.erase_section_key("campaign", "cinematic_baseline")
+
 ## Restarts only the cinematic thread, clearing all of its choices and derived flags.
 ## Other evidence, the report draft, ending, and mission progress remain untouched.
 func reset_cinematic_progress() -> bool:
@@ -159,21 +192,10 @@ func reset_cinematic_progress() -> bool:
 		if config.has_section_key("campaign", choice_key):
 			config.erase_section_key("campaign", choice_key)
 
-	# These answers are direct consequences written by cinematic choices.
-	# Remove them together so a replay does not inherit its previous branch state.
-	for key in [
-		"cinematic_outcome_score",
-		"orchid_lea_support_status",
-		"orchid_cinematic_focus_pause",
-		"orchid_report_quality",
-		"orchid_sample_protocol",
-		"orchid_release_guardrail",
-		"orchid_results_claim",
-		"orchid_final_prompt_choice",
-		"orchid_notification_mode"
-	]:
-		if config.has_section_key("campaign", key):
-			config.erase_section_key("campaign", key)
+	# Restore settings which a cinematic choice may have overwritten in other game modes.
+	restore_cinematic_baseline(config)
+	if config.has_section_key("campaign", "cinematic_outcome_score"):
+		config.erase_section_key("campaign", "cinematic_outcome_score")
 
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
 	var save_error := config.save(SAVE_PATH)
