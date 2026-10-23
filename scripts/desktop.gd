@@ -4619,6 +4619,11 @@ func _open_orchid_report_studio() -> void:
 				recycle_report += "Le journal ORCHID a été restauré depuis la corbeille simulée et enregistré dans le dossier d’enquête. Il indique un écart entre DEV_RING_INTERNAL et la cible STABLE, sans référence d’approbation visible. Cette trace ne permet pas d’identifier qui a déclenché le déploiement ni de déterminer si l’écart était intentionnel.\n"
 			else:
 				recycle_report += "Le journal ORCHID a été inspecté dans la corbeille simulée, mais aucune restauration n’est enregistrée. Il peut orienter les vérifications ; traitez son contenu comme une piste consultée, pas comme une pièce restaurée dans le dossier.\n"
+			var archive_opened_for_recycle := evidence.has("browser_orchid_archive_opened")
+			if recycle_log_restored and archive_opened_for_recycle:
+				recycle_report += "RECOUPEMENT AVEC L’ARCHIVE NAVIGATEUR : le journal restauré et l’archive interne ont tous deux été consultés. Comparez leurs références de version, leur cible de déploiement et leurs horodatages ; leur consultation commune ne garantit pas à elle seule qu’ils sont indépendants ou concordants.\n"
+			elif recycle_log_restored:
+				recycle_report += "VÉRIFICATION À FAIRE : ouvrez l’archive interne dans le navigateur et comparez les références de version et les horodatages avant de conclure sur l’écart de déploiement.\n"
 			paragraphs.append(recycle_report)
 			selected_count += 1
 		var committee_decision := CampaignStore.load_case_answer("incident_committee_decision")
