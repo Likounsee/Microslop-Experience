@@ -27,16 +27,20 @@ func load_progress() -> int:
 	return mission_step
 
 func save_progress(step: int) -> bool:
-	mission_step = clampi(step, MIN_MISSION_STEP, MAX_MISSION_STEP)
+	var next_step := clampi(step, MIN_MISSION_STEP, MAX_MISSION_STEP)
 	var config := ConfigFile.new()
-	# Load the existing file first so ending choices and future narrative flags survive progress saves.
-	config.load(SAVE_PATH)
-	config.set_value("campaign", "mission_step", mission_step)
+	# Refuse to overwrite an unreadable save; a missing save is valid for a new campaign.
+	var load_error := config.load(SAVE_PATH)
+	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
+		push_warning("Impossible de relire la sauvegarde avant d'enregistrer la progression.")
+		return false
+	config.set_value("campaign", "mission_step", next_step)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
 	var error := config.save(SAVE_PATH)
 	if error != OK:
 		push_warning("Impossible d'enregistrer la progression de campagne : %s" % error)
 		return false
+	mission_step = next_step
 	return true
 
 
@@ -45,9 +49,10 @@ func save_ending(ending: String) -> bool:
 	if ending not in ["published", "preserved"]:
 		return false
 	var config := ConfigFile.new()
-	var error := config.load(SAVE_PATH)
-	if error != OK:
-		config = ConfigFile.new()
+	var load_error := config.load(SAVE_PATH)
+	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
+		push_warning("Impossible de relire la sauvegarde avant d'enregistrer la conclusion ORCHID.")
+		return false
 	config.set_value("campaign", "ending", ending)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
 	var save_error := config.save(SAVE_PATH)
@@ -61,7 +66,10 @@ func save_evidence(evidence_id: String) -> bool:
 	if evidence_id.strip_edges().is_empty():
 		return false
 	var config := ConfigFile.new()
-	config.load(SAVE_PATH)
+	var load_error := config.load(SAVE_PATH)
+	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
+		push_warning("Impossible de relire la sauvegarde avant d'enregistrer les indices ORCHID.")
+		return false
 	var raw: Variant = config.get_value("campaign", "evidence", [])
 	var evidence: Array = raw if raw is Array else []
 	if not evidence.has(evidence_id):
@@ -88,9 +96,12 @@ func save_case_answer(case_id: String, answer: int) -> bool:
 	if case_id.strip_edges().is_empty() or answer < 0 or answer > 2:
 		return false
 	var config := ConfigFile.new()
-	config.load(SAVE_PATH)
-	config.set_value("campaign", "case_answers", config.get_value("campaign", "case_answers", {}))
-	var answers: Dictionary = config.get_value("campaign", "case_answers", {})
+	var load_error := config.load(SAVE_PATH)
+	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
+		push_warning("Impossible de relire la sauvegarde avant d'enregistrer la réponse ORCHID.")
+		return false
+	var raw_answers: Variant = config.get_value("campaign", "case_answers", {})
+	var answers: Dictionary = raw_answers if raw_answers is Dictionary else {}
 	answers[case_id] = answer
 	config.set_value("campaign", "case_answers", answers)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
@@ -114,7 +125,10 @@ func load_case_answer(case_id: String) -> int:
 ## Stores an editable report draft independently of the campaign ending and progress.
 func save_report_draft(draft: String) -> bool:
 	var config := ConfigFile.new()
-	config.load(SAVE_PATH)
+	var load_error := config.load(SAVE_PATH)
+	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
+		push_warning("Impossible de relire la sauvegarde avant d'enregistrer le brouillon ORCHID.")
+		return false
 	config.set_value("campaign", "report_draft", draft)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
 	var error := config.save(SAVE_PATH)
