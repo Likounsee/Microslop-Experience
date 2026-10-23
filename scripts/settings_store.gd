@@ -137,21 +137,23 @@ func save_settings() -> bool:
 		DirAccess.remove_absolute(absolute_backup)
 	return true
 
-func set_value_and_save(key: String, value: Variant) -> void:
+func set_value_and_save(key: String, value: Variant) -> bool:
 	# Validate writes as well as reads: UI callbacks or future features must not
 	# be able to persist unsupported values that break settings consumers.
 	if not values.has(key):
 		push_warning("Ignoring unknown setting: %s" % key)
-		return
+		return false
 	if not _is_valid_setting(key, value):
 		push_warning("Ignoring invalid value for setting: %s" % key)
-		return
+		return false
 	if values[key] == value:
-		return
+		return true
 	var previous_value: Variant = values[key]
 	values[key] = value
 	if not save_settings():
 		values[key] = previous_value
+		return false
+	return true
 
 func apply_display_settings() -> void:
 	var mode: String = str(values.get("display_mode", "Fenêtré"))
