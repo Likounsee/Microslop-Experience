@@ -4499,19 +4499,23 @@ func _open_orchid_report_studio() -> void:
 	review.pressed.connect(func():
 		var normalized_report := editor.text.to_lower()
 		var word_count := normalized_report.replace("\r", " ").replace("\n", " ").replace("\t", " ").split(" ", false)
-		var has_limits := normalized_report.contains("limites") or normalized_report.contains("ne prouvent pas") or normalized_report.contains("pas établis") or normalized_report.contains("pas établies") or normalized_report.contains("reste inconnu")
-		var has_action := normalized_report.contains("mesures") or normalized_report.contains("demande") or normalized_report.contains("vérifier") or normalized_report.contains("contrôler") or normalized_report.contains("obtenir")
+		var has_facts := normalized_report.contains("chronologie") or normalized_report.contains("faits observés") or normalized_report.contains("journal") or normalized_report.contains("diffusion") or normalized_report.contains("témoignage")
+		var has_limits := normalized_report.contains("ne prouvent pas") or normalized_report.contains("ne permet pas") or normalized_report.contains("n’établit pas") or normalized_report.contains("n'etablit pas") or normalized_report.contains("reste à vérifier") or normalized_report.contains("reste inconnu") or normalized_report.contains("pas établis") or normalized_report.contains("pas établies")
+		var has_action := normalized_report.contains("préserver") or normalized_report.contains("preserver") or normalized_report.contains("retrouver") or normalized_report.contains("comparer") or normalized_report.contains("suspendre") or normalized_report.contains("vérifier") or normalized_report.contains("verifier") or normalized_report.contains("contrôler") or normalized_report.contains("obtenir")
 		var outcome := 2
 		var review_message := "BROUILLON ACCEPTÉ POUR REVUE — le comité ouvre une demande de suivi. Ce n’est pas une validation définitive : la référence d’approbation et les journaux originaux restent à obtenir."
 		if word_count.size() < 55:
 			outcome = 0
 			review_message = "Le comité refuse le brouillon : il est trop court pour distinguer faits, limites et action demandée. Ajoutez du contenu, puis réessayez."
+		elif not has_facts:
+			outcome = 1
+			review_message = "Le comité demande une révision : aucun fait vérifiable ni aucune trace identifiable n’est clairement décrit."
 		elif not has_limits:
 			outcome = 1
-			review_message = "Le comité demande une révision : les limites des preuves ne sont pas explicites. Ajoutez une section sur ce qui reste inconnu."
+			review_message = "Le comité demande une révision : les limites des preuves ne sont pas explicites. Indiquez ce que les traces ne prouvent pas et ce qui reste à vérifier."
 		elif not has_action:
 			outcome = 1
-			review_message = "Le comité demande une révision : le rapport décrit les faits mais ne propose aucune action vérifiable."
+			review_message = "Le comité demande une révision : le rapport ne propose pas de mesure concrète et vérifiable."
 		# Draft, outcome and evidence are committed together; never show a result if persistence failed.
 		if not CampaignStore.save_report_review(editor.text, outcome):
 			status.text = "Soumission interrompue : impossible d’enregistrer le rapport et son résultat ensemble. Réessayez sans fermer cette fenêtre."
@@ -5344,8 +5348,16 @@ func _render_orchid_campaign_dashboard(summary: Label) -> void:
 	else:
 		lines.append("Aucun recoupement entre explorateur et navigateur n’est enregistré pour le moment.")
 	var report_review_status := CampaignStore.load_case_answer("report_studio_reviewed")
-	var report_review_label := "pas encore soumis" if report_review_status < 0 else ("refusé : contenu insuffisant" if report_review_status == 0 else ("révision demandée : limites ou mesures manquantes" if report_review_status == 1 else "brouillon accepté pour revue (pas une résolution)"))
+	var report_review_label := "pas encore soumis" if report_review_status < 0 else ("refusé : contenu insuffisant" if report_review_status == 0 else ("révision demandée : faits, limites ou mesures à compléter" if report_review_status == 1 else "brouillon accepté pour revue (pas une résolution)"))
 	lines.append("REVUE DU RAPPORT : %s" % report_review_label)
+	var report_draft := CampaignStore.load_report_draft()
+	var report_words := report_draft.replace("\\r", " ").replace("\\n", " ").replace("\\t", " ").split(" ", false)
+	lines.append("BROUILLON : %d caractères · %d mots enregistrés." % [report_draft.length(), report_words.size()])
+	var report_review_evidence := evidence.has("report_studio_reviewed") or evidence.has("report_studio_revision_requested")
+	if report_review_status >= 0 and not report_review_evidence:
+		lines.append("COHÉRENCE : état de revue présent sans preuve correspondante. Rouvrez le studio et soumettez à nouveau le rapport.")
+	elif report_review_status < 0 and report_review_evidence:
+		lines.append("COHÉRENCE : une ancienne preuve de revue existe, mais aucun résultat actuel n’est enregistré. Soumettez à nouveau le brouillon si nécessaire.")
 	summary.text = "\n".join(lines)
 
 
