@@ -165,3 +165,8 @@ Le magasin de campagne écrit désormais les modifications dans un fichier tempo
 La couche de persistance distingue maintenant le code d'erreur du résultat de sauvegarde : un enregistrement réussi renvoie `OK`, et non un booléen interprété comme une erreur. À la lecture, si le fichier principal est absent ou illisible, le magasin vérifie le fichier `.bak` et restaure une copie valide laissée par une interruption entre la mise à l'abri de l'ancien fichier et son remplacement. Un test de régression simule cet arrêt en déplaçant la sauvegarde principale vers le fichier de secours, puis vérifie la récupération des données. Cette couverture est ajoutée à la suite headless, mais son exécution CI reste à confirmer.
 
 Les chemins de lecture des réponses, preuves, conclusions et brouillons passent également par cette récupération commune : un fichier principal absent ou mal formé ne masque donc pas automatiquement une sauvegarde de secours valide. Les tests couvrent maintenant les deux situations — fichier principal absent et fichier principal corrompu — sans prétendre remplacer l'exécution de la suite dans Godot.
+
+
+### Tolérance aux fichiers de secours obsolètes
+
+Lors d'une nouvelle écriture, le magasin valide d'abord la sauvegarde principale avant de remplacer un fichier `.bak` résiduel. Si le fichier principal est valide, un ancien fichier de secours corrompu est nettoyé au lieu de bloquer indéfiniment toute sauvegarde ; si le principal est illisible, le fichier de secours est conservé et l'écriture échoue sans l'écraser. Des tests de régression couvrent le nettoyage et la conservation des données existantes. L'exécution Godot/CI doit encore confirmer ces cas.
