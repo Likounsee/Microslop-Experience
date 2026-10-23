@@ -204,6 +204,27 @@ func reset_case_progress(answers_to_reset: Dictionary, evidence_prefixes: Array 
 	return true
 
 
+## Reads a group of campaign answers from one save snapshot.
+## Missing, malformed, or out-of-range entries use the same -1 sentinel as load_case_answer.
+func load_case_answers(case_ids: Array[String]) -> Dictionary:
+	var result: Dictionary = {}
+	for case_id in case_ids:
+		result[case_id] = -1
+	if case_ids.is_empty():
+		return result
+	var config := ConfigFile.new()
+	if config.load(save_path) != OK:
+		return result
+	var raw: Variant = config.get_value("campaign", "case_answers", {})
+	if not (raw is Dictionary):
+		return result
+	for case_id in case_ids:
+		var answer: Variant = raw.get(case_id, -1)
+		if typeof(answer) == TYPE_INT and answer >= MIN_CASE_ANSWER and answer <= MAX_CASE_ANSWER:
+			result[case_id] = answer
+	return result
+
+
 func load_case_answer(case_id: String) -> int:
 	var config := ConfigFile.new()
 	if config.load(save_path) != OK:
