@@ -73,6 +73,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if not key_event.pressed or key_event.echo:
 		return
 
+	# Ctrl+Shift+Esc opens the simulated Task Manager directly.
+	if key_event.keycode == KEY_ESCAPE and key_event.ctrl_pressed and key_event.shift_pressed:
+		_open_task_manager()
+		key_event.accept()
+		return
+
 	# Alt+Tab cycles through open simulated app windows, like the Windows desktop.
 	if key_event.keycode == KEY_TAB and key_event.alt_pressed:
 		_cycle_app_window()
@@ -109,6 +115,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 				return
 			KEY_R:
 				_open_run_dialog()
+				key_event.accept()
+				return
+			KEY_X:
+				_toggle_quick_link_menu()
 				key_event.accept()
 				return
 			KEY_T:
@@ -6982,6 +6992,24 @@ func _execute_run_command(command_edit: LineEdit, result_label: Label) -> void:
 		_:
 			result_label.text = "Commande introuvable : « %s ». Essayez explorer, ms-settings:, calc, notepad, taskmgr ou winver." % command_edit.text.strip_edges()
 
+
+func _open_task_manager() -> void:
+	var app := _open_window("Gestionnaire des tâches", "Processus\n\nMicroslop Experience     En cours d’exécution\nBureau Windows simulé     En cours d’exécution\nUtilisation CPU : non mesurée\nUtilisation mémoire : non mesurée\n\nLes statistiques matérielles réelles ne sont pas disponibles dans cette simulation.", Vector2(540, 360))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	var refresh_button := Button.new()
+	refresh_button.text = "Actualiser la liste"
+	refresh_button.pressed.connect(func():
+		if is_instance_valid(app):
+			var refreshed_content := _get_window_content(app)
+				if refreshed_content != null:
+					for child in refreshed_content.get_children():
+						if child is Label and child.text.begins_with("Processus"):
+							child.text = "Processus\n\nMicroslop Experience     En cours d’exécution\nBureau Windows simulé     En cours d’exécution\nUtilisation CPU : non mesurée\nUtilisation mémoire : non mesurée\n\nDernière actualisation : maintenant"
+							break
+	)
+	content.add_child(refresh_button)
 
 func _open_search() -> void:
 	var evidence: Array = CampaignStore.load_evidence()
