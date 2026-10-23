@@ -6001,11 +6001,33 @@ func _open_orchid_casebook() -> void:
 	var theory := Button.new()
 	theory.text = "Reconstituer la chaîne des événements"
 	theory.pressed.connect(func():
-		var found = CampaignStore.load_evidence().size()
-		if found < 4:
-			detail.text = "La reconstitution est prématurée : examinez au moins quatre pièces.\n\nPour l’instant, vous avez %d pièce(s) enregistrée(s)." % found
-		else:
-			detail.text = "RECONSTITUTION PROVISOIRE\n\n1. Une notification affirme que 18 fichiers ont été analysés.\n2. L’index reprend exactement le même nombre et la même heure, sans fournir de chemins : les deux traces ne sont pas indépendantes.\n3. La mise à jour masque publiquement un objectif d’engagement.\n4. L’assistant tente d’abord de banaliser ORCHID, puis révèle le vocabulaire de la rétention.\n5. Le navigateur favorise une offre commerciale et dégrade la visibilité des critiques.\n6. Les tests internes optimisent le retour dans l’application, pas la satisfaction.\n\nCONCLUSION : les preuves soutiennent l’hypothèse d’un système d’interruptions intentionnelles et d’une présentation trompeuse. Elles ne prouvent pas qui, individuellement, a donné l’ordre. Conservez cette distinction dans votre rapport."
+		var saved_evidence: Array = CampaignStore.load_evidence()
+		var examined := 0
+		for entry in entries:
+			if saved_evidence.has(str(entry["id"])):
+				examined += 1
+		if examined < 4:
+			detail.text = "La reconstitution est prématurée : examinez au moins quatre pièces de ce carnet.\n\nPièces réellement examinées : %d / %d. Les preuves provenant d’autres applications ne remplacent pas la lecture de ces pièces." % [examined, entries.size()]
+			return
+		var findings: Array[String] = []
+		if saved_evidence.has("notification_18") and saved_evidence.has("explorer_index"):
+			findings.append("• Notification et index reprennent le même nombre et la même heure, sans chemins vérifiables. Leur cohérence apparente ne prouve pas qu’ils proviennent de sources indépendantes.")
+		if saved_evidence.has("update_public") and saved_evidence.has("update_internal"):
+			findings.append("• Le résumé public omet l’objectif d’engagement présent dans la note interne : l’écart de communication est directement documenté.")
+		if saved_evidence.has("assistant_script"):
+			findings.append("• La réponse de l’assistant minimise d’abord le sujet puis évoque la rétention. Cela documente le discours fourni, pas l’identité de son auteur.")
+		if saved_evidence.has("browser_sponsor"):
+			findings.append("• Le résultat sponsorisé est mis en avant alors qu’une source critique est moins visible. Cela établit un problème de présentation, pas à lui seul une suppression intentionnelle.")
+		if saved_evidence.has("quality_survey"):
+			findings.append("• Le questionnaire ne propose pas de refus simple : le dispositif de retour transforme une objection en occasion de relance.")
+		if saved_evidence.has("experiment_04"):
+			findings.append("• Le test recommande la variante qui génère davantage de retours tout en distinguant explicitement ce résultat de la satisfaction.")
+		if saved_evidence.has("recycle_bin_orchid_log_restored"):
+			findings.append("• Le journal restauré montre un écart entre canal STABLE et étiquette DEV_RING_INTERNAL, sans chaîne d’approbation consultable.")
+		var conclusion := "RECONSTITUTION PROVISOIRE · %d / %d pièces examinées\n\n" % [examined, entries.size()]
+		conclusion += "\n\n".join(findings)
+		conclusion += "\n\nCONCLUSION ET LIMITES\nLes éléments lus permettent d’étayer uniquement les constats ci-dessus. Une pièce non examinée n’est pas utilisée comme preuve dans cette reconstitution. Ne déduisez ni lecture effective de fichiers ni responsabilité individuelle à partir d’une notification, d’un compteur ou d’un écart de canal seuls. Ouvrez les pièces restantes puis relancez la reconstitution pour compléter l’analyse."
+		detail.text = conclusion
 	)
 	content.add_child(theory)
 
