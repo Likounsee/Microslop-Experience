@@ -353,3 +353,8 @@ Validation automatisée : la CI vérifie l’import du projet, le démarrage hea
 ### Régressions de persistance — conclusions et échecs d’écriture
 
 La suite automatisée vérifie également que les deux conclusions autorisées (`published` et `preserved`) sont sauvegardées et relues, qu’une valeur inconnue est rejetée sans remplacer la conclusion valide, et qu’une revue de rapport ne supprime pas les preuves sans rapport avec cette revue. Le scénario de chemin de sauvegarde illisible contrôle désormais aussi que l’échec d’écriture ne modifie pas la progression en mémoire. Ces tests utilisent toujours un fichier isolé et ne touchent pas à la sauvegarde du joueur.
+
+
+### Rejeu cinématique — tests de non-régression
+
+La suite de persistance couvre maintenant aussi le rejeu de la cinématique : elle vérifie que les preuves et choix des 39 scènes, le score de conclusion et la capture de paramètres cinématiques sont retirés, tandis que les preuves non cinématiques, le brouillon du rapport, la conclusion de campagne et l'étape de mission restent conservés. Le test injecte un paramètre partagé modifié pendant la cinématique et confirme que sa valeur de départ est restaurée ; il contrôle également la suppression d'une clé temporaire qui n'existait pas avant la séquence. Ce test utilise la sauvegarde isolée de CI, pas le fichier de campagne du joueur.
