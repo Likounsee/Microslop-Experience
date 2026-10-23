@@ -147,7 +147,7 @@ func _run_tests() -> void:
 	_check(final_reopen.load_ending() == "published", "published ending survives fresh store reload")
 	final_reopen.queue_free()
 	_check(not store.save_report_ending("Must not overwrite the valid final report.", "unknown"), "reject invalid atomic final ending")
-	_check(store.load_report_draft() == "Final report retained with conclusion.", "invalid final ending preserves prior report")
+	_check(store.load_report_draft() == complete_final_text, "invalid final ending preserves prior complete report")
 	_check(store.load_ending() == "published", "invalid final ending preserves prior conclusion")
 	_check(store.save_report_ending("Final copy kept locally.", "preserved"), "replace final report and ending atomically")
 	_check(store.load_report_draft() == "Final copy kept locally." and store.load_ending() == "preserved", "atomic final report update persists both fields")
