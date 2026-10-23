@@ -396,8 +396,12 @@ func _apply_snap_layout(mode: String) -> void:
 	var full_height := viewport_size.y
 	var left_width := full_width / 2.0
 	var third_width := full_width / 3.0
-	_restore_size = size
-	_restore_position = position
+	# Preserve the original free-floating geometry while moving between snap layouts.
+	# Otherwise snapping left and then right would overwrite the restore target with
+	# the previous half-screen rectangle.
+	if _snap_mode.is_empty() and not _is_maximized:
+		_restore_size = size
+		_restore_position = position
 	_is_maximized = false
 	_snap_mode = mode
 	match mode:
