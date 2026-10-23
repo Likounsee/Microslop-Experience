@@ -1960,6 +1960,21 @@ func _show_taskbar_preview(app_id: String, source_button: Button, glyph: String)
 	title_label.add_theme_color_override("font_color", Color("24344d"))
 	title_label.add_theme_font_size_override("font_size", 12)
 	title_row.add_child(title_label)
+	var close_preview_button := Button.new()
+	close_preview_button.text = "×"
+	close_preview_button.tooltip_text = "Fermer cette fenêtre"
+	close_preview_button.custom_minimum_size = Vector2(26, 26)
+	close_preview_button.add_theme_font_size_override("font_size", 18)
+	close_preview_button.add_theme_color_override("font_color", Color("b42332"))
+	close_preview_button.add_theme_stylebox_override("normal", _flat_style(Color(0, 0, 0, 0), 6))
+	close_preview_button.add_theme_stylebox_override("hover", _flat_style(Color("f8dadd"), 6))
+	close_preview_button.pressed.connect(func():
+		var target_window := _find_app_window(app_id)
+		_hide_taskbar_preview()
+		if is_instance_valid(target_window):
+			target_window.call("_animate_close")
+	)
+	title_row.add_child(close_preview_button)
 	layout.add_child(title_row)
 
 	var thumbnail := PanelContainer.new()
