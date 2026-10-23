@@ -274,3 +274,8 @@ Les choix de la séquence narrative appliquent maintenant des conséquences pers
 
 La dernière sollicitation de l’épilogue est également enregistrée comme refus ou test de l’interface. Ces effets sont locaux à la simulation et n’utilisent aucune télémétrie réelle. Vérification effectuée dans cette passe : contrôle statique du point d’insertion et des identifiants de sauvegarde. Le jeu n’a pas été lancé dans Godot ; le parseur et les interactions restent à confirmer à l’exécution.
 
+
+
+### Conséquences narratives visibles
+
+À partir du deuxième mouvement de la séquence cinématique, un panneau « État du dossier » récapitule les conséquences de plusieurs choix antérieurs : traitement de l’alerte des fichiers, prudence autour du brouillon support, réponse à Léa et choix de la pause locale. Les scènes rappellent les limites des éléments disponibles au lieu de transformer un choix en vérité absolue. Ces rappels sont dérivés des réponses sauvegardées localement ; ils n’ajoutent aucune télémétrie réelle.
