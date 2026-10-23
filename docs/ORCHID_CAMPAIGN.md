@@ -319,3 +319,12 @@ Validation restante : vérifier en Godot les trois issues de revue et le scénar
 ### Revue du rapport — enregistrement cohérent
 
 Le résultat de revue est maintenant enregistré dans une seule écriture de sauvegarde avec le texte soumis et la preuve correspondante. Le jeu ne doit donc plus afficher un refus, une demande de révision ou une acceptation comme réussis si l’enregistrement combiné échoue. Le tableau de campagne et le dossier de preuves continuent de lire les mêmes identifiants persistants. Cette protection concerne la sauvegarde locale du jeu ; elle ne remplace pas un test de fermeture et de relance dans Godot.
+
+
+### Revue du rapport — critères de contenu et cohérence du tableau
+
+La revue du rapport ne se contente plus de chercher les mots génériques « limites » ou « mesures » : au-delà du seuil minimal de longueur, elle vérifie qu’une trace ou un fait identifiable est décrit, que le texte formule explicitement une limite probatoire et qu’il propose une action concrète. Un rapport qui ne satisfait pas l’un de ces critères reçoit une demande de révision plutôt qu’une acceptation pour revue. Cette validation reste volontairement simple et déterministe ; elle ne remplace pas le jugement du joueur ni une véritable revue humaine.
+
+Le tableau de synthèse affiche maintenant la taille et le nombre de mots du brouillon sauvegardé. Il signale aussi une incohérence éventuelle entre l’état de revue et les preuves associées, notamment pour aider à repérer d’anciennes sauvegardes ou un état partiel hérité. Les critères ne prouvent pas que le rapport est vrai : ils vérifient uniquement la présence d’éléments minimaux dans le texte.
+
+Validation restante : la CI Godot doit confirmer l’analyse et le smoke test après ces changements. Il reste nécessaire de tester dans l’interface les brouillons trop courts, incomplets et complets, puis de fermer et rouvrir le jeu pour vérifier la reprise des données.
