@@ -24,6 +24,32 @@ func _run_tests() -> void:
 	var store = SettingsStoreScript.new()
 	store.settings_path = TEST_SETTINGS_PATH
 	root.add_child(store)
+	# Dedicated audio buses are optional; when present, their saved levels must apply.
+	var music_bus_index := AudioServer.get_bus_index("Music")
+	var sfx_bus_index := AudioServer.get_bus_index("SFX")
+	var created_music_bus := music_bus_index < 0
+	var created_sfx_bus := sfx_bus_index < 0
+	if created_music_bus:
+		AudioServer.add_bus()
+		music_bus_index = AudioServer.get_bus_count() - 1
+		AudioServer.set_bus_name(music_bus_index, "Music")
+	if created_sfx_bus:
+		AudioServer.add_bus()
+		sfx_bus_index = AudioServer.get_bus_count() - 1
+		AudioServer.set_bus_name(sfx_bus_index, "SFX")
+	store.values["music_volume"] = 0.35
+	store.values["sfx_volume"] = 0.0
+	store.apply_audio_settings()
+	_check(absf(AudioServer.get_bus_volume_db(music_bus_index) - linear_to_db(0.35)) < 0.01, "apply music volume to dedicated bus")
+	_check(AudioServer.is_bus_mute(sfx_bus_index), "mute dedicated SFX bus at zero volume")
+	store.values["music_volume"] = 0.7
+	store.values["sfx_volume"] = 0.85
+	store.apply_audio_settings()
+	if created_sfx_bus:
+		AudioServer.remove_bus(sfx_bus_index)
+	if created_music_bus:
+		AudioServer.remove_bus(music_bus_index)
+
 	_check(store.save_settings(), "save initial settings atomically")
 	_check(FileAccess.file_exists(absolute_path), "atomic settings save creates primary file")
 	_check(not FileAccess.file_exists(absolute_path + ".tmp"), "successful save removes temporary file")
