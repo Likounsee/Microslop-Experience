@@ -430,12 +430,13 @@ func reset_cinematic_progress() -> bool:
 		kept_evidence.append(item)
 	config.set_value("campaign", "evidence", kept_evidence)
 
-	# The sequence currently has 39 scenes (indices 0..38). Its choices are stored
-	# inside the case_answers dictionary, not as top-level ConfigFile keys.
+	# Remove every saved cinematic choice, rather than relying on a hard-coded
+	# scene count that would become stale as the story grows.
 	var raw_answers: Variant = config.get_value("campaign", "case_answers", {})
 	var answers: Dictionary = raw_answers if raw_answers is Dictionary else {}
-	for scene_index in range(39):
-		answers.erase("cinematic_choice_%02d" % scene_index)
+	for answer_key in answers.keys():
+		if str(answer_key).begins_with("cinematic_choice_"):
+			answers.erase(answer_key)
 	for answer_key in [
 		"cinematic_outcome_score",
 		"orchid_lea_support_status",
@@ -450,9 +451,8 @@ func reset_cinematic_progress() -> bool:
 	config.set_value("campaign", "case_answers", answers)
 
 	# Older saves or integrations may also have left top-level scene keys behind.
-	for scene_index in range(39):
-		var choice_key := "cinematic_choice_%02d" % scene_index
-		if config.has_section_key("campaign", choice_key):
+	for choice_key in config.get_section_keys("campaign"):
+		if choice_key.begins_with("cinematic_choice_"):
 			config.erase_section_key("campaign", choice_key)
 
 	# Restore settings which a cinematic choice may have overwritten in other game modes.
