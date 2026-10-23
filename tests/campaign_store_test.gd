@@ -74,6 +74,19 @@ func _run_tests() -> void:
 	_check(store.load_case_answer("atomic_score") == -3, "load atomically saved score")
 	_check(store.load_evidence().has("atomic_choice_evidence"), "load evidence from atomic decision")
 	_check(store.save_case_answers_with_evidence({
+		"orchid_casebook_examined_count": 7,
+		"orchid_casebook_findings_count": 5
+	}, "orchid_casebook_reconstructed_test"), "persist ORCHID reconstruction summary with evidence atomically")
+	_check(store.load_case_answer("orchid_casebook_examined_count") == 7, "reload reconstructed evidence count")
+	_check(store.load_case_answer("orchid_casebook_findings_count") == 5, "reload reconstructed findings count")
+	_check(store.load_evidence().has("orchid_casebook_reconstructed_test"), "reload reconstruction completion evidence")
+	var reconstruction_reload = CampaignStoreScript.new()
+	reconstruction_reload.save_path = TEST_SAVE_PATH
+	root.add_child(reconstruction_reload)
+	_check(reconstruction_reload.load_case_answer("orchid_casebook_examined_count") == 7, "reconstruction summary survives fresh store instance")
+	_check(reconstruction_reload.load_evidence().has("orchid_casebook_reconstructed_test"), "reconstruction evidence survives fresh store instance")
+	reconstruction_reload.queue_free()
+	_check(store.save_case_answers_with_evidence({
 		"orchid_workflow_stage": 7,
 		"orchid_workflow_score": -4,
 		"orchid_crisis_stage": 3
