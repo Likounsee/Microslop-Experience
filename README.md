@@ -173,3 +173,7 @@ Lors d'une nouvelle écriture, le magasin valide d'abord la sauvegarde principal
 
 
 Les tests vérifient aussi le scénario où la sauvegarde principale et le fichier `.bak` sont tous deux mal formés : la lecture échoue proprement et les deux fichiers sont conservés pour diagnostic, plutôt que supprimés au cours d'une tentative de récupération. Le test restaure ensuite son fixture valide avant de poursuivre les cas d'échec d'écriture.
+
+### Persistance atomique des paramètres
+
+Les paramètres utilisateur sont maintenant écrits dans un fichier temporaire, relus pour vérifier chaque valeur, puis installés par remplacement avec une sauvegarde intermédiaire. Si l'écriture ou le remplacement échoue, la valeur en mémoire revient à son état précédent ; le magasin refuse aussi d'écraser une configuration existante illisible. La CI lance une suite dédiée qui couvre l'écriture, le rechargement dans une nouvelle instance, le rejet des valeurs invalides et le rollback après échec. L'exécution réelle de cette suite doit encore être confirmée par un résultat GitHub Actions.
