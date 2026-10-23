@@ -366,3 +366,9 @@ Les recherches du navigateur relisent maintenant les preuves au moment où la re
 L’avancement de la mission principale est désormais conditionné à la réussite de l’écriture sur disque. Si la sauvegarde échoue, l’étape visible reste inchangée et une notification explique l’échec au lieu de signaler une mission accomplie qui ne survivrait pas au redémarrage.
 
 Validation restante : vérifier la CI après ces changements et tester dans Godot le scénario où l’explorateur enregistre l’indice alors que le navigateur est déjà ouvert, ainsi que l’échec de sauvegarde de progression. Aucun lancement manuel Godot n’a été effectué dans cette passe.
+
+### Rejeu cinématique — correction des réponses réellement sauvegardées
+
+Les choix narratifs sont stockés dans le dictionnaire `case_answers`, et non comme clés directes de la section `campaign`. Le rejeu effaçait auparavant les éventuelles clés de premier niveau mais pouvait donc laisser les choix réellement sauvegardés (y compris les choix des scènes 0 et 38 et le score de fin) dans le dictionnaire. Le reset retire maintenant les 39 réponses de scène ainsi que les résultats dérivés propres à la cinématique, tout en conservant les réponses d’autres dossiers. Le test de non-régression utilise désormais la structure de sauvegarde réelle et vérifie les deux côtés : réponses cinématiques supprimées, réponse sans rapport conservée.
+
+Validation automatisée attendue sur le commit courant : la CI doit passer avant de considérer la correction vérifiée. Le test manuel de rejeu et de reprise dans Godot reste à faire.
