@@ -31,3 +31,6 @@ jobs:
 
       - name: Smoke-test main scene startup
         run: godot --headless --path . --quit-after 5
+
+      - name: Test campaign persistence and malformed saves
+        run: godot --headless --path . --script res://tests/campaign_store_test.gd
