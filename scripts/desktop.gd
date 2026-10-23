@@ -7209,6 +7209,27 @@ func _refresh_task_manager_processes(list: VBoxContainer, task_manager: Control,
 					_refresh_task_manager_processes(list, task_manager)
 		)
 		row.add_child(switch_button)
+		var minimize_button := Button.new()
+		minimize_button.text = "Réduire"
+		minimize_button.disabled = not process_window.visible or process_window == task_manager
+		minimize_button.pressed.connect(func():
+			if not is_instance_valid(process_window) or process_window == task_manager:
+				return
+			var was_active := str(_active_app_id) == app_id
+			if process_window.has_method("_animate_minimize"):
+				process_window.call("_animate_minimize")
+			else:
+				process_window.hide()
+			if was_active:
+				_active_app_id = ""
+				_activate_topmost_visible_window(app_id)
+			_update_taskbar_indicators()
+			get_tree().create_timer(0.15).timeout.connect(func():
+				if is_instance_valid(list) and is_instance_valid(task_manager):
+					_refresh_task_manager_processes(list, task_manager, search_edit.text)
+			)
+		)
+		row.add_child(minimize_button)
 		var end_button := Button.new()
 		end_button.text = "Terminer"
 		end_button.disabled = process_window == task_manager
