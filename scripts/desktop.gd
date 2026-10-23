@@ -95,20 +95,20 @@ func _unhandled_key_input(event: InputEvent) -> void:
 				key_event.accept()
 				return
 			KEY_UP:
-				var active_window := _get_active_visible_window()
-				if is_instance_valid(active_window) and not bool(active_window.get("_is_maximized")):
-					active_window.call("_toggle_maximize")
-					active_window.move_to_front()
+				var active_window_up := _get_active_visible_window()
+				if is_instance_valid(active_window_up) and not bool(active_window_up.get("_is_maximized")):
+					active_window_up.call("_toggle_maximize")
+					active_window_up.move_to_front()
 				key_event.accept()
 				return
 			KEY_DOWN:
-				var active_window := _get_active_visible_window()
-				if is_instance_valid(active_window):
-					if bool(active_window.get("_is_maximized")):
-						active_window.call("_toggle_maximize")
+				var active_window_down := _get_active_visible_window()
+				if is_instance_valid(active_window_down):
+					if bool(active_window_down.get("_is_maximized")):
+						active_window_down.call("_toggle_maximize")
 					else:
-						active_window.call("_animate_minimize")
-						_activate_topmost_visible_window(str(active_window.get_meta("app_id")))
+						active_window_down.call("_animate_minimize")
+						_activate_topmost_visible_window(str(active_window_down.get_meta("app_id")))
 				key_event.accept()
 				return
 
