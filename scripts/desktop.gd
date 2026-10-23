@@ -229,8 +229,8 @@ func _cycle_taskbar_focus(reverse: bool = false) -> void:
 			available_buttons.append(button)
 	if available_buttons.is_empty():
 		return
-	if not has_focus():
-		_taskbar_focus_index = -1
+	var focused_control := get_viewport().gui_get_focus_owner()
+	_taskbar_focus_index = available_buttons.find(focused_control as Button) if focused_control is Button and available_buttons.has(focused_control) else -1
 	var step := -1 if reverse else 1
 	_taskbar_focus_index = posmod(_taskbar_focus_index + step, available_buttons.size())
 	available_buttons[_taskbar_focus_index].grab_focus()
