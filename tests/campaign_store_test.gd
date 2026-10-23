@@ -223,6 +223,17 @@ func _run_tests() -> void:
 		_check(not revised_evidence.has("report_studio_reviewed"), "stale acceptance marker removed")
 		_check(revised_evidence.has("evidence_test"), "revision review preserves unrelated evidence")
 
+	# Finalizing different text must not retain a review for the earlier draft.
+	_check(store.save_report_ending("Final report differs from reviewed text.", "published"), "save changed final report and ending atomically")
+	_check(store.load_report_draft() == "Final report differs from reviewed text.", "load changed final report text")
+	_check(store.load_case_answer("report_studio_reviewed") == -1, "finalizing changed report clears stale review outcome")
+	_check(config.load(TEST_SAVE_PATH) == OK, "reload save after final report review invalidation")
+	if config.load(TEST_SAVE_PATH) == OK:
+		var final_evidence: Array = config.get_value("campaign", "evidence", [])
+		_check(not final_evidence.has("report_studio_reviewed"), "finalizing changed report removes accepted review marker")
+		_check(not final_evidence.has("report_studio_revision_requested"), "finalizing changed report removes revision marker")
+		_check(final_evidence.has("evidence_test"), "finalizing changed report preserves unrelated evidence")
+
 	# A wrong-typed evidence field is normalized before a new evidence ID is written.
 	config.set_value("campaign", "evidence", "not-an-array")
 	_check(config.save(TEST_SAVE_PATH) == OK, "seed malformed evidence field")
