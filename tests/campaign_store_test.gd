@@ -144,6 +144,8 @@ func _run_tests() -> void:
 	_check(not store.save_evidence("   "), "reject whitespace-only evidence ID")
 	_check(store.save_evidence("evidence_test"), "saving existing evidence remains successful")
 	_check(store.load_evidence().count("evidence_test") == 1, "saving existing evidence does not create duplicates")
+	_check(store.save_evidence("  evidence_test  "), "trim whitespace around an existing evidence ID")
+	_check(store.load_evidence().count("evidence_test") == 1, "normalized evidence ID remains unique")
 	_check(store.save_ending("published"), "save valid published ending")
 	_check(store.load_ending() == "published", "load published ending")
 	_check(not store.save_ending("unknown"), "reject unknown ending")
