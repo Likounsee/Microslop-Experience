@@ -177,3 +177,7 @@ Les tests vérifient aussi le scénario où la sauvegarde principale et le fichi
 ### Persistance atomique des paramètres
 
 Les paramètres utilisateur sont maintenant écrits dans un fichier temporaire, relus pour vérifier chaque valeur, puis installés par remplacement avec une sauvegarde intermédiaire. Si l'écriture ou le remplacement échoue, la valeur en mémoire revient à son état précédent ; le magasin refuse aussi d'écraser une configuration existante illisible. La CI lance une suite dédiée qui couvre l'écriture, le rechargement dans une nouvelle instance, le rejet des valeurs invalides et le rollback après échec. L'exécution réelle de cette suite doit encore être confirmée par un résultat GitHub Actions.
+
+### Réinitialisation évolutive de la séquence cinématique
+
+La réinitialisation de la séquence ORCHID ne dépend plus d'une plage fixe de 39 scènes. Elle parcourt les clés réellement enregistrées et supprime celles qui commencent par `cinematic_choice_`, dans les réponses regroupées comme dans les anciennes clés de premier niveau. Un test ajoute volontairement une réponse de scène `99` pour s'assurer que les futures scènes ne restent pas bloquées dans une sauvegarde après réinitialisation. La suite headless doit encore être exécutée pour confirmer ce comportement.
