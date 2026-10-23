@@ -94,6 +94,22 @@ func _unhandled_key_input(event: InputEvent) -> void:
 				_open_settings()
 				key_event.accept()
 				return
+			KEY_A:
+				_toggle_quick_settings()
+				key_event.accept()
+				return
+			KEY_N:
+				_toggle_notification_center()
+				key_event.accept()
+				return
+			KEY_S:
+				_open_search()
+				key_event.accept()
+				return
+			KEY_TAB:
+				_toggle_task_view()
+				key_event.accept()
+				return
 			KEY_M:
 				if key_event.shift_pressed:
 					_restore_all_minimized_windows()
