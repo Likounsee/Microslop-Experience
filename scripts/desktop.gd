@@ -65,6 +65,34 @@ var _notification_history: Array[Dictionary] = []
 var _desktop_hidden_windows: Array[Control] = []
 var _show_desktop_active := false
 
+func _unhandled_key_input(event: InputEvent) -> void:
+	if not event is InputEventKey:
+		return
+	var key_event := event as InputEventKey
+	if not key_event.pressed or key_event.echo:
+		return
+
+	if key_event.keycode == KEY_ESCAPE:
+		if is_instance_valid(_start_menu) and _start_menu.visible and is_instance_valid(_start_search) and not _start_search.text.is_empty():
+			_start_search.clear()
+			key_event.accept()
+			return
+		var had_overlay := false
+		for overlay in [_start_menu, _quick_settings_panel, _calendar_panel, _notification_center, _task_view_panel, _desktop_context_menu, _desktop_icon_context_menu, _quick_link_menu]:
+			if is_instance_valid(overlay) and overlay.visible:
+				overlay.hide()
+				had_overlay = true
+		if had_overlay:
+			_start_open = false
+			key_event.accept()
+		return
+
+	if key_event.keycode == KEY_ESCAPE and key_event.ctrl_pressed:
+		_toggle_start_menu()
+		if is_instance_valid(_start_menu) and _start_menu.visible and is_instance_valid(_start_search):
+			_start_search.grab_focus()
+		key_event.accept()
+
 func _notification(what: int) -> void:
 
 	if what == NOTIFICATION_RESIZED and is_instance_valid(_start_menu):
