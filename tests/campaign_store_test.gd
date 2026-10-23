@@ -51,6 +51,19 @@ func _run_tests() -> void:
 	_check(store.load_case_answer("atomic_choice") == 2, "load atomically saved choice")
 	_check(store.load_case_answer("atomic_score") == -3, "load atomically saved score")
 	_check(store.load_evidence().has("atomic_choice_evidence"), "load evidence from atomic decision")
+	_check(store.save_case_answers_with_evidence({
+		"orchid_workflow_stage": 7,
+		"orchid_workflow_score": -4,
+		"orchid_crisis_stage": 3
+	}, "snapshot_fixture"), "seed grouped resume snapshot")
+	var resume_snapshot := store.load_case_answers([
+		"orchid_workflow_stage", "orchid_workflow_score", "orchid_crisis_stage", "missing_snapshot_key"
+	])
+	_check(resume_snapshot["orchid_workflow_stage"] == 7, "batch loader restores saved stage")
+	_check(resume_snapshot["orchid_workflow_score"] == -4, "batch loader restores saved score")
+	_check(resume_snapshot["orchid_crisis_stage"] == 3, "batch loader restores another journey from same snapshot")
+	_check(resume_snapshot["missing_snapshot_key"] == -1, "batch loader uses missing-answer sentinel")
+	_check(store.load_case_answers([]).is_empty(), "batch loader handles empty request")
 	# Simulate closing and reopening the application: a fresh store must recover the whole committed decision.
 	var resumed_store = CampaignStoreScript.new()
 	resumed_store.save_path = TEST_SAVE_PATH
