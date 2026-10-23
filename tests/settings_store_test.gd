@@ -36,6 +36,10 @@ func _run_tests() -> void:
 	_check(persisted_after_rejection.load(TEST_SETTINGS_PATH) == OK, "invalid save leaves previous settings readable")
 	_check(persisted_after_rejection.get_value("settings", "fps_limit", -1) == 0, "invalid save preserves previously persisted value")
 	store.values["fps_limit"] = 0
+	store.values["unexpected_setting"] = true
+	_check(not store.save_settings(), "reject unknown in-memory setting keys before writing")	
+	store.values.erase("unexpected_setting")
+	_check(ConfigFile.new().load(TEST_SETTINGS_PATH) == OK, "unknown setting rejection preserves readable save")
 
 	_check(store.set_value_and_save("fps_limit", 120), "valid setting update reports successful persistence")
 	_check(store.set_value_and_save("fps_limit", 120), "unchanged valid setting reports success")
