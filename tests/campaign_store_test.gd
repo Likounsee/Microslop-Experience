@@ -53,14 +53,14 @@ func _run_tests() -> void:
 	# An unreadable existing file must not be overwritten by a save attempt.
 	var file := FileAccess.open(TEST_SAVE_PATH, FileAccess.WRITE)
 	if file != null:
-		file.store_string("this is not a ConfigFile")
+		file.store_string("[campaign\nmission_step = \"unterminated\n")
 		file.close()
 	_check(not store.save_progress(1), "refuse to overwrite unreadable save")
 	var verify := FileAccess.open(TEST_SAVE_PATH, FileAccess.READ)
 	var saved_text := verify.get_as_text() if verify != null else ""
 	if verify != null:
 		verify.close()
-	_check(saved_text == "this is not a ConfigFile", "preserve unreadable save contents")
+	_check(saved_text == "[campaign\nmission_step = \"unterminated\n", "preserve unreadable save contents")
 
 	if FileAccess.file_exists(absolute_path):
 		DirAccess.remove_absolute(absolute_path)
@@ -69,5 +69,5 @@ func _run_tests() -> void:
 		print("CampaignStore tests passed.")
 		quit(0)
 	else:
-		push_error("%d CampaignStore test(s) failed: %s" % [failures.size(), ", ".join(failures)])
+		push_error("%d CampaignStore test(s) failed: %s" % [failures.size(), str(failures)])
 		quit(1)
