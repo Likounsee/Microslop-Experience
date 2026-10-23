@@ -29,13 +29,13 @@ func _run_tests() -> void:
 	_check(not FileAccess.file_exists(absolute_path + ".tmp"), "successful save removes temporary file")
 	_check(not FileAccess.file_exists(absolute_path + ".bak"), "successful save removes backup file")
 
-	store.set_value_and_save("fps_limit", 120)
+	_check(store.set_value_and_save("fps_limit", 120), "valid setting update reports successful persistence")
 	_check(store.values["fps_limit"] == 120, "valid setting update is retained after save")
 	var reloaded = SettingsStoreScript.new()
 	reloaded.settings_path = TEST_SETTINGS_PATH
 	root.add_child(reloaded)
 	_check(reloaded.values["fps_limit"] == 120, "fresh store loads persisted setting")
-	reloaded.set_value_and_save("fps_limit", 121)
+	_check(not reloaded.set_value_and_save("fps_limit", 121), "invalid setting reports persistence failure")
 	_check(reloaded.values["fps_limit"] == 120, "invalid setting is rejected without changing value")
 	_check(reloaded.save_settings(), "replace an existing settings file")
 	_check(not FileAccess.file_exists(absolute_path + ".bak"), "replacement cleans backup after success")
@@ -95,7 +95,7 @@ func _run_tests() -> void:
 	blocked_store.settings_path = blocked_path
 	root.add_child(blocked_store)
 	var original_limit: int = blocked_store.values["fps_limit"]
-	blocked_store.set_value_and_save("fps_limit", 60)
+	_check(not blocked_store.set_value_and_save("fps_limit", 60), "failed disk write reports persistence failure")
 	_check(blocked_store.values["fps_limit"] == original_limit, "failed disk write rolls back in-memory setting")
 	_check(not FileAccess.file_exists(blocked_absolute + ".tmp"), "failed replacement cleans temporary settings file")
 	_check(DirAccess.dir_exists_absolute(blocked_absolute), "failed replacement preserves destination directory")
