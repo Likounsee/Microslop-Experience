@@ -4546,6 +4546,12 @@ func _open_orchid_report_studio() -> void:
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	status.custom_minimum_size = Vector2(0, 42)
 	content.add_child(status)
+	editor.focus_exited.connect(func():
+		if CampaignStore.save_report_draft(editor.text):
+			status.text = "Sauvegarde automatique du brouillon (%d caractères)." % editor.text.length()
+		else:
+			status.text = "Échec de la sauvegarde automatique : utilisez le bouton de sauvegarde et vérifiez la progression."
+	)
 	restore.pressed.connect(func():
 		var saved_draft := CampaignStore.load_report_draft()
 		if saved_draft.is_empty():
