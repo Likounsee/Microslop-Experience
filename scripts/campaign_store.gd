@@ -14,44 +14,78 @@ var mission_step: int = MIN_MISSION_STEP
 
 ## Writes to a sibling temporary file, validates it, then swaps it into place.
 ## The previous save is retained as a backup until the replacement succeeds.
-func _save_config_atomic(config: ConfigFile) -> bool:
+## Recovers a valid backup if a previous process stopped during replacement.
+## Returns the ConfigFile error code, so callers can distinguish success from failure.
+func _load_config(config: ConfigFile) -> Error:
+	var load_error := config.load(save_path)
+	if load_error == OK:
+		return OK
+	var target_path := ProjectSettings.globalize_path(save_path)
+	var backup_path := target_path + ".bak"
+	if not FileAccess.file_exists(backup_path):
+		return load_error
+	var backup_config := ConfigFile.new()
+	if backup_config.load(backup_path) != OK:
+		return load_error
+	# Keep an unreadable primary file until a valid backup has been confirmed.
+	if FileAccess.file_exists(target_path):
+		var remove_error := DirAccess.remove_absolute(target_path)
+		if remove_error != OK:
+			return remove_error
+	var restore_error := DirAccess.rename_absolute(backup_path, target_path)
+		if restore_error != OK:
+			return restore_error
+	return config.load(save_path)
+
+
+## Writes to a sibling temporary file, validates it, then swaps it into place.
+## The previous save is retained as a backup until the replacement succeeds.
+func _save_config_atomic(config: ConfigFile) -> Error:
 	var target_path := ProjectSettings.globalize_path(save_path)
 	var temporary_path := target_path + ".tmp"
 	var backup_path := target_path + ".bak"
 	var write_error := config.save(temporary_path)
 	if write_error != OK:
 		push_warning("Impossible d'écrire la sauvegarde temporaire ORCHID : %s" % write_error)
-		return false
+		return write_error
 
 	var verification := ConfigFile.new()
 	var verify_error := verification.load(temporary_path)
 	if verify_error != OK:
 		DirAccess.remove_absolute(temporary_path)
 		push_warning("La sauvegarde temporaire ORCHID est illisible : %s" % verify_error)
-		return false
+		return verify_error
 
 	var had_previous := FileAccess.file_exists(target_path)
 	if had_previous:
+		# Never discard the only known-good backup before validating the current primary.
 		if FileAccess.file_exists(backup_path):
-			DirAccess.remove_absolute(backup_path)
+			var old_backup := ConfigFile.new()
+			if old_backup.load(backup_path) == OK:
+				DirAccess.remove_absolute(backup_path)
+			else:
+				DirAccess.remove_absolute(temporary_path)
+				push_warning("Une sauvegarde de secours ORCHID existe mais est illisible.")
+				return ERR_FILE_CORRUPT
 		var backup_error := DirAccess.rename_absolute(target_path, backup_path)
 		if backup_error != OK:
 			DirAccess.remove_absolute(temporary_path)
 			push_warning("Impossible de protéger l'ancienne sauvegarde ORCHID : %s" % backup_error)
-			return false
+			return backup_error
 
 	var replace_error := DirAccess.rename_absolute(temporary_path, target_path)
 	if replace_error != OK:
 		if had_previous:
-			DirAccess.rename_absolute(backup_path, target_path)
+			var restore_error := DirAccess.rename_absolute(backup_path, target_path)
+			if restore_error != OK:
+				push_error("La restauration de la sauvegarde ORCHID a échoué : %s" % restore_error)
 		DirAccess.remove_absolute(temporary_path)
 		push_warning("Impossible de remplacer la sauvegarde ORCHID : %s" % replace_error)
-		return false
+		return replace_error
 
 	if had_previous:
 		DirAccess.remove_absolute(backup_path)
-	return true
-
+	return OK
 
 ## Returns only unique, non-empty evidence IDs from potentially malformed save data.
 func _normalized_evidence(raw: Variant) -> Array:
