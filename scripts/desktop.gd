@@ -7023,7 +7023,7 @@ func _calculate_expression(expression_edit: LineEdit, result_label: Label) -> vo
 	var expression := Expression.new()
 	var parse_error := expression.parse(source)
 	if parse_error != OK:
-		result_label.text = "Expression invalide (position %d)." % expression.get_error_text().length()
+		result_label.text = "Expression invalide : %s" % expression.get_error_text()
 		return
 	var value: Variant = expression.execute([], null, false)
 	if expression.has_execute_failed() or not (value is int or value is float):
