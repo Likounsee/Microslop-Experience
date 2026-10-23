@@ -16,7 +16,8 @@ func load_progress() -> int:
 		return mission_step
 
 	var saved_value: Variant = config.get_value("campaign", "mission_step", MIN_MISSION_STEP)
-	var saved_version: int = int(config.get_value("campaign", "version", 1))
+	var raw_version: Variant = config.get_value("campaign", "version", 1)
+	var saved_version: int = raw_version if typeof(raw_version) == TYPE_INT else 1
 	if typeof(saved_value) != TYPE_INT:
 		mission_step = MIN_MISSION_STEP
 	else:
@@ -88,7 +89,13 @@ func load_evidence() -> Array:
 	if config.load(SAVE_PATH) != OK:
 		return []
 	var raw: Variant = config.get_value("campaign", "evidence", [])
-	return raw if raw is Array else []
+	if not (raw is Array):
+		return []
+	var evidence: Array = []
+	for item in raw:
+		if item is String and not item.strip_edges().is_empty() and not evidence.has(item):
+			evidence.append(item)
+	return evidence
 
 
 ## Saves the latest answer for a named ORCHID evidence puzzle.
@@ -116,10 +123,15 @@ func load_case_answer(case_id: String) -> int:
 	var config := ConfigFile.new()
 	if config.load(SAVE_PATH) != OK:
 		return -1
+	if case_id.strip_edges().is_empty():
+		return -1
 	var raw: Variant = config.get_value("campaign", "case_answers", {})
-	if raw is Dictionary:
-		return int(raw.get(case_id, -1))
-	return -1
+	if not (raw is Dictionary):
+		return -1
+	var answer: Variant = raw.get(case_id, -1)
+	if typeof(answer) != TYPE_INT or answer < 0 or answer > 2:
+		return -1
+	return answer
 
 
 ## Stores an editable report draft independently of the campaign ending and progress.
@@ -174,7 +186,8 @@ func load_report_draft() -> String:
 	var config := ConfigFile.new()
 	if config.load(SAVE_PATH) != OK:
 		return ""
-	return str(config.get_value("campaign", "report_draft", ""))
+	var raw_draft: Variant = config.get_value("campaign", "report_draft", "")
+	return raw_draft if raw_draft is String else ""
 
 
 ## Restarts only the cinematic thread, leaving the wider ORCHID case file intact.
@@ -187,7 +200,8 @@ func capture_cinematic_baseline(case_id: String) -> bool:
 	var load_error := config.load(SAVE_PATH)
 	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
 		return false
-	var baseline: Dictionary = config.get_value("campaign", "cinematic_baseline", {})
+	var raw_baseline: Variant = config.get_value("campaign", "cinematic_baseline", {})
+	var baseline: Dictionary = raw_baseline if raw_baseline is Dictionary else {}
 	if baseline.has(case_id):
 		return true
 	baseline[case_id] = {
@@ -254,4 +268,7 @@ func load_ending() -> String:
 	var config := ConfigFile.new()
 	if config.load(SAVE_PATH) != OK:
 		return ""
-	return str(config.get_value("campaign", "ending", ""))
+	var raw_ending: Variant = config.get_value("campaign", "ending", "")
+	if raw_ending is String and raw_ending in ["published", "preserved"]:
+		return raw_ending
+	return ""
