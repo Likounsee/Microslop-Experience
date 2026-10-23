@@ -194,6 +194,7 @@ func _run_tests() -> void:
 
 	_check(store.save_report_review("A factual report with limits and actions.", 2), "save accepted report review")
 	_check(not store.save_report_review("Invalid outcome must not replace this report.", 3), "reject invalid report review outcome")
+	_check(not store.save_report_review("Negative outcome must not replace this report.", -1), "reject negative report review outcome")
 	_check(store.load_report_draft() == "A factual report with limits and actions.", "invalid review leaves saved report unchanged")
 	_check(store.load_report_draft() == "A factual report with limits and actions.", "load report draft")
 	var config := ConfigFile.new()
