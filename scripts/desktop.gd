@@ -72,6 +72,26 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if not key_event.pressed or key_event.echo:
 		return
 
+	# Common Windows shortcuts: Win+E opens Explorer, Alt+F4 closes the focused app.
+	if key_event.keycode == KEY_E and key_event.meta_pressed:
+		_open_files()
+		key_event.accept()
+		return
+
+	if key_event.keycode == KEY_F4 and key_event.alt_pressed:
+		var active_window: Control
+		if is_instance_valid(_window_layer):
+			for child in _window_layer.get_children():
+				if child is Control and child.has_meta("app_id") and str(child.get_meta("app_id")) == _active_app_id and child.visible:
+					active_window = child
+					break
+		if is_instance_valid(active_window):
+			active_window.queue_free()
+			_active_app_id = ""
+			_update_taskbar_indicators()
+		key_event.accept()
+		return
+
 	if key_event.keycode == KEY_ESCAPE and key_event.ctrl_pressed:
 		_toggle_start_menu()
 		if is_instance_valid(_start_menu) and _start_menu.visible and is_instance_valid(_start_search):
