@@ -213,6 +213,16 @@ func _run_tests() -> void:
 		_check(retry_result.get_value("campaign", "report_draft", "") == "Keep this unrelated report draft.", "reset retry preserves report draft")
 		_check(retry_result.get_value("campaign", "quick_settings_mode", "") == "normal", "reset retry preserves restored setting")
 
+	# Simulate a crash after the previous save was moved to the backup but before replacement.
+	_check(store.save_case_answer("backup_recovery_fixture", 42), "seed save before interrupted replacement recovery")
+	var backup_path := absolute_path + ".bak"
+	if FileAccess.file_exists(backup_path):
+		DirAccess.remove_absolute(backup_path)
+	_check(DirAccess.rename_absolute(absolute_path, backup_path) == OK, "simulate interrupted replacement with backup only")
+	_check(store.load_case_answer("backup_recovery_fixture") == 42, "recover saved answer from backup after interrupted replacement")
+	_check(FileAccess.file_exists(absolute_path), "backup recovery restores primary save file")
+	_check(not FileAccess.file_exists(backup_path), "backup recovery consumes restored backup")
+
 	# A directory at the save path simulates a location ConfigFile cannot read or overwrite.
 	if FileAccess.file_exists(absolute_path):
 		DirAccess.remove_absolute(absolute_path)
