@@ -3803,10 +3803,15 @@ func _open_browser() -> void:
 ## Progression sauvegardée séparément du parcours narratif de 41 séquences.
 func _open_orchid_task_sprint() -> void:
 	var app := _open_window("Sprint de travail — ORCHID", "SIMULATION ACTIVE · 13 TÂCHES · SAUVEGARDE LOCALE", Vector2(760, 620))
+	# Load stage, score, and interruption count from one disk snapshot so the resumed UI cannot mix save revisions.
+	var saved := CampaignStore.load_case_answers([
+		"orchid_sprint_stage", "orchid_sprint_score", "orchid_sprint_interruptions"
+	])
+	var saved_score := int(saved["orchid_sprint_score"])
 	var state := {
-		"stage": clampi(CampaignStore.load_case_answer("orchid_sprint_stage"), 0, 13),
-		"score": CampaignStore.load_case_answer("orchid_sprint_score") if CampaignStore.load_case_answer("orchid_sprint_score") >= -10 else 0,
-		"interrupted": maxi(0, CampaignStore.load_case_answer("orchid_sprint_interruptions"))
+		"stage": clampi(int(saved["orchid_sprint_stage"]), 0, 13),
+		"score": saved_score if saved_score >= -26 and saved_score <= 26 else 0,
+		"interrupted": clampi(int(saved["orchid_sprint_interruptions"]), 0, 13)
 	}
 	_render_orchid_task_sprint(app, state)
 
@@ -3980,9 +3985,12 @@ func _render_orchid_task_sprint(app: Control, state: Dictionary) -> void:
 ## Les dix étapes réutilisent les preuves, le centre de notifications et le tableau de campagne.
 func _open_orchid_workflow_board() -> void:
 	var app := _open_window("Dossier transversal — ORCHID", "FIL DE TRAVAIL · 10 ÉTAPES · ÉTAT PERSISTANT", Vector2(780, 650))
+	# Resume the stage and score from the same save snapshot.
+	var saved := CampaignStore.load_case_answers(["orchid_workflow_stage", "orchid_workflow_score"])
+	var saved_score := int(saved["orchid_workflow_score"])
 	var state := {
-		"stage": clampi(CampaignStore.load_case_answer("orchid_workflow_stage"), 0, 10),
-		"score": CampaignStore.load_case_answer("orchid_workflow_score")
+		"stage": clampi(int(saved["orchid_workflow_stage"]), 0, 10),
+		"score": saved_score if saved_score >= -20 and saved_score <= 20 else 0
 	}
 	_render_orchid_workflow_board(app, state)
 
@@ -4167,14 +4175,15 @@ func _render_orchid_workflow_board(app: Control, state: Dictionary) -> void:
 
 func _open_orchid_crisis_tabletop() -> void:
 	var app := _open_window("Tabletop de crise — ORCHID", "EXERCICE D’INCIDENT · 12 DÉCISIONS · MODE LOCAL", Vector2(790, 650))
+	# Load stage, score, and first decision together to avoid inconsistent resume state.
+	var saved := CampaignStore.load_case_answers([
+		"orchid_crisis_stage", "orchid_crisis_score", "orchid_crisis_choice_00"
+	])
+	var saved_score := int(saved["orchid_crisis_score"])
 	var state := {
-		"stage": clampi(CampaignStore.load_case_answer("orchid_crisis_stage"), 0, 12),
-		"score": CampaignStore.load_case_answer("orchid_crisis_score")
+		"stage": clampi(int(saved["orchid_crisis_stage"]), 0, 12),
+		"score": 0 if int(saved["orchid_crisis_stage"]) == 0 and int(saved["orchid_crisis_choice_00"]) < 0 else (saved_score if saved_score >= -24 and saved_score <= 24 else 0)
 	}
-	if int(state["stage"]) == 0 and CampaignStore.load_case_answer("orchid_crisis_choice_00") < 0:
-		state["score"] = 0
-	elif int(state["score"]) < -24 or int(state["score"]) > 24:
-		state["score"] = 0
 	_render_orchid_crisis_tabletop(app, state)
 
 
