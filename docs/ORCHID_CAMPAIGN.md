@@ -348,3 +348,8 @@ Ces protections limitent les erreurs de type sur des sauvegardes altérées ; el
 Les écritures de progression, de conclusion, de preuves, de réponses et de brouillon relisent désormais le fichier existant avant de le modifier. Une sauvegarde absente reste autorisée pour une nouvelle partie, mais une erreur de lecture différente de « fichier introuvable » interrompt l’écriture au lieu de remplacer potentiellement les données par un fichier neuf. Les réponses de dossier dont la collection sauvegardée n’est pas un dictionnaire sont traitées comme une collection vide plutôt que de provoquer une conversion de type invalide. La progression en mémoire n’est actualisée qu’après la réussite de l’écriture sur disque.
 
 Validation automatisée : la CI vérifie l’import du projet, le démarrage headless et exécute maintenant `tests/campaign_store_test.gd` sur un fichier de sauvegarde isolé. Les tests couvrent la progression, les réponses, les preuves, la revue du rapport, la normalisation d’un champ mal typé et le refus d’écrire lorsque l’emplacement de sauvegarde est illisible. Le test d’une vraie reprise de campagne dans l’interface après fermeture du jeu reste manuel.
+
+
+### Régressions de persistance — conclusions et échecs d’écriture
+
+La suite automatisée vérifie également que les deux conclusions autorisées (`published` et `preserved`) sont sauvegardées et relues, qu’une valeur inconnue est rejetée sans remplacer la conclusion valide, et qu’une revue de rapport ne supprime pas les preuves sans rapport avec cette revue. Le scénario de chemin de sauvegarde illisible contrôle désormais aussi que l’échec d’écriture ne modifie pas la progression en mémoire. Ces tests utilisent toujours un fichier isolé et ne touchent pas à la sauvegarde du joueur.
