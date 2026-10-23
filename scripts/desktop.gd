@@ -5605,16 +5605,38 @@ func _open_orchid_decision_board() -> void:
 		["Surveiller sans publier immédiatement", "decision_monitor", "Le comité conserve une copie locale et demande une reproduction contrôlée avant toute déclaration publique. Cette option limite les affirmations prématurées, mais laisse le risque actif tant qu’aucune mesure de suspension n’est confirmée."],
 		["Clore comme incident de configuration", "decision_close", "Le comité classe l’événement comme défaut de configuration et ferme le dossier sans attribution de responsabilité. Cette option est rapide, mais elle ne répond ni à l’absence d’approbation ni à la répétition des mécanismes de rétention observés."]
 	]
+	var prior_decision := CampaignStore.load_case_answer("incident_committee_decision")
+	var decision_locked := prior_decision >= 0 and prior_decision < options.size()
+	var decision_buttons: Array[Button] = []
+	var reopen := Button.new()
+	reopen.text = "Réouvrir la séance pour changer la décision"
+	reopen.disabled = not decision_locked
+	reopen.pressed.connect(func() -> void:
+		decision_locked = false
+		for decision_button in decision_buttons:
+			decision_button.disabled = false
+		reopen.disabled = true
+		report.text = "SÉANCE RÉOUVERTE\n\nChoisissez une nouvelle décision. Le choix le plus récent remplacera la décision active dans la sauvegarde ; les anciennes pièces d’audit restent conservées comme historique."
+	)
 	for option in options:
 		var choice := Button.new()
 		choice.text = str(option[0])
 		choice.custom_minimum_size = Vector2(0, 42)
-		choice.pressed.connect(func():
-			var saved_decision := CampaignStore.save_case_answer("incident_committee_decision", options.find(option))
-			var saved_marker := CampaignStore.save_evidence(str(option[1]))
-			if not saved_decision or not saved_marker:
-				report.text = "ÉCHEC DE SAUVEGARDE\n\nLa décision ou son marqueur de dossier n’a pas pu être enregistré. Actualisez les preuves et réessayez."
+		choice.disabled = decision_locked
+		choice.pressed.connect(func() -> void:
+			if decision_locked:
 				return
+			var saved := CampaignStore.save_case_answers_with_evidence(
+				{"incident_committee_decision": options.find(option)},
+				str(option[1])
+			)
+			if not saved:
+				report.text = "ÉCHEC DE SAUVEGARDE\n\nLa décision et son marqueur n’ont pas pu être enregistrés ensemble. La décision précédente reste active. Réessayez."
+				return
+			decision_locked = true
+			reopen.disabled = false
+			for decision_button in decision_buttons:
+				decision_button.disabled = true
 			var evidence_now: Array = CampaignStore.load_evidence()
 			var trace_count := 0
 			for required_id in ["night_rule", "night_download", "night_install", "night_activation", "night_notification"]:
@@ -5632,17 +5654,12 @@ func _open_orchid_decision_board() -> void:
 			else:
 				evidence_assessment += "\nLe journal de la corbeille n’a pas été examiné ; la provenance reste à compléter."
 			report.text = "DÉCISION ENREGISTRÉE\n\n%s\n\n%s\n\nCette décision ne modifie pas les faits déjà collectés. Elle fixe la manière dont le dossier sera traité." % [option[2], evidence_assessment]
-			for child in content.get_children():
-				if child is Button and child != refresh:
-					child.disabled = true
 		)
+		decision_buttons.append(choice)
 		content.add_child(choice)
-	var prior_decision = CampaignStore.load_case_answer("incident_committee_decision")
-	if prior_decision >= 0 and prior_decision < options.size():
-		report.text = "DERNIÈRE DÉCISION ENREGISTRÉE\n\n%s\n\nVous pouvez consulter les preuves, mais cette séance sauvegardée ne peut pas être votée une seconde fois dans la même fenêtre." % str(options[prior_decision][2])
-		for child in content.get_children():
-			if child is Button and child != refresh:
-				child.disabled = true
+	content.add_child(reopen)
+	if decision_locked:
+		report.text = "DERNIÈRE DÉCISION ENREGISTRÉE\n\n%s\n\nVous pouvez rouvrir la séance pour remplacer la décision active. Les marqueurs précédents restent dans le journal d’audit." % str(options[prior_decision][2])
 
 
 ## Additional playable investigative scenes broaden the chapter beyond reading the final report.
