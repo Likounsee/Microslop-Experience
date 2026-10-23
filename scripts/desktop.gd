@@ -74,6 +74,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if not key_event.pressed or key_event.echo:
 		return
 
+	# Ctrl+W and Ctrl+F4 close the active simulated application window.
+	if key_event.ctrl_pressed and (key_event.keycode == KEY_W or (key_event.keycode == KEY_F4 and not key_event.alt_pressed)):
+		_close_active_window()
+		key_event.accept()
+		return
+
 	# Ctrl+Shift+Esc opens the simulated Task Manager directly.
 	if key_event.keycode == KEY_ESCAPE and key_event.ctrl_pressed and key_event.shift_pressed:
 		_open_task_manager()
