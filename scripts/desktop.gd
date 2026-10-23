@@ -6896,25 +6896,22 @@ func _show_notification(title: String, message: String) -> void:
 
 func _advance_mission(reason: String) -> void:
 
-	var previous_step := _mission_step
+	var next_step := mini(_mission_step + 1, 5)
+	if next_step == _mission_step:
+		return
 
-	_mission_step = mini(_mission_step + 1, 5)
+	# Do not advance the visible mission unless its new state reached disk.
+	if not CampaignStore.save_progress(next_step):
+		_show_notification("Progression non enregistrée", "La sauvegarde a échoué. La mission reste à son étape précédente.")
+		return
 
-	_save_progress()
-
+	_mission_step = next_step
 	_update_mission()
-
-	if _mission_step != previous_step:
-
-		_show_notification("Mission accomplie", reason)
+	_show_notification("Mission accomplie", reason)
 
 func _load_progress() -> void:
 
 	_mission_step = CampaignStore.load_progress()
-
-func _save_progress() -> void:
-
-	CampaignStore.save_progress(_mission_step)
 
 func _update_mission() -> void:
 
