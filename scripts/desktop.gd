@@ -7077,7 +7077,9 @@ func _execute_run_command(command_edit: LineEdit, result_label: Label) -> void:
 		"notepad", "notepad.exe", "bloc-notes":
 			_open_window("Bloc-notes", "Bloc-notes Microslop\n\nL’éditeur est simulé dans ce prototype.", Vector2(520, 360))
 		"taskmgr", "taskmgr.exe", "gestionnaire des tâches":
-			_open_window("Gestionnaire des tâches", "Applications ouvertes : %d\n\nPerformances simulées · CPU : 7 %% · Mémoire : 42 %%." % _window_layer.get_child_count(), Vector2(500, 320))
+			_open_task_manager()
+		"snippingtool", "snippingtool.exe", "ms-screenclip", "capture", "outil capture":
+			_open_snipping_tool()
 		"control", "control.exe":
 			_open_window("Panneau de configuration", "Réseau et Internet\nMatériel et audio\nComptes utilisateur\nProgrammes\n\nPanneau de configuration simulé.", Vector2(500, 360))
 		"cmd", "cmd.exe", "powershell", "powershell.exe", "wt", "wt.exe":
@@ -7089,7 +7091,7 @@ func _execute_run_command(command_edit: LineEdit, result_label: Label) -> void:
 		"shell:recyclebinfolder", "recyclebin", "corbeille":
 			_open_recycle_bin()
 		_:
-			result_label.text = "Commande introuvable : « %s ». Essayez explorer, ms-settings:, calc, notepad, taskmgr ou winver." % command_edit.text.strip_edges()
+			result_label.text = "Commande introuvable : « %s ». Essayez explorer, ms-settings:, calc, notepad, taskmgr, snippingtool ou winver." % command_edit.text.strip_edges()
 
 
 func _open_task_manager() -> void:
