@@ -170,6 +170,16 @@ func save_report_ending(draft: String, ending: String) -> bool:
 	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
 		push_warning("Impossible de relire la sauvegarde avant d'enregistrer le rapport final ORCHID.")
 		return false
+	var previous_draft: Variant = config.get_value("campaign", "report_draft", "")
+	if previous_draft is String and previous_draft != draft:
+		var raw_answers: Variant = config.get_value("campaign", "case_answers", {})
+		var answers: Dictionary = raw_answers if raw_answers is Dictionary else {}
+		answers.erase("report_studio_reviewed")
+		config.set_value("campaign", "case_answers", answers)
+		var evidence := _normalized_evidence(config.get_value("campaign", "evidence", []))
+		evidence.erase("report_studio_reviewed")
+		evidence.erase("report_studio_revision_requested")
+		config.set_value("campaign", "evidence", evidence)
 	config.set_value("campaign", "report_draft", draft)
 	config.set_value("campaign", "ending", ending)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
