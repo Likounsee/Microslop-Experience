@@ -3624,6 +3624,14 @@ func _set_explorer_location(path: String, address: LineEdit, heading: Label, sta
 
 	status.text = "Aucun élément à afficher dans %s. Le contenu personnel reste inaccessible." % clean_path
 
+	# ORCHID is not listed in the ordinary folders: the player must search for it.
+	var orchid_file := grid_placeholder_for_orchid(heading)
+	if orchid_file != null:
+		orchid_file.visible = clean_path.to_lower().contains("orchid")
+	if clean_path.to_lower().contains("orchid"):
+		status.text = "1 élément trouvé · accès interne\n\nORCHID_telemetry_review.txt — Dernière modification : aujourd’hui, 08:42\n\nLe fichier est absent de l’index habituel. Ouvrez-le pour examiner les preuves."
+		CampaignStore.save_evidence("explorer_orchid_file_discovered")
+
 	_refresh_explorer_navigation_buttons(address)
 
 	var nav_buttons: Array = address.get_meta("explorer_nav_buttons", [])
@@ -3648,9 +3656,84 @@ func _set_explorer_location(path: String, address: LineEdit, heading: Label, sta
 
 	for child in grid.get_children():
 
-		if child is Button:
+		if child is Button and child.name != "OrchidEvidenceButton":
 
 			child.visible = clean_path == "Accueil" or child.text.to_lower().contains(clean_path.to_lower())
+
+func grid_placeholder_for_orchid(heading: Label) -> Button:
+	var grid := heading.get_parent().get_node_or_null("GridContainer") as GridContainer
+	if grid == null:
+		return null
+	var existing := grid.get_node_or_null("OrchidEvidenceButton") as Button
+	if existing != null:
+		return existing
+	var evidence_button := Button.new()
+	evidence_button.name = "OrchidEvidenceButton"
+	evidence_button.custom_minimum_size = Vector2(220, 72)
+	evidence_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	evidence_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	evidence_button.text = "📄   ORCHID_telemetry_review.txt\n       Journal interne · 08:42"
+	evidence_button.add_theme_font_size_override("font_size", 12)
+	evidence_button.add_theme_color_override("font_color", Color("243249"))
+	evidence_button.add_theme_stylebox_override("normal", _flat_style(Color("fff4df"), 9))
+	evidence_button.add_theme_stylebox_override("hover", _flat_style(Color("ffe7b8"), 9))
+	evidence_button.pressed.connect(_open_orchid_telemetry_file)
+	grid.add_child(evidence_button)
+	return evidence_button
+
+
+func _open_orchid_telemetry_file() -> void:
+	var app := _open_window("ORCHID_telemetry_review.txt", "DOCUMENT INTERNE · COPIE LOCALE", Vector2(650, 500))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	for child in content.get_children():
+		child.queue_free()
+	var heading := Label.new()
+	heading.text = "REVUE DE TÉLÉMÉTRIE — EXTRAIT NON DESTINÉ AUX UTILISATEURS"
+	heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	heading.add_theme_font_size_override("font_size", 17)
+	heading.add_theme_color_override("font_color", Color("8b3f20"))
+	content.add_child(heading)
+	var report := Label.new()
+	report.text = "08:42:11  · Le compteur « 18 fichiers analysés » a été injecté par le module de notification.\n08:42:13  · Aucun accès au contenu des documents n’apparaît dans ce journal.\n08:43:02  · Le message a été conservé malgré l’absence de preuve.\n\nNote de conformité : ne pas confondre un compteur affiché avec une opération réellement exécutée. L’approbation de déploiement est absente de cette copie."
+	report.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	report.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	report.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(report)
+	var question := Label.new()
+	question.text = "Que faites-vous de cet indice ?"
+	question.add_theme_font_size_override("font_size", 14)
+	question.add_theme_color_override("font_color", Color("182235"))
+	content.add_child(question)
+	var preserve := Button.new()
+	preserve.text = "Conserver la copie et signaler les limites de la preuve"
+	preserve.pressed.connect(func():
+		CampaignStore.save_evidence("explorer_orchid_file_preserved")
+		CampaignStore.save_case_answer("explorer_orchid_file_response", 0)
+		_show_notification("Indice conservé", "Le dossier ORCHID contient maintenant une copie locale et une note prudente.")
+		app.queue_free()
+	)
+	content.add_child(preserve)
+	var escalate := Button.new()
+	escalate.text = "Transmettre au canal de conformité"
+	escalate.pressed.connect(func():
+		CampaignStore.save_evidence("explorer_orchid_file_escalated")
+		CampaignStore.save_case_answer("explorer_orchid_file_response", 1)
+		_show_notification("Transmission préparée", "La copie est signalée au canal de conformité. L’approbation manquante reste à vérifier.")
+		app.queue_free()
+	)
+	content.add_child(escalate)
+	var dismiss := Button.new()
+	dismiss.text = "Fermer sans conserver"
+	dismiss.pressed.connect(func():
+		CampaignStore.save_case_answer("explorer_orchid_file_response", 2)
+		_show_notification("Fichier fermé", "Aucune copie supplémentaire n’a été conservée. L’indice reste consultable dans l’explorateur.")
+		app.queue_free()
+	)
+	content.add_child(dismiss)
+	CampaignStore.save_evidence("explorer_orchid_file_opened")
+
 
 func _open_browser() -> void:
 
