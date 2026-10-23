@@ -315,3 +315,7 @@ Validation : modification poussée sur `Microslop-Experience`. Vérifier la CI e
 La soumission au comité fictif sauvegarde maintenant le texte exact de l’éditeur avant d’évaluer sa longueur, ses limites et les actions proposées. Si cette sauvegarde échoue, la revue est interrompue et aucun nouveau résultat n’est annoncé comme enregistré. Le comptage normalise aussi les retours chariot Windows, les sauts de ligne et les tabulations avant de compter les mots. Cela réduit le risque qu’un rapport soumis diffère du brouillon repris après fermeture du studio.
 
 Validation restante : vérifier en Godot les trois issues de revue et le scénario d’échec d’écriture si l’environnement permet de le simuler. La CI confirme l’analyse automatisée, mais ne remplace pas le test manuel de l’interface et de la sauvegarde locale.
+
+### Revue du rapport — enregistrement cohérent
+
+Le résultat de revue est maintenant enregistré dans une seule écriture de sauvegarde avec le texte soumis et la preuve correspondante. Le jeu ne doit donc plus afficher un refus, une demande de révision ou une acceptation comme réussis si l’enregistrement combiné échoue. Le tableau de campagne et le dossier de preuves continuent de lire les mêmes identifiants persistants. Cette protection concerne la sauvegarde locale du jeu ; elle ne remplace pas un test de fermeture et de relance dans Godot.
