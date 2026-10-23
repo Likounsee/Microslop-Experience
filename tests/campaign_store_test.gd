@@ -154,10 +154,10 @@ func _run_tests() -> void:
 	var padded_evidence_fixture := ConfigFile.new()
 	_check(padded_evidence_fixture.load(TEST_SAVE_PATH) == OK, "load save before seeding padded legacy evidence")
 	if padded_evidence_fixture.load(TEST_SAVE_PATH) == OK:
-		padded_evidence_fixture.set_value("campaign", "evidence", ["  legacy_padded_evidence  ", "legacy_padded_evidence", "   ", 42])
+		padded_evidence_fixture.set_value("campaign", "evidence", ["evidence_test", "  legacy_padded_evidence  ", "legacy_padded_evidence", "   ", 42])
 		_check(padded_evidence_fixture.save(TEST_SAVE_PATH) == OK, "seed padded and malformed legacy evidence")
 	var normalized_legacy_evidence := store.load_evidence()
-	_check(normalized_legacy_evidence == ["legacy_padded_evidence"], "loading legacy evidence trims IDs and removes duplicates and invalid entries")
+	_check(normalized_legacy_evidence == ["evidence_test", "legacy_padded_evidence"], "loading legacy evidence trims IDs, removes duplicates and invalid entries, and preserves unrelated evidence")
 	_check(store.save_evidence("legacy_padded_evidence"), "save an ID already present in padded legacy evidence")
 	_check(store.load_evidence().count("legacy_padded_evidence") == 1, "saving padded legacy evidence does not create a semantic duplicate")
 	_check(store.save_ending("published"), "save valid published ending")
