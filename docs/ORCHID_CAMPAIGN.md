@@ -282,7 +282,7 @@ La dernière sollicitation de l’épilogue est également enregistrée comme re
 
 ### Sprint — rejeu complet et conséquences tardives visibles
 
-La fonction de rejeu de la cinématique efface désormais les 39 emplacements de choix (indices 0 à 38), y compris ceux de l’épilogue, et retire les preuves propres aux choix cinématiques. Les indicateurs de conséquence directement écrits par cette séquence sont réinitialisés afin qu’un nouveau parcours ne récupère pas involontairement l’ancien résultat. Les autres preuves, le brouillon du rapport, la conclusion de campagne et la progression de mission sont conservés.
+La fonction de rejeu de la cinématique efface désormais les 39 emplacements de choix (indices 0 à 38), y compris ceux de l’épilogue, et retire les preuves propres aux choix cinématiques. Les indicateurs de conséquence directement écrits par cette séquence sont réinitialisés afin qu’un nouveau parcours ne récupère pas involontairement l’ancien résultat. Avant de modifier un réglage partagé avec les autres activités du chapitre, la cinématique mémorise sa valeur antérieure ; le rejeu restaure cette valeur au lieu d’effacer un choix effectué ailleurs. Les autres preuves, le brouillon du rapport, la conclusion de campagne et la progression de mission sont conservés.
 
 Le panneau « État du dossier » expose aussi les décisions tardives : qualité du rapport, protocole d’échantillonnage, garde-fous de mise en production, communication du premier résultat et réponse à la dernière sollicitation. Les textes rappellent les limites des preuves plutôt que de présenter le score comme une vérité absolue.
 
