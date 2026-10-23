@@ -145,3 +145,5 @@ Les décisions des parcours ORCHID (cinématique, sprint, workflow et exercice d
 
 
 Les effets secondaires des décisions du workflow et de l’exercice de crise sont maintenant inclus dans la même écriture que le choix, le score et la preuve. L’avancement vers l’étape suivante vérifie aussi le succès de la sauvegarde avant de modifier l’interface : une panne disque ne fait plus avancer un parcours à tort.
+
+Les tests couvrent désormais aussi la reprise après fermeture simulée : une instance fraîche du magasin relit choix, score et preuve d’une décision atomique. La réinitialisation cinématique est rejouée pour vérifier qu’elle reste idempotente et préserve les données hors parcours ; une sauvegarde illisible doit faire échouer le reset sans écrasement. Ces cas sont couverts par la CI headless, sans remplacer un test manuel dans Godot.
