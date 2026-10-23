@@ -24,8 +24,12 @@ func _run_tests() -> void:
 	store.save_path = TEST_SAVE_PATH
 	root.add_child(store)
 
-	_check(store.save_progress(4), "save progress")
-	_check(store.load_progress() == 4, "load saved progress")
+	_check(store.save_progress(4), "save progress through verified atomic replacement")
+	_check(store.load_progress() == 4, "load saved progress after atomic replacement")
+	var absolute_save_path := ProjectSettings.globalize_path(TEST_SAVE_PATH)
+	_check(FileAccess.file_exists(absolute_save_path), "atomic save creates the target file")
+	_check(not FileAccess.file_exists(absolute_save_path + ".tmp"), "atomic save cleans temporary file after success")
+	_check(not FileAccess.file_exists(absolute_save_path + ".bak"), "atomic save cleans backup after success")
 	_check(store.save_progress(99), "save progress above maximum")
 	_check(store.load_progress() == 5, "clamp progress to maximum")
 	_check(store.save_progress(4), "restore normal progress for remaining tests")
