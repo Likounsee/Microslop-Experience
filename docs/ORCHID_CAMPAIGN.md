@@ -309,3 +309,9 @@ Validation : la CI du commit ajoutant le recoupement navigateur est en cours ; v
 La revue enregistre désormais un état distinct selon le résultat : brouillon trop court, révision demandée pour limites ou mesures manquantes, ou acceptation pour revue. Le tableau de campagne lit le dernier état enregistré plutôt que de se fier uniquement à la présence d’une ancienne preuve d’acceptation ; une révision ultérieure peut donc remplacer l’état affiché. La vérification des sections « limites » et « mesures » ignore la casse, et le comptage du texte inclut les mots répartis sur plusieurs lignes. Une acceptation reste une étape de suivi fictive, pas une résolution de l’incident.
 
 Validation : modification poussée sur `Microslop-Experience`. Vérifier la CI et effectuer un test en jeu dans Godot ; ce dernier n’a pas été exécuté dans cette passe.
+
+### Soumission du rapport — sauvegarde préalable
+
+La soumission au comité fictif sauvegarde maintenant le texte exact de l’éditeur avant d’évaluer sa longueur, ses limites et les actions proposées. Si cette sauvegarde échoue, la revue est interrompue et aucun nouveau résultat n’est annoncé comme enregistré. Le comptage normalise aussi les retours chariot Windows, les sauts de ligne et les tabulations avant de compter les mots. Cela réduit le risque qu’un rapport soumis diffère du brouillon repris après fermeture du studio.
+
+Validation restante : vérifier en Godot les trois issues de revue et le scénario d’échec d’écriture si l’environnement permet de le simuler. La CI confirme l’analyse automatisée, mais ne remplace pas le test manuel de l’interface et de la sauvegarde locale.
