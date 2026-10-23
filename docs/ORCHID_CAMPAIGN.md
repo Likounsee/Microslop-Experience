@@ -295,3 +295,10 @@ Validation : le workflow GitHub Actions a terminé avec succès sur le commit de
 L’explorateur permet maintenant de rechercher « ORCHID » pour découvrir le fichier fictif `ORCHID_telemetry_review.txt`, volontairement absent de l’index habituel. Son contenu distingue le compteur affiché (« 18 fichiers analysés ») d’une opération réellement attestée : le journal fourni ne montre aucun accès aux documents, et l’approbation du déploiement est absente de la copie. Le joueur peut conserver la copie en signalant les limites de la preuve, transmettre l’indice au canal de conformité ou fermer sans conserver de copie supplémentaire. Chaque option écrit une réponse dédiée et des preuves persistantes dans la sauvegarde locale. Cette enquête complète le chapitre 1 et ne lance pas le contenu du DLC du chapitre 2.
 
 Validation : le commit de cette interaction a déclenché le workflow Godot CI ; son résultat doit être confirmé avant de considérer cette passe validée. Le lancement manuel et le test des trois choix dans l’interface restent à effectuer.
+
+
+### Enquête — recoupement entre explorateur et navigateur
+
+Le navigateur ORCHID lit désormais les indices déjà sauvegardés dans la campagne. Si le joueur a conservé une copie locale du journal, les résultats de recherche rappellent le décalage entre le compteur « 18 fichiers analysés » et l’absence de preuve d’accès aux documents. Si le joueur a transmis le signalement, les résultats rappellent que l’approbation manquante doit encore être recherchée. Sans indice conservé ou transmis, le navigateur renvoie le joueur vers l’explorateur au lieu de présenter l’archive comme une preuve suffisante. Les recherches et l’ouverture de l’archive sont également enregistrées comme preuves distinctes. Cela crée un premier lien persistant entre deux applications du bureau, sans utiliser de données externes ni de télémétrie réelle.
+
+Validation : la CI du commit ajoutant le recoupement navigateur est en cours ; vérifier son résultat avant de considérer la modification validée. Les chemins de jeu et le rendu restent à tester manuellement dans Godot.
