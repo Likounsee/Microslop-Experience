@@ -4623,6 +4623,31 @@ func _render_orchid_cinematic_scene(app: Control, state: Dictionary) -> void:
 			context_lines.append("SESSION · La pause locale a été demandée ; elle ne garantit pas que tous les composants la respecteront.")
 		elif pause_choice == 1:
 			context_lines.append("SESSION · Les suggestions ont été acceptées pour faire disparaître la fenêtre ; cela ne vaut pas consentement éclairé.")
+		var report_choice := CampaignStore.load_case_answer("cinematic_choice_18")
+		if report_choice == 0:
+			context_lines.append("RAPPORT · Les faits et les hypothèses sont séparés ; la conclusion reste à confronter aux journaux.")
+		elif report_choice == 1:
+			context_lines.append("RAPPORT · Une affirmation non vérifiée fragilise le brouillon ; elle ne doit pas être présentée comme un fait.")
+		var sample_choice := CampaignStore.load_case_answer("cinematic_choice_31")
+		if sample_choice == 0:
+			context_lines.append("ÉCHANTILLON · Le protocole limite la collecte aux événements utiles et datés.")
+		elif sample_choice == 1:
+			context_lines.append("ÉCHANTILLON · Le risque de collecte excessive est signalé ; davantage de données ne signifie pas davantage de certitude.")
+		var guardrail_choice := CampaignStore.load_case_answer("cinematic_choice_34")
+		if guardrail_choice == 0:
+			context_lines.append("MISE EN PRODUCTION · Le dossier demande de mesurer les tâches terminées et le respect du refus.")
+		elif guardrail_choice == 1:
+			context_lines.append("MISE EN PRODUCTION · Les critères restent centrés sur les retours ; la réussite réelle n'est pas encore démontrée.")
+		var result_choice := CampaignStore.load_case_answer("cinematic_choice_36")
+		if result_choice == 0:
+			context_lines.append("RÉSULTATS · Le premier point d'étape conserve ses limites et les mesures encore manquantes.")
+		elif result_choice == 1:
+			context_lines.append("RÉSULTATS · L'annonce prématurée est conservée dans le dossier ; un échantillon incomplet ne prouve pas une résolution.")
+		var final_choice := CampaignStore.load_case_answer("cinematic_choice_38")
+		if final_choice == 0:
+			context_lines.append("DERNIÈRE SOLLICITATION · Vous avez refusé et conservé les preuves ; le suivi reste ouvert.")
+		elif final_choice == 1:
+			context_lines.append("DERNIÈRE SOLLICITATION · Vous avez testé le nouveau panneau ; ce test isolé ne garantit pas son comportement futur.")
 	if not context_lines.is_empty():
 		var context_panel := Label.new()
 		context_panel.text = "ÉTAT DU DOSSIER\n" + "\n".join(context_lines)
