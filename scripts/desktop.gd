@@ -4700,6 +4700,19 @@ func _choose_orchid_cinematic_option(stage: int, choice: int, continue_button: B
 	elif choice == 1:
 		feedback = "Vous privilégiez une sortie rapide ou une conclusion immédiate. Cela peut faire gagner du temps, mais laisse des questions sans réponse."
 
+	# Snapshot shared settings once before cinematic choices overwrite them.
+	# Replaying this sequence can then restore decisions made in other chapter activities.
+	for baseline_key in [
+		"orchid_lea_support_status",
+		"orchid_cinematic_focus_pause",
+		"orchid_report_quality",
+		"orchid_sample_protocol",
+		"orchid_release_guardrail",
+		"orchid_results_claim",
+		"orchid_final_prompt_choice",
+		"orchid_notification_mode"
+	]:
+		CampaignStore.capture_cinematic_baseline(baseline_key)
 	# A cinematic choice is more than a score: selected actions change the
 	# simulated desktop policy and create evidence that the archive can inspect.
 	match stage:
