@@ -822,6 +822,8 @@ func _toggle_show_desktop() -> void:
 
 		_show_desktop_active = false
 
+		_activate_topmost_visible_window()
+
 	_update_taskbar_indicators()
 
 func _build_calendar_panel() -> void:
@@ -1839,9 +1841,7 @@ func _add_taskbar_app(parent: HBoxContainer, glyph: String, tooltip: String, cal
 
 				existing.call("_animate_minimize")
 
-				_active_app_id = ""
-
-				_update_taskbar_indicators()
+				_activate_topmost_visible_window(app_id)
 
 			else:
 
@@ -2004,18 +2004,24 @@ func _cycle_app_window() -> void:
 		next_window.emit_signal("window_activated")
 	_update_taskbar_indicators()
 
-func _activate_topmost_visible_window() -> void:
+func _activate_topmost_visible_window(excluded_app_id: String = "") -> void:
+	# Pick the highest visible window, optionally skipping the one being minimized.
+	# This avoids leaving the desktop with no focused app during taskbar animations.
 	_active_app_id = ""
 	if is_instance_valid(_window_layer):
 		var children := _window_layer.get_children()
 		for i in range(children.size() - 1, -1, -1):
 			var candidate = children[i]
-			if candidate is Control and candidate.visible and candidate.has_meta("app_id"):
-				candidate.move_to_front()
-				_active_app_id = str(candidate.get_meta("app_id"))
-				if candidate.has_signal("window_activated"):
-					candidate.emit_signal("window_activated")
-				break
+			if not candidate is Control or not candidate.visible or not candidate.has_meta("app_id"):
+				continue
+			var candidate_id := str(candidate.get_meta("app_id"))
+			if candidate_id == excluded_app_id:
+				continue
+			candidate.move_to_front()
+			_active_app_id = candidate_id
+			if candidate.has_signal("window_activated"):
+				candidate.emit_signal("window_activated")
+			break
 	_update_taskbar_indicators()
 
 func _find_app_window(app_id: String) -> Control:
