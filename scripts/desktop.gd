@@ -5963,8 +5963,8 @@ func _open_orchid_experiment_simulator() -> void:
 		var variant_names := ["A · sans interruption", "B · interruption prédictive", "C · interruption avec refus respecté"]
 		var base_completion := [7, 6, 5]
 		var base_return := [2, 3, 2]
-		var a_done := base_completion[selected_task]
-		var a_return := base_return[selected_task]
+		var a_done: int = base_completion[selected_task]
+		var a_return: int = base_return[selected_task]
 		var b_done := maxi(1, a_done - (2 if selected_trigger == 1 else 1))
 		var b_return := mini(8, a_return + (4 if selected_trigger == 1 else 2))
 		var c_done := a_done if respect_refusal else maxi(2, a_done - 1)
