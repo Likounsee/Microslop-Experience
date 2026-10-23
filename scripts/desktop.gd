@@ -6009,7 +6009,7 @@ func _open_orchid_casebook() -> void:
 		if examined < 4:
 			detail.text = "La reconstitution est prématurée : examinez au moins quatre pièces de ce carnet.\n\nPièces réellement examinées : %d / %d. Les preuves provenant d’autres applications ne remplacent pas la lecture de ces pièces." % [examined, entries.size()]
 			return
-		var findings: Array[String] = []
+		var findings: PackedStringArray = []
 		if saved_evidence.has("notification_18") and saved_evidence.has("explorer_index"):
 			findings.append("• Notification et index reprennent le même nombre et la même heure, sans chemins vérifiables. Leur cohérence apparente ne prouve pas qu’ils proviennent de sources indépendantes.")
 		if saved_evidence.has("update_public") and saved_evidence.has("update_internal"):
