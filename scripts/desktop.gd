@@ -1449,11 +1449,8 @@ func _build_quick_settings() -> void:
 
 		volume_value.text = "%d%%" % int(value)
 
-		SettingsStore.values["master_volume"] = value / 100.0
-
+		SettingsStore.set_value_and_save("master_volume", value / 100.0)
 		SettingsStore.apply_audio_settings()
-
-		SettingsStore.save_settings()
 
 	)
 
@@ -6587,11 +6584,8 @@ func _open_settings() -> void:
 
 	display.item_selected.connect(func(index: int):
 
-		SettingsStore.values["display_mode"] = display.get_item_text(index)
-
+		SettingsStore.set_value_and_save("display_mode", display.get_item_text(index))
 		SettingsStore.apply_display_settings()
-
-		SettingsStore.save_settings()
 
 	)
 
@@ -6625,11 +6619,8 @@ func _open_settings() -> void:
 
 	resolution.item_selected.connect(func(index: int):
 
-		SettingsStore.values["resolution"] = resolutions[index]
-
+		SettingsStore.set_value_and_save("resolution", resolutions[index])
 		SettingsStore.apply_display_settings()
-
-		SettingsStore.save_settings()
 
 	)
 
@@ -6646,11 +6637,8 @@ func _open_settings() -> void:
 
 	vsync.toggled.connect(func(enabled: bool):
 
-		SettingsStore.values["vsync"] = enabled
-
+		SettingsStore.set_value_and_save("vsync", enabled)
 		SettingsStore.apply_display_settings()
-
-		SettingsStore.save_settings()
 
 	)
 
@@ -6686,11 +6674,8 @@ func _open_settings() -> void:
 
 	fps_limit.item_selected.connect(func(index: int):
 
-		SettingsStore.values["fps_limit"] = fps_options[index]
-
+		SettingsStore.set_value_and_save("fps_limit", fps_options[index])
 		SettingsStore.apply_display_settings()
-
-		SettingsStore.save_settings()
 
 	)
 
@@ -6754,9 +6739,7 @@ func _open_settings() -> void:
 
 	language.item_selected.connect(func(index: int):
 
-		SettingsStore.values["language"] = language.get_item_text(index)
-
-		SettingsStore.save_settings()
+		SettingsStore.set_value_and_save("language", language.get_item_text(index))
 
 		_show_notification("Langue enregistrée", "La traduction complète sera ajoutée dans une phase ultérieure.")
 
