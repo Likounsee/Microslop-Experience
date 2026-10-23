@@ -6185,8 +6185,93 @@ func _refresh_orchid_evidence_status(status: Label, total: int) -> void:
 
 
 func _open_recycle_bin() -> void:
+	var app := _open_window("Corbeille", "ÉLÉMENTS SUPPRIMÉS · STOCKAGE LOCAL SIMULÉ", Vector2(620, 460))
+	var content := _get_window_content(app)
+	if content == null:
+		return
+	for child in content.get_children():
+		child.queue_free()
 
-	_open_window("Corbeille", "La corbeille est vide.\n\nElle a tout de même besoin d'une mise à jour de 4,7 Go.", Vector2(440, 240))
+	var intro := Label.new()
+	intro.text = "La corbeille contient un élément que Microslop Update n’a pas réussi à faire disparaître. Tout est fictif : aucune donnée réelle n’est consultée ou supprimée."
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	intro.add_theme_color_override("font_color", Color("263247"))
+	content.add_child(intro)
+
+	var item := PanelContainer.new()
+	item.add_theme_stylebox_override("panel", _flat_style(Color("f3f6fb"), 9))
+	content.add_child(item)
+	var item_row := HBoxContainer.new()
+	item_row.add_theme_constant_override("separation", 12)
+	item.add_child(item_row)
+	var glyph := Label.new()
+	glyph.text = "📄"
+	glyph.add_theme_font_size_override("font_size", 28)
+	item_row.add_child(glyph)
+	var item_details := VBoxContainer.new()
+	item_details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	item_row.add_child(item_details)
+	var filename := Label.new()
+	filename.text = "ORCHID_deployment_trace.log"
+	filename.add_theme_color_override("font_color", Color("182235"))
+	item_details.add_child(filename)
+	var metadata := Label.new()
+	metadata.text = "Journal de déploiement · 18 Ko · déplacé aujourd’hui à 08:12"
+	metadata.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	metadata.add_theme_color_override("font_color", Color("66758b"))
+	item_details.add_child(metadata)
+
+	var status := Label.new()
+	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	status.add_theme_color_override("font_color", Color("356b47"))
+	content.add_child(status)
+
+	var evidence: Array = CampaignStore.load_evidence()
+	var restored := evidence.has("recycle_bin_orchid_log_restored")
+	var inspected := evidence.has("recycle_bin_orchid_log_inspected")
+	if restored:
+		status.text = "État : le journal a déjà été restauré et ajouté à votre dossier d’enquête."
+	elif inspected:
+		status.text = "État : métadonnées consultées. Le fichier reste dans la corbeille."
+	else:
+		status.text = "État : non examiné. Choisissez une action ; chaque décision est enregistrée dans la campagne."
+
+	var inspect := Button.new()
+	inspect.text = "Examiner les métadonnées"
+	inspect.pressed.connect(func():
+		CampaignStore.save_evidence("recycle_bin_orchid_log_inspected")
+		CampaignStore.save_case_answer("recycle_bin_orchid_log_action", 0)
+		status.text = "Métadonnées : le journal référence un canal STABLE, mais le paquet porte l’étiquette DEV_RING_INTERNAL. Cet écart justifie une vérification ; il ne prouve pas qui a autorisé le déploiement."
+		_show_notification("Métadonnées consultées", "Une incohérence de canal a été ajoutée aux indices ORCHID.")
+	)
+	content.add_child(inspect)
+
+	var restore := Button.new()
+	restore.text = "Restaurer le journal et conserver l’indice"
+	restore.pressed.connect(func():
+		CampaignStore.save_evidence("recycle_bin_orchid_log_restored")
+		CampaignStore.save_evidence("recycle_bin_orchid_log_inspected")
+		CampaignStore.save_case_answer("recycle_bin_orchid_log_action", 1)
+		status.text = "Journal restauré dans votre dossier fictif. L’indice est conservé ; la chaîne d’approbation reste à vérifier."
+		_show_notification("Indice restauré", "ORCHID_deployment_trace.log est désormais suivi dans votre enquête.")
+		restore.disabled = true
+	)
+	content.add_child(restore)
+
+	var discard := Button.new()
+	discard.text = "Ignorer le fichier"
+	discard.pressed.connect(func():
+		CampaignStore.save_case_answer("recycle_bin_orchid_log_action", 2)
+		status.text = "Vous avez choisi de ne pas conserver ce journal. Vous pourrez revenir examiner la corbeille plus tard."
+		_show_notification("Journal ignoré", "Aucune preuve n’a été ajoutée pour cette décision.")
+	)
+	content.add_child(discard)
+
+	var note := Label.new()
+	note.text = "Indice de campagne : le journal peut aider à comparer le canal de diffusion et l’approbation manquante."
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.add_theme_color_override("font_color", Color("66758b"))
+	content.add_child(note)
 
 func _open_ai() -> void:
 
