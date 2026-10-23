@@ -5351,7 +5351,7 @@ func _render_orchid_campaign_dashboard(summary: Label) -> void:
 	var report_review_label := "pas encore soumis" if report_review_status < 0 else ("refusé : contenu insuffisant" if report_review_status == 0 else ("révision demandée : faits, limites ou mesures à compléter" if report_review_status == 1 else "brouillon accepté pour revue (pas une résolution)"))
 	lines.append("REVUE DU RAPPORT : %s" % report_review_label)
 	var report_draft := CampaignStore.load_report_draft()
-	var report_words := report_draft.replace("\\r", " ").replace("\\n", " ").replace("\\t", " ").split(" ", false)
+	var report_words := report_draft.replace("\r", " ").replace("\n", " ").replace("\t", " ").split(" ", false)
 	lines.append("BROUILLON : %d caractères · %d mots enregistrés." % [report_draft.length(), report_words.size()])
 	var report_review_evidence := evidence.has("report_studio_reviewed") or evidence.has("report_studio_revision_requested")
 	if report_review_status >= 0 and not report_review_evidence:
