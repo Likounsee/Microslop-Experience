@@ -3858,9 +3858,9 @@ func _render_orchid_task_sprint(app: Control, state: Dictionary) -> void:
 		if score >= 16:
 			ending.text = "SPRINT TERMINÉ · OBJECTIF PROTÉGÉ\n\nScore de qualité : %d/26. Interruptions promotionnelles ouvertes : %d. Vous avez privilégié les tâches terminées et gardé les alertes distinctes des recommandations. Ce n’est pas une preuve scientifique, seulement le résultat de cette simulation." % [score, interrupted]
 		elif score >= 6:
-			ending.text = "SPRINT TERMINÉ · RÉSULTAT MITIGÉ\n\nScore de qualité : %d/10. Interruptions promotionnelles ouvertes : %d. Certaines décisions ont protégé le travail ; d’autres ont optimisé la réaction immédiate plutôt que le résultat." % [score, interrupted]
+			ending.text = "SPRINT TERMINÉ · RÉSULTAT MITIGÉ\n\nScore de qualité : %d/26. Interruptions promotionnelles ouvertes : %d. Certaines décisions ont protégé le travail ; d’autres ont optimisé la réaction immédiate plutôt que le résultat." % [score, interrupted]
 		else:
-			ending.text = "SPRINT TERMINÉ · LE TABLEAU DE BORD A GAGNÉ\n\nScore de qualité : %d/10. Interruptions promotionnelles ouvertes : %d. Vous avez généré de l’activité, mais le parcours a rendu plus difficile la réalisation des tâches." % [score, interrupted]
+			ending.text = "SPRINT TERMINÉ · LE TABLEAU DE BORD A GAGNÉ\n\nScore de qualité : %d/26. Interruptions promotionnelles ouvertes : %d. Vous avez généré de l’activité, mais le parcours a rendu plus difficile la réalisation des tâches." % [score, interrupted]
 		content.add_child(ending)
 		var archive := Button.new()
 		archive.text = "Examiner les preuves du sprint"
