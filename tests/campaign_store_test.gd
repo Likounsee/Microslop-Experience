@@ -223,6 +223,11 @@ func _run_tests() -> void:
 		_check(not revised_evidence.has("report_studio_reviewed"), "stale acceptance marker removed")
 		_check(revised_evidence.has("evidence_test"), "revision review preserves unrelated evidence")
 
+	# Saving an unchanged draft must keep its still-valid review.
+	_check(store.save_report_draft("Report to revise."), "save unchanged reviewed draft")
+	_check(store.load_case_answer("report_studio_reviewed") == 1, "unchanged draft preserves review outcome")
+	_check(store.load_evidence().has("report_studio_revision_requested"), "unchanged draft preserves revision marker")
+
 	# Finalizing different text must not retain a review for the earlier draft.
 	_check(store.save_report_ending("Final report differs from reviewed text.", "published"), "save changed final report and ending atomically")
 	_check(store.load_report_draft() == "Final report differs from reviewed text.", "load changed final report text")
