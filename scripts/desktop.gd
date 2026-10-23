@@ -72,6 +72,13 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if not key_event.pressed or key_event.echo:
 		return
 
+	if key_event.keycode == KEY_ESCAPE and key_event.ctrl_pressed:
+		_toggle_start_menu()
+		if is_instance_valid(_start_menu) and _start_menu.visible and is_instance_valid(_start_search):
+			_start_search.grab_focus()
+		key_event.accept()
+		return
+
 	if key_event.keycode == KEY_ESCAPE:
 		if is_instance_valid(_start_menu) and _start_menu.visible and is_instance_valid(_start_search) and not _start_search.text.is_empty():
 			_start_search.clear()
@@ -86,12 +93,6 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			_start_open = false
 			key_event.accept()
 		return
-
-	if key_event.keycode == KEY_ESCAPE and key_event.ctrl_pressed:
-		_toggle_start_menu()
-		if is_instance_valid(_start_menu) and _start_menu.visible and is_instance_valid(_start_search):
-			_start_search.grab_focus()
-		key_event.accept()
 
 func _notification(what: int) -> void:
 
