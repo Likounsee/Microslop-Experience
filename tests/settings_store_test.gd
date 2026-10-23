@@ -29,6 +29,14 @@ func _run_tests() -> void:
 	_check(not FileAccess.file_exists(absolute_path + ".tmp"), "successful save removes temporary file")
 	_check(not FileAccess.file_exists(absolute_path + ".bak"), "successful save removes backup file")
 
+	# Direct mutations must not bypass validation at the persistence boundary.
+	store.values["fps_limit"] = 121
+	_check(not store.save_settings(), "reject invalid in-memory values before writing")
+	var persisted_after_rejection := ConfigFile.new()
+	_check(persisted_after_rejection.load(TEST_SETTINGS_PATH) == OK, "invalid save leaves previous settings readable")
+	_check(persisted_after_rejection.get_value("settings", "fps_limit", -1) == 0, "invalid save preserves previously persisted value")
+	store.values["fps_limit"] = 0
+
 	_check(store.set_value_and_save("fps_limit", 120), "valid setting update reports successful persistence")
 	_check(store.values["fps_limit"] == 120, "valid setting update is retained after save")
 	var reloaded = SettingsStoreScript.new()
