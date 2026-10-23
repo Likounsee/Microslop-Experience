@@ -23,13 +23,38 @@ func _ready() -> void:
 
 func load_settings() -> void:
 	var config := ConfigFile.new()
-	var error := config.load(settings_path)
+	var error := _load_settings_config(config)
 	if error != OK:
 		return
 	for key in values.keys():
 		var candidate: Variant = config.get_value("settings", key, values[key])
 		if _is_valid_setting(key, candidate):
 			values[key] = candidate
+
+## Recovers an interrupted replacement only when the backup parses successfully.
+## If both files are damaged, leave them untouched for diagnosis rather than guessing.
+func _load_settings_config(config: ConfigFile) -> Error:
+	var load_error := config.load(settings_path)
+	if load_error == OK:
+		return OK
+
+	var absolute_target := ProjectSettings.globalize_path(settings_path)
+	var absolute_backup := ProjectSettings.globalize_path(settings_path + BACKUP_SUFFIX)
+	if not FileAccess.file_exists(absolute_backup):
+		return load_error
+
+	var backup_config := ConfigFile.new()
+	if backup_config.load(settings_path + BACKUP_SUFFIX) != OK:
+		return load_error
+
+	if FileAccess.file_exists(absolute_target):
+		var remove_error := DirAccess.remove_absolute(absolute_target)
+		if remove_error != OK:
+			return remove_error
+	var restore_error := DirAccess.rename_absolute(absolute_backup, absolute_target)
+	if restore_error != OK:
+		return restore_error
+	return config.load(settings_path)
 
 func _is_valid_setting(key: String, candidate: Variant) -> bool:
 	match key:
