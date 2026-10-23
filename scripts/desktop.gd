@@ -4528,6 +4528,10 @@ func _open_orchid_report_studio() -> void:
 	save.text = "Sauvegarder le brouillon"
 	save.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	actions.add_child(save)
+	var restore := Button.new()
+	restore.text = "Restaurer le brouillon"
+	restore.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	actions.add_child(restore)
 	content.add_child(actions)
 
 	var editor := TextEdit.new()
@@ -4542,6 +4546,14 @@ func _open_orchid_report_studio() -> void:
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	status.custom_minimum_size = Vector2(0, 42)
 	content.add_child(status)
+	restore.pressed.connect(func():
+		var saved_draft := CampaignStore.load_report_draft()
+		if saved_draft.is_empty():
+			status.text = "Aucun brouillon sauvegardé à restaurer. Le texte actuel n’a pas été modifié."
+			return
+		editor.text = saved_draft
+		status.text = "Dernier brouillon sauvegardé restauré (%d caractères)." % saved_draft.length()
+	)
 	assemble.pressed.connect(func():
 		var paragraphs: Array[String] = ["ORCHID — RAPPORT DE REVUE\nObjet : anomalies de diffusion et interruptions après mise à jour\nStatut : brouillon interne"]
 		var selected_count := 0
