@@ -78,11 +78,22 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		key_event.accept()
 		return
 
-	# Common Windows shortcuts: Win+E opens Explorer, Alt+F4 closes the focused app.
-	if key_event.keycode == KEY_E and key_event.meta_pressed:
-		_open_files()
-		key_event.accept()
-		return
+	# Common Windows shortcuts: Win+D shows the desktop, Win+E opens Explorer,
+	# Win+I opens Settings, and Alt+F4 closes the focused app.
+	if key_event.meta_pressed:
+		match key_event.keycode:
+			KEY_D:
+				_toggle_show_desktop()
+				key_event.accept()
+				return
+			KEY_E:
+				_open_files()
+				key_event.accept()
+				return
+			KEY_I:
+				_open_settings()
+				key_event.accept()
+				return
 
 	if key_event.keycode == KEY_F4 and key_event.alt_pressed:
 		var active_window: Control
