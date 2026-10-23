@@ -3151,7 +3151,7 @@ func _glyph_for_app_id(app_id: String) -> String:
 
 func _app_id_for_title(title: String) -> String:
 
-	var normalized := title.to_lower()
+	var normalized = title.to_lower()
 
 	if normalized.contains("browser"):
 
@@ -3479,7 +3479,7 @@ func _open_files() -> void:
 
 	search.text_changed.connect(func(query: String):
 
-		var normalized := query.strip_edges().to_lower()
+		var normalized = query.strip_edges().to_lower()
 
 		for index in range(quick_grid.get_child_count()):
 
@@ -3639,7 +3639,7 @@ func _set_explorer_location(path: String, address: LineEdit, heading: Label, sta
 
 			continue
 
-		var selected := str(nav_item.get_meta("explorer_path", "")) == clean_path
+		var selected = str(nav_item.get_meta("explorer_path", "")) == clean_path
 
 		nav_item.add_theme_stylebox_override("normal", _flat_style(Color("dce9f8") if selected else Color(0, 0, 0, 0), 6))
 
@@ -3801,7 +3801,7 @@ func _open_browser() -> void:
 func _open_orchid_task_sprint() -> void:
 	var app := _open_window("Sprint de travail — ORCHID", "SIMULATION ACTIVE · 13 TÂCHES · SAUVEGARDE LOCALE", Vector2(760, 620))
 	# Load stage, score, and interruption count from one disk snapshot so the resumed UI cannot mix save revisions.
-	var saved := CampaignStore.load_case_answers([
+	var saved = CampaignStore.load_case_answers([
 		"orchid_sprint_stage", "orchid_sprint_score", "orchid_sprint_interruptions"
 	])
 	var saved_score := int(saved["orchid_sprint_score"])
@@ -3849,7 +3849,7 @@ func _render_orchid_task_sprint(app: Control, state: Dictionary) -> void:
 	if stage >= data.size():
 		var score := int(state.get("score", 0))
 		var interrupted := int(state.get("interrupted", 0))
-		var ending := Label.new()
+		var ending = Label.new()
 		ending.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		ending.custom_minimum_size = Vector2(0, 170)
 		if score >= 16:
@@ -3887,19 +3887,19 @@ func _render_orchid_task_sprint(app: Control, state: Dictionary) -> void:
 	var brief := Label.new()
 	var brief_text := str(task["brief"])
 	if stage == 6:
-		var interruption_choice := CampaignStore.load_case_answer("orchid_sprint_choice_01")
+		var interruption_choice = CampaignStore.load_case_answer("orchid_sprint_choice_01")
 		if interruption_choice == 2:
 			brief_text += "\n\nCONSÉQUENCE : vous avez choisi le mode digest plus tôt. Le rapport doit vérifier que la baisse des interruptions n’a pas masqué une alerte système."
 		elif interruption_choice == 1:
 			brief_text += "\n\nCONSÉQUENCE : l’ouverture immédiate de la promotion a gonflé les retours comptés comme engagement. Comparez-les aux tâches terminées."
 	if stage == 9:
-		var alert_choice := CampaignStore.load_case_answer("orchid_sprint_choice_03")
+		var alert_choice = CampaignStore.load_case_answer("orchid_sprint_choice_03")
 		if alert_choice == 2:
 			brief_text += "\n\nRAPPEL DE L’INCIDENT : vous aviez choisi de couper toutes les alertes. Vérifiez que la nouvelle politique ne répète pas ce risque."
 		else:
 			brief_text += "\n\nRAPPEL DE L’INCIDENT : le contrôle doit distinguer les alertes système des promotions, même si certaines sollicitations semblaient urgentes."
 	if stage == 11:
-		var evidence_choice := CampaignStore.load_case_answer("orchid_sprint_choice_10")
+		var evidence_choice = CampaignStore.load_case_answer("orchid_sprint_choice_10")
 		if evidence_choice == 0:
 			brief_text += "\n\nCONSÉQUENCE : l’annexe indique déjà les sources et la pièce manquante. Le correctif peut être assorti d’un test précis."
 		else:
@@ -3920,7 +3920,7 @@ func _render_orchid_task_sprint(app: Control, state: Dictionary) -> void:
 	next.text = "Tâche suivante →"
 	next.disabled = true
 	content.add_child(next)
-	var saved := CampaignStore.load_case_answer("orchid_sprint_choice_%02d" % stage)
+	var saved = CampaignStore.load_case_answer("orchid_sprint_choice_%02d" % stage)
 	if saved >= 0 and saved < task["options"].size():
 		feedback.text = str(task["feedback"][saved])
 		next.disabled = false
@@ -3983,7 +3983,7 @@ func _render_orchid_task_sprint(app: Control, state: Dictionary) -> void:
 func _open_orchid_workflow_board() -> void:
 	var app := _open_window("Dossier transversal — ORCHID", "FIL DE TRAVAIL · 10 ÉTAPES · ÉTAT PERSISTANT", Vector2(780, 650))
 	# Resume the stage and score from the same save snapshot.
-	var saved := CampaignStore.load_case_answers(["orchid_workflow_stage", "orchid_workflow_score"])
+	var saved = CampaignStore.load_case_answers(["orchid_workflow_stage", "orchid_workflow_score"])
 	var saved_score := int(saved["orchid_workflow_score"])
 	var state := {
 		"stage": clampi(int(saved["orchid_workflow_stage"]), 0, 10),
@@ -4071,7 +4071,7 @@ func _render_orchid_workflow_board(app: Control, state: Dictionary) -> void:
 	var brief_text := str(step["brief"])
 	# Les choix antérieurs changent la situation des étapes suivantes.
 	if stage == 4:
-		var notification_choice := CampaignStore.load_case_answer("orchid_workflow_choice_01")
+		var notification_choice = CampaignStore.load_case_answer("orchid_workflow_choice_01")
 		if notification_choice == 0:
 			brief_text += "\n\nCONSÉQUENCE : le mode digest a réduit les interruptions. L’équipe a pu comparer les abandons sans recevoir chaque promotion en plein écran."
 		elif notification_choice == 1:
@@ -4079,7 +4079,7 @@ func _render_orchid_workflow_board(app: Control, state: Dictionary) -> void:
 		else:
 			brief_text += "\n\nCONSÉQUENCE : les cartes ont continué à interrompre les tests. Les clics sont nombreux, mais une partie correspond à des fermetures involontaires."
 	if stage == 5:
-		var collection_choice := CampaignStore.load_case_answer("orchid_workflow_choice_02")
+		var collection_choice = CampaignStore.load_case_answer("orchid_workflow_choice_02")
 		if collection_choice == 0:
 			brief_text += "\n\nSUITE DE L’ENQUÊTE : les deux captures datées sont conservées ; Lina peut décrire le contexte sans devoir reconstruire seule l’incident."
 		elif collection_choice == 1:
@@ -4087,7 +4087,7 @@ func _render_orchid_workflow_board(app: Control, state: Dictionary) -> void:
 		else:
 			brief_text += "\n\nSUITE DE L’ENQUÊTE : la publication prématurée a figé une explication avant l’entretien. Le support doit maintenant corriger publiquement l’incertitude."
 	if stage == 7:
-		var reproduction_choice := CampaignStore.load_case_answer("orchid_workflow_choice_03")
+		var reproduction_choice = CampaignStore.load_case_answer("orchid_workflow_choice_03")
 		if reproduction_choice == 0:
 			brief_text += "\n\nÉLÉMENT NOUVEAU : le test isolé a reproduit le recouvrement. Vous pouvez communiquer un constat précis, tout en limitant sa portée à la configuration testée."
 		elif reproduction_choice == 1:
@@ -4095,7 +4095,7 @@ func _render_orchid_workflow_board(app: Control, state: Dictionary) -> void:
 		else:
 			brief_text += "\n\nÉLÉMENT NOUVEAU : la vidéo ne reproduit pas le défaut sur la version actuelle. Il faut communiquer cette incertitude au lieu d’annoncer une cause confirmée."
 	if stage == 8:
-		var metric_choice := CampaignStore.load_case_answer("orchid_workflow_choice_04")
+		var metric_choice = CampaignStore.load_case_answer("orchid_workflow_choice_04")
 		if metric_choice == 0:
 			brief_text += "\n\nCONTRAINTE DE REMÉDIATION : le suivi inclut déjà l’achèvement des tâches et les refus respectés ; le correctif doit conserver ces indicateurs."
 		elif metric_choice == 1:
@@ -4118,7 +4118,7 @@ func _render_orchid_workflow_board(app: Control, state: Dictionary) -> void:
 	next.text = "Étape suivante →"
 	next.disabled = true
 	content.add_child(next)
-	var saved := CampaignStore.load_case_answer("orchid_workflow_choice_%02d" % stage)
+	var saved = CampaignStore.load_case_answer("orchid_workflow_choice_%02d" % stage)
 	if saved >= 0 and saved < 3:
 		feedback.text = str(step["feedback"][saved])
 		next.disabled = false
@@ -4173,7 +4173,7 @@ func _render_orchid_workflow_board(app: Control, state: Dictionary) -> void:
 func _open_orchid_crisis_tabletop() -> void:
 	var app := _open_window("Tabletop de crise — ORCHID", "EXERCICE D’INCIDENT · 12 DÉCISIONS · MODE LOCAL", Vector2(790, 650))
 	# Load stage, score, and first decision together to avoid inconsistent resume state.
-	var saved := CampaignStore.load_case_answers([
+	var saved = CampaignStore.load_case_answers([
 		"orchid_crisis_stage", "orchid_crisis_score", "orchid_crisis_choice_00"
 	])
 	var saved_score := int(saved["orchid_crisis_score"])
@@ -4221,7 +4221,7 @@ func _render_orchid_crisis_tabletop(app: Control, state: Dictionary) -> void:
 		var summary := Label.new()
 		summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		summary.custom_minimum_size = Vector2(0, 200)
-		var ending := "INCIDENT MAÎTRISÉ — DÉCISION TRAÇABLE"
+		var ending = "INCIDENT MAÎTRISÉ — DÉCISION TRAÇABLE"
 		if score < 8:
 			ending = "INCIDENT ENCORE FRAGILE — CONTRÔLES À REPRENDRE"
 		elif score < 18:
@@ -4274,7 +4274,7 @@ func _render_orchid_crisis_tabletop(app: Control, state: Dictionary) -> void:
 	next.text = "Décision suivante →"
 	next.disabled = true
 	content.add_child(next)
-	var saved := CampaignStore.load_case_answer("orchid_crisis_choice_%02d" % stage)
+	var saved = CampaignStore.load_case_answer("orchid_crisis_choice_%02d" % stage)
 	if saved >= 0 and saved < 3:
 		feedback.text = str(scenario["feedback"][saved])
 		next.disabled = false
@@ -4467,7 +4467,7 @@ func _open_orchid_report_studio() -> void:
 	for spec in section_specs:
 		var toggle := CheckButton.new()
 		toggle.text = str(spec["label"])
-		var saved := CampaignStore.load_case_answer(str(spec["id"]))
+		var saved = CampaignStore.load_case_answer(str(spec["id"]))
 		toggle.button_pressed = saved != 0
 		toggle.toggled.connect(func(enabled: bool, section_id: String = str(spec["id"])):
 			CampaignStore.save_case_answer(section_id, 1 if enabled else 0)
@@ -4700,7 +4700,7 @@ func _render_orchid_cinematic_scene(app: Control, state: Dictionary) -> void:
 		for scene_index in range(scenes.size()):
 			if not bool(scenes[scene_index].get("choice", false)):
 				continue
-			var picked := CampaignStore.load_case_answer("cinematic_choice_%02d" % scene_index)
+			var picked = CampaignStore.load_case_answer("cinematic_choice_%02d" % scene_index)
 			if picked == 0:
 				ending_score += 1
 				careful_choices += 1
@@ -4714,7 +4714,7 @@ func _render_orchid_cinematic_scene(app: Control, state: Dictionary) -> void:
 			outcome = "Vous avez privilégié les faits vérifiables, la prudence et les garde-fous. Le dossier est solide, mais le correctif doit encore être testé avant de parler de résolution."
 		elif ending_score >= 1:
 			outcome = "Vous avez construit une piste crédible, avec quelques compromis. Le dossier reste exploitable si vous distinguez clairement les faits des hypothèses."
-		var ending := Label.new()
+		var ending = Label.new()
 		ending.text = "SÉQUENCE TERMINÉE\n\nVous avez vu les %d scènes de « La mise à jour de trop ».\n\nBILAN DE VOS CHOIX\nDécisions prudentes : %d   ·   Décisions précipitées : %d\n\n%s\n\nLes décisions sont conservées dans la sauvegarde locale. Le chapitre reprend sur le bureau : explorez l’archive ORCHID et les outils d’enquête à votre rythme." % [scenes.size(), careful_choices, rushed_choices, outcome]
 		ending.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		ending.custom_minimum_size = Vector2(0, 210)
@@ -4769,7 +4769,7 @@ func _render_orchid_cinematic_scene(app: Control, state: Dictionary) -> void:
 	var variant_key := str(scene.get("dialogue_choice_key", ""))
 	var variants: Array = scene.get("dialogue_variants", [])
 	if not variant_key.is_empty() and variants.size() > 0:
-		var prior_choice := CampaignStore.load_case_answer(variant_key)
+		var prior_choice = CampaignStore.load_case_answer(variant_key)
 		if prior_choice >= 0 and prior_choice < variants.size():
 			dialogue.text = str(variants[prior_choice])
 	dialogue.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -4778,47 +4778,47 @@ func _render_orchid_cinematic_scene(app: Control, state: Dictionary) -> void:
 	content.add_child(dialogue)
 	var context_lines: Array[String] = []
 	if stage >= 10:
-		var file_choice := CampaignStore.load_case_answer("cinematic_choice_03")
+		var file_choice = CampaignStore.load_case_answer("cinematic_choice_03")
 		if file_choice == 0:
 			context_lines.append("TRACE CONSERVÉE · Les dix-huit fichiers restent une observation à vérifier, pas une preuve d’accès à des documents personnels.")
 		elif file_choice == 1:
 			context_lines.append("TRACE MANQUANTE · La première alerte a été fermée sans vérification ; le dossier devra reconnaître cette limite.")
-		var support_choice := CampaignStore.load_case_answer("cinematic_choice_07")
+		var support_choice = CampaignStore.load_case_answer("cinematic_choice_07")
 		if support_choice == 0:
 			context_lines.append("TÉMOIGNAGE · Le brouillon support est conservé avec prudence et peut être comparé aux journaux.")
 		elif support_choice == 1:
 			context_lines.append("TÉMOIGNAGE · La diffusion immédiate a précédé la vérification ; distinguez ce message des faits confirmés.")
-		var lea_choice := CampaignStore.load_case_answer("cinematic_choice_11")
+		var lea_choice = CampaignStore.load_case_answer("cinematic_choice_11")
 		if lea_choice == 0:
 			context_lines.append("LIEN AVEC LÉA · Vous avez proposé de comparer les heures et de garder les messages.")
 		elif lea_choice == 1:
 			context_lines.append("LIEN AVEC LÉA · Vous avez fermé la conversation ; les éléments qu’elle aurait pu partager ne sont pas dans votre dossier.")
-		var pause_choice := CampaignStore.load_case_answer("cinematic_choice_13")
+		var pause_choice = CampaignStore.load_case_answer("cinematic_choice_13")
 		if pause_choice == 0:
 			context_lines.append("SESSION · La pause locale a été demandée ; elle ne garantit pas que tous les composants la respecteront.")
 		elif pause_choice == 1:
 			context_lines.append("SESSION · Les suggestions ont été acceptées pour faire disparaître la fenêtre ; cela ne vaut pas consentement éclairé.")
-		var report_choice := CampaignStore.load_case_answer("cinematic_choice_18")
+		var report_choice = CampaignStore.load_case_answer("cinematic_choice_18")
 		if report_choice == 0:
 			context_lines.append("RAPPORT · Les faits et les hypothèses sont séparés ; la conclusion reste à confronter aux journaux.")
 		elif report_choice == 1:
 			context_lines.append("RAPPORT · Une affirmation non vérifiée fragilise le brouillon ; elle ne doit pas être présentée comme un fait.")
-		var sample_choice := CampaignStore.load_case_answer("cinematic_choice_31")
+		var sample_choice = CampaignStore.load_case_answer("cinematic_choice_31")
 		if sample_choice == 0:
 			context_lines.append("ÉCHANTILLON · Le protocole limite la collecte aux événements utiles et datés.")
 		elif sample_choice == 1:
 			context_lines.append("ÉCHANTILLON · Le risque de collecte excessive est signalé ; davantage de données ne signifie pas davantage de certitude.")
-		var guardrail_choice := CampaignStore.load_case_answer("cinematic_choice_34")
+		var guardrail_choice = CampaignStore.load_case_answer("cinematic_choice_34")
 		if guardrail_choice == 0:
 			context_lines.append("MISE EN PRODUCTION · Le dossier demande de mesurer les tâches terminées et le respect du refus.")
 		elif guardrail_choice == 1:
 			context_lines.append("MISE EN PRODUCTION · Les critères restent centrés sur les retours ; la réussite réelle n'est pas encore démontrée.")
-		var result_choice := CampaignStore.load_case_answer("cinematic_choice_36")
+		var result_choice = CampaignStore.load_case_answer("cinematic_choice_36")
 		if result_choice == 0:
 			context_lines.append("RÉSULTATS · Le premier point d'étape conserve ses limites et les mesures encore manquantes.")
 		elif result_choice == 1:
 			context_lines.append("RÉSULTATS · L'annonce prématurée est conservée dans le dossier ; un échantillon incomplet ne prouve pas une résolution.")
-		var final_choice := CampaignStore.load_case_answer("cinematic_choice_38")
+		var final_choice = CampaignStore.load_case_answer("cinematic_choice_38")
 		if final_choice == 0:
 			context_lines.append("DERNIÈRE SOLLICITATION · Vous avez refusé et conservé les preuves ; le suivi reste ouvert.")
 		elif final_choice == 1:
@@ -4847,7 +4847,7 @@ func _render_orchid_cinematic_scene(app: Control, state: Dictionary) -> void:
 		question.text = str(scene.get("question", ""))
 		question.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		content.add_child(question)
-		var saved_choice := CampaignStore.load_case_answer("cinematic_choice_%02d" % stage)
+		var saved_choice = CampaignStore.load_case_answer("cinematic_choice_%02d" % stage)
 		continue_button.disabled = saved_choice < 0
 		var options: Array = scene.get("options", [])
 		for i in range(options.size()):
@@ -5048,9 +5048,9 @@ func _orchid_workday_tasks() -> Array:
 		{"act":"ÉPILOGUE — LE BUREAU VOUS APPARTIENT-IL ?", "title":"12:15 · Une pause réelle", "brief":"Le bureau est calme. La messagerie n’affiche plus de badge rouge. Une notification propose un « résumé personnalisé de votre matinée ». Vous pouvez reprendre le travail, faire une pause ou consulter l’archive ORCHID.", "task":"Comment terminez-vous cette journée de travail ?", "options":["Enregistrer le rapport, puis fermer la session.", "Continuer à traiter les suggestions jusqu’à ce qu’il n’y en ait plus.", "Ouvrir l’archive et préparer le prochain contrôle."], "results":["Le rapport et vos notes restent sauvegardés. Le bureau s’assombrit doucement ; la journée n’a pas résolu le problème, mais vous avez décidé quand vous arrêter.", "Les suggestions continuent de se renouveler. Une carte annonce « Encore 3 recommandations », puis en affiche cinq nouvelles.", "L’archive s’ouvre sur la liste des questions encore sans réponse. Cette fois, la prochaine étape est un contrôle précis, pas une chasse au coupable."]}
 	]
 	# The epilogue reacts to earlier decisions instead of presenting one identical ending.
-	var report_decision := CampaignStore.load_case_answer("workday_choice_12")
-	var report_wording := CampaignStore.load_case_answer("workday_choice_10")
-	var witness_choice := CampaignStore.load_case_answer("workday_choice_11")
+	var report_decision = CampaignStore.load_case_answer("workday_choice_12")
+	var report_wording = CampaignStore.load_case_answer("workday_choice_10")
+	var witness_choice = CampaignStore.load_case_answer("workday_choice_11")
 	if report_decision == 0 and report_wording == 0 and witness_choice == 0:
 		tasks[tasks.size() - 1]["title"] = "16:40 · Le dossier circule"
 		tasks[tasks.size() - 1]["brief"] = "Le rapport sourcé a été transmis, les formulations précises ont été conservées et les témoignages ne sont pas nominatifs. Marc confirme qu’il demandera la référence d’approbation. Le système n’a pas reconnu de faute ; il a seulement créé une demande de suivi."
@@ -5082,7 +5082,7 @@ func _render_orchid_workday_stage(app: Control, state: Dictionary) -> void:
 	progress.show_percentage = false
 	content.add_child(progress)
 	if stage >= tasks.size():
-		var ending := Label.new()
+		var ending = Label.new()
 		ending.text = "JOURNÉE TERMINÉE\n\nVous avez traversé 41 moments interactifs, du premier incident au suivi du lendemain. Les décisions restent enregistrées et le bureau reprend la main. ORCHID n’est pas résolu par magie : vos notes, vos choix et les questions ouvertes constituent la suite du chapitre."
 		ending.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		ending.custom_minimum_size = Vector2(0, 150)
@@ -5122,7 +5122,7 @@ func _render_orchid_workday_stage(app: Control, state: Dictionary) -> void:
 	continue_button.custom_minimum_size = Vector2(0, 42)
 	continue_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	continue_button.disabled = true
-	var saved_choice := CampaignStore.load_case_answer("workday_choice_%02d" % stage)
+	var saved_choice = CampaignStore.load_case_answer("workday_choice_%02d" % stage)
 	var options: Array = task["options"]
 	var results: Array = task["results"]
 	if saved_choice >= 0 and saved_choice < options.size():
@@ -5350,19 +5350,19 @@ func _render_orchid_campaign_dashboard(summary: Label) -> void:
 		lines.append("%s : %d / %d" % [group["name"], count, group["ids"].size()])
 	var morning := PackedStringArray()
 	for stage in range(5):
-		var answer := CampaignStore.load_case_answer("morning_stage_%d" % stage)
+		var answer = CampaignStore.load_case_answer("morning_stage_%d" % stage)
 		morning.append("Étape %d : %s" % [stage + 1, "choix sauvegardé (%d)" % (answer + 1) if answer >= 0 else "non examinée"])
 	lines.append("")
 	lines.append("PARCOURS DU REDÉMARRAGE")
 	lines.append_array(morning)
-	var committee := CampaignStore.load_case_answer("incident_committee_decision")
+	var committee = CampaignStore.load_case_answer("incident_committee_decision")
 	var committee_names := ["Escalade avec rapport sourcé", "Surveillance avant publication", "Clôture comme incident de configuration"]
 	lines.append("")
 	lines.append("DÉCISION DU COMITÉ : %s" % (committee_names[committee] if committee >= 0 and committee < committee_names.size() else "aucune décision enregistrée"))
-	var ending := CampaignStore.load_ending()
+	var ending = CampaignStore.load_ending()
 	var ending_label := "rapport transmis" if ending == "published" else ("copie locale conservée" if ending == "preserved" else "non décidée")
 	lines.append("CONCLUSION : %s" % ending_label)
-	var cinematic_score := CampaignStore.load_case_answer("cinematic_outcome_score")
+	var cinematic_score = CampaignStore.load_case_answer("cinematic_outcome_score")
 	lines.append("")
 	lines.append("BILAN NARRATIF")
 	if evidence.has("cinematic_outcome_calculated"):
@@ -5393,11 +5393,11 @@ func _render_orchid_campaign_dashboard(summary: Label) -> void:
 		lines.append("Recherche navigateur enregistrée, mais aucune conservation ni transmission du journal n’est enregistrée.")
 	else:
 		lines.append("Aucun recoupement entre explorateur et navigateur n’est enregistré pour le moment.")
-	var report_review_status := CampaignStore.load_case_answer("report_studio_reviewed")
+	var report_review_status = CampaignStore.load_case_answer("report_studio_reviewed")
 	var report_review_label := "pas encore soumis" if report_review_status < 0 else ("refusé : contenu insuffisant" if report_review_status == 0 else ("révision demandée : faits, limites ou mesures à compléter" if report_review_status == 1 else ("brouillon accepté pour revue (pas une résolution)" if report_review_status == 2 else "état de revue invalide")))
 	lines.append("REVUE DU RAPPORT : %s" % report_review_label)
-	var report_draft := CampaignStore.load_report_draft()
-	var report_words := report_draft.replace("\r", " ").replace("\n", " ").replace("\t", " ").split(" ", false)
+	var report_draft = CampaignStore.load_report_draft()
+	var report_words = report_draft.replace("\r", " ").replace("\n", " ").replace("\t", " ").split(" ", false)
 	lines.append("BROUILLON : %d caractères · %d mots enregistrés." % [report_draft.length(), report_words.size()])
 	var accepted_review_evidence := evidence.has("report_studio_reviewed")
 	var revision_review_evidence := evidence.has("report_studio_revision_requested")
@@ -5591,7 +5591,7 @@ func _open_orchid_decision_board() -> void:
 					child.disabled = true
 		)
 		content.add_child(choice)
-	var prior_decision := CampaignStore.load_case_answer("incident_committee_decision")
+	var prior_decision = CampaignStore.load_case_answer("incident_committee_decision")
 	if prior_decision >= 0 and prior_decision < options.size():
 		report.text = "DERNIÈRE DÉCISION ENREGISTRÉE\n\n%s\n\nVous pouvez consulter les preuves, mais cette séance sauvegardée ne peut pas être votée une seconde fois dans la même fenêtre." % str(options[prior_decision][2])
 		for child in content.get_children():
@@ -5808,7 +5808,7 @@ func _open_orchid_casebook() -> void:
 	var theory := Button.new()
 	theory.text = "Reconstituer la chaîne des événements"
 	theory.pressed.connect(func():
-		var found := CampaignStore.load_evidence().size()
+		var found = CampaignStore.load_evidence().size()
 		if found < 4:
 			detail.text = "La reconstitution est prématurée : examinez au moins quatre pièces.\n\nPour l’instant, vous avez %d pièce(s) enregistrée(s)." % found
 		else:
@@ -5833,7 +5833,7 @@ func _open_orchid_notification_controls() -> void:
 	intro.custom_minimum_size = Vector2(0, 100)
 	content.add_child(intro)
 
-	var current := CampaignStore.load_case_answer("orchid_notification_mode")
+	var current = CampaignStore.load_case_answer("orchid_notification_mode")
 	if current < 0 or current > 2:
 		current = 0
 	var status := Label.new()
@@ -5848,7 +5848,7 @@ func _open_orchid_notification_controls() -> void:
 		{"label":"Mode digest — garder dans l’historique", "description":"Les promotions n’interrompent plus l’écran ; elles restent consultables dans le centre de notifications."}
 	]
 	var refresh := func() -> void:
-		var selected := CampaignStore.load_case_answer("orchid_notification_mode")
+		var selected = CampaignStore.load_case_answer("orchid_notification_mode")
 		if selected < 0 or selected > 2:
 			selected = 0
 		status.text = "POLITIQUE ACTIVE : %s\n%s" % [str(modes[selected]["label"]), str(modes[selected]["description"])]
@@ -5886,7 +5886,7 @@ func _open_orchid_notification_controls() -> void:
 	var promo := Button.new()
 	promo.text = "Envoyer une notification promotionnelle de test"
 	promo.pressed.connect(func() -> void:
-		var mode := CampaignStore.load_case_answer("orchid_notification_mode")
+		var mode = CampaignStore.load_case_answer("orchid_notification_mode")
 		_show_notification("Suggestion personnalisée", "Un article de productivité sponsorisé vous attend. Cliquez maintenant pour prolonger votre expérience.")
 		if mode == 1:
 			result.text = "RÉSULTAT : toast bloqué. Le compteur de preuve « promotion bloquée » a été mis à jour."
@@ -5942,7 +5942,7 @@ func _open_orchid_experiment_simulator() -> void:
 	task_select.add_item("Rejoindre une réunion à l’heure")
 	task_select.add_item("Désactiver les notifications")
 	task_select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var saved_task := CampaignStore.load_case_answer("orchid_sim_task")
+	var saved_task = CampaignStore.load_case_answer("orchid_sim_task")
 	task_select.select(saved_task if saved_task >= 0 and saved_task < 3 else 0)
 	config.add_child(task_select)
 
@@ -5954,7 +5954,7 @@ func _open_orchid_experiment_simulator() -> void:
 	trigger_select.add_item("Rappel dès que l’utilisateur commence")
 	trigger_select.add_item("Rappel après deux minutes sans activité")
 	trigger_select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var saved_trigger := CampaignStore.load_case_answer("orchid_sim_trigger")
+	var saved_trigger = CampaignStore.load_case_answer("orchid_sim_trigger")
 	trigger_select.select(saved_trigger if saved_trigger >= 0 and saved_trigger < 3 else 1)
 	config.add_child(trigger_select)
 
@@ -5966,7 +5966,7 @@ func _open_orchid_experiment_simulator() -> void:
 	metric_select.add_item("Maximiser les tâches terminées")
 	metric_select.add_item("Réduire les interruptions non souhaitées")
 	metric_select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var saved_metric := CampaignStore.load_case_answer("orchid_sim_metric")
+	var saved_metric = CampaignStore.load_case_answer("orchid_sim_metric")
 	metric_select.select(saved_metric if saved_metric >= 0 and saved_metric < 3 else 0)
 	config.add_child(metric_select)
 
@@ -6126,7 +6126,7 @@ func _open_orchid_lab() -> void:
 		feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		feedback.add_theme_color_override("font_color", Color("356b47"))
 		stack.add_child(feedback)
-		var saved_answer := CampaignStore.load_case_answer(str(puzzle["id"]))
+		var saved_answer = CampaignStore.load_case_answer(str(puzzle["id"]))
 		if saved_answer == int(puzzle["correct"]):
 			feedback.text = "DOSSIER VALIDÉ — " + str(puzzle["explain"])
 		elif saved_answer >= 0:
@@ -6173,7 +6173,7 @@ func _select_orchid_evidence(entry: Dictionary, detail: Label, status: Label, to
 
 
 func _refresh_orchid_evidence_status(status: Label, total: int) -> void:
-	var found := CampaignStore.load_evidence().size()
+	var found = CampaignStore.load_evidence().size()
 	status.text = "PIÈCES EXAMINÉES : %d / %d — progression sauvegardée" % [mini(found, total), total]
 
 
@@ -6192,7 +6192,7 @@ func _open_ai() -> void:
 		return
 
 	var evidence: Array = CampaignStore.load_evidence()
-	var morning_choice := CampaignStore.load_case_answer("morning_stage_4")
+	var morning_choice = CampaignStore.load_case_answer("morning_stage_4")
 	var audit_complete := evidence.has("audit_wifi") and evidence.has("audit_exit") and evidence.has("audit_answer")
 	var response := Label.new()
 	if evidence.has("compliance_finding") and audit_complete:
@@ -6354,7 +6354,7 @@ func _render_orchid_morning_summary(app: Control, state: Dictionary) -> void:
 		"Indices de cette séquence :"
 	])
 	for stage in range(5):
-		var answer := CampaignStore.load_case_answer("morning_stage_%d" % stage)
+		var answer = CampaignStore.load_case_answer("morning_stage_%d" % stage)
 		lines.append("Étape %d : %s" % [stage + 1, "choix enregistré (%d)" % (answer + 1) if answer >= 0 else "aucun choix retrouvé"])
 	lines.append("")
 	lines.append("Les traces conservées dans le dossier sont des éléments fictifs du jeu. La chronologie suggère une mise en production anormale et une stratégie de rétention ; elle ne permet pas encore d’attribuer la décision à une personne.")
@@ -6482,9 +6482,9 @@ func _render_deployment_stage(app: Control, stage: int) -> void:
 			choice.pressed.connect(_choose_deployment_answer.bind(app, stage, choice_index))
 			content.add_child(choice)
 	else:
-		var previous_channel := CampaignStore.load_case_answer("deployment_channel")
-		var previous_install := CampaignStore.load_case_answer("deployment_install")
-		var previous_trace := CampaignStore.load_case_answer("deployment_trace")
+		var previous_channel = CampaignStore.load_case_answer("deployment_channel")
+		var previous_install = CampaignStore.load_case_answer("deployment_install")
+		var previous_trace = CampaignStore.load_case_answer("deployment_trace")
 		var conclusion := Label.new()
 		conclusion.text = "VOTRE DOSSIER PROVISOIRE\nCanal : %s\nInterprétation : %s\nPiste suivie : %s\n\nConclusion : une préversion destinée aux développeurs a atteint un appareil du canal stable. L’explication la plus prudente est une erreur de ciblage ou de configuration au départ. La décision de conserver le composant après son arrivée est distincte et plus suspecte. Les journaux disponibles ne permettent pas encore de trancher entre négligence, expérimentation tolérée et déploiement délibéré." % [
 			["canal incorrect repéré", "signature jugée suffisante", "avertissement ignoré"][clampi(previous_channel, 0, 2)],
@@ -6811,7 +6811,7 @@ func _show_notification(title: String, message: String) -> void:
 
 	# ORCHID controls affect promotional toasts in the simulated desktop. System-critical
 	# notices still pass through. Modes: 0=normal, 1=block promo, 2=history-only digest.
-	var orchid_mode := CampaignStore.load_case_answer("orchid_notification_mode")
+	var orchid_mode = CampaignStore.load_case_answer("orchid_notification_mode")
 	var notification_text := (title + " " + message).to_lower()
 	var is_promotional := notification_text.contains("suggestion") or notification_text.contains("sponsor") or notification_text.contains("productivité") or notification_text.contains("personnalisée") or notification_text.contains("article") or notification_text.contains("offre")
 	if is_promotional and orchid_mode == 1:
@@ -6957,7 +6957,7 @@ func _update_mission() -> void:
 	]
 	_mission_label.text = missions[mini(_mission_step, missions.size() - 1)]
 	if _mission_step >= 5:
-		var saved_ending := CampaignStore.load_ending()
+		var saved_ending = CampaignStore.load_ending()
 		if saved_ending == "published":
 			_mission_label.text += "\n\nFIN ENREGISTRÉE : rapport transmis."
 		elif saved_ending == "preserved":
