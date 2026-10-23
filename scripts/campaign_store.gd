@@ -58,15 +58,20 @@ func _save_config_atomic(config: ConfigFile) -> Error:
 
 	var had_previous := FileAccess.file_exists(target_path)
 	if had_previous:
-		# Never discard the only known-good backup before validating the current primary.
+		# The primary must be valid before replacing any existing backup: it may be
+		# the only recoverable copy if the backup was left corrupt by an old crash.
 		if FileAccess.file_exists(backup_path):
-			var old_backup := ConfigFile.new()
-			if old_backup.load(backup_path) == OK:
-				DirAccess.remove_absolute(backup_path)
-			else:
+			var current_primary := ConfigFile.new()
+			var primary_error := current_primary.load(target_path)
+			if primary_error != OK:
 				DirAccess.remove_absolute(temporary_path)
-				push_warning("Une sauvegarde de secours ORCHID existe mais est illisible.")
-				return ERR_FILE_CORRUPT
+				push_warning("La sauvegarde ORCHID existante est illisible ; le fichier de secours est conservé.")
+				return primary_error
+			var remove_backup_error := DirAccess.remove_absolute(backup_path)
+			if remove_backup_error != OK:
+				DirAccess.remove_absolute(temporary_path)
+				push_warning("Impossible de nettoyer l'ancien fichier de secours ORCHID : %s" % remove_backup_error)
+				return remove_backup_error
 		var backup_error := DirAccess.rename_absolute(target_path, backup_path)
 		if backup_error != OK:
 			DirAccess.remove_absolute(temporary_path)
