@@ -5348,15 +5348,20 @@ func _render_orchid_campaign_dashboard(summary: Label) -> void:
 	else:
 		lines.append("Aucun recoupement entre explorateur et navigateur n’est enregistré pour le moment.")
 	var report_review_status := CampaignStore.load_case_answer("report_studio_reviewed")
-	var report_review_label := "pas encore soumis" if report_review_status < 0 else ("refusé : contenu insuffisant" if report_review_status == 0 else ("révision demandée : faits, limites ou mesures à compléter" if report_review_status == 1 else "brouillon accepté pour revue (pas une résolution)"))
+	var report_review_label := "pas encore soumis" if report_review_status < 0 else ("refusé : contenu insuffisant" if report_review_status == 0 else ("révision demandée : faits, limites ou mesures à compléter" if report_review_status == 1 else ("brouillon accepté pour revue (pas une résolution)" if report_review_status == 2 else "état de revue invalide")))
 	lines.append("REVUE DU RAPPORT : %s" % report_review_label)
 	var report_draft := CampaignStore.load_report_draft()
 	var report_words := report_draft.replace("\r", " ").replace("\n", " ").replace("\t", " ").split(" ", false)
 	lines.append("BROUILLON : %d caractères · %d mots enregistrés." % [report_draft.length(), report_words.size()])
-	var report_review_evidence := evidence.has("report_studio_reviewed") or evidence.has("report_studio_revision_requested")
-	if report_review_status >= 0 and not report_review_evidence:
-		lines.append("COHÉRENCE : état de revue présent sans preuve correspondante. Rouvrez le studio et soumettez à nouveau le rapport.")
-	elif report_review_status < 0 and report_review_evidence:
+	var accepted_review_evidence := evidence.has("report_studio_reviewed")
+	var revision_review_evidence := evidence.has("report_studio_revision_requested")
+	if report_review_status == 2 and (not accepted_review_evidence or revision_review_evidence):
+		lines.append("COHÉRENCE : le résultat accepté ne correspond pas aux preuves du dossier. Rouvrez le studio et soumettez à nouveau le rapport.")
+	elif (report_review_status == 0 or report_review_status == 1) and (not revision_review_evidence or accepted_review_evidence):
+		lines.append("COHÉRENCE : le résultat de refus ou de révision ne correspond pas aux preuves du dossier. Rouvrez le studio et soumettez à nouveau le rapport.")
+	elif report_review_status > 2:
+		lines.append("COHÉRENCE : le résultat enregistré est invalide. Soumettez à nouveau le rapport depuis le studio.")
+	elif report_review_status < 0 and (accepted_review_evidence or revision_review_evidence):
 		lines.append("COHÉRENCE : une ancienne preuve de revue existe, mais aucun résultat actuel n’est enregistré. Soumettez à nouveau le brouillon si nécessaire.")
 	summary.text = "\n".join(lines)
 
