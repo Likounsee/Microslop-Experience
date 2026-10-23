@@ -154,6 +154,7 @@ func _run_tests() -> void:
 		"case_test": 2,
 		"cinematic_choice_02": 1,
 		"cinematic_choice_38": 2,
+		"cinematic_choice_99": 1,
 		"cinematic_outcome_score": 17,
 		"orchid_lea_support_status": 1,
 		"orchid_report_quality": 1,
@@ -165,6 +166,7 @@ func _run_tests() -> void:
 	})
 	reset_fixture.set_value("campaign", "cinematic_choice_02", 1)
 	reset_fixture.set_value("campaign", "cinematic_choice_38", 2)
+	reset_fixture.set_value("campaign", "cinematic_choice_99", 1)
 	reset_fixture.set_value("campaign", "cinematic_outcome_score", 17)
 	reset_fixture.set_value("campaign", "quick_settings_mode", "digest")
 	reset_fixture.set_value("campaign", "cinematic_baseline", {
@@ -184,10 +186,12 @@ func _run_tests() -> void:
 		_check(not reset_evidence.has("cinematic_outcome_calculated"), "cinematic reset removes calculated outcome evidence")
 		_check(not reset_result.has_section_key("campaign", "cinematic_choice_02"), "cinematic reset clears early choice")
 		_check(not reset_result.has_section_key("campaign", "cinematic_choice_38"), "cinematic reset clears epilogue choice")
+		_check(not reset_result.has_section_key("campaign", "cinematic_choice_99"), "cinematic reset clears future top-level scene choice")
 		_check(not reset_result.has_section_key("campaign", "cinematic_outcome_score"), "cinematic reset clears outcome score")
 		var reset_answers: Dictionary = reset_result.get_value("campaign", "case_answers", {})
 		_check(not reset_answers.has("cinematic_choice_02"), "cinematic reset clears persisted early answer")
 		_check(not reset_answers.has("cinematic_choice_38"), "cinematic reset clears persisted epilogue answer")
+		_check(not reset_answers.has("cinematic_choice_99"), "cinematic reset clears future persisted scene answer")
 		_check(not reset_answers.has("cinematic_outcome_score"), "cinematic reset clears persisted outcome score")
 		_check(not reset_answers.has("orchid_lea_support_status"), "cinematic reset clears derived testimony status")
 		_check(not reset_answers.has("orchid_report_quality"), "cinematic reset clears derived report status")
