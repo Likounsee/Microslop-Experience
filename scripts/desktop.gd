@@ -4540,6 +4540,34 @@ func _open_orchid_report_studio() -> void:
 				recycle_report += "Le journal ORCHID a été inspecté dans la corbeille simulée, mais aucune restauration n’est enregistrée. Il peut orienter les vérifications ; traitez son contenu comme une piste consultée, pas comme une pièce restaurée dans le dossier.\n"
 			paragraphs.append(recycle_report)
 			selected_count += 1
+		var committee_decision := CampaignStore.load_case_answer("incident_committee_decision")
+		if committee_decision >= 0:
+			var committee_evidence: Array = CampaignStore.load_evidence()
+			var trace_count := 0
+			for trace_id in ["night_rule", "night_download", "night_install", "night_activation", "night_notification"]:
+				if committee_evidence.has(trace_id):
+					trace_count += 1
+			var approval_missing := not committee_evidence.has("compliance_approval")
+			var decision_section := "DÉCISION DU COMITÉ ET SUITES PROPOSÉES\n"
+			match committee_decision:
+				0:
+					decision_section += "Orientation choisie : escalade documentée. Préserver les journaux originaux et demander une revue indépendante avant toute attribution. Couverture chronologique actuelle : %d/5." % trace_count
+					if trace_count < 4 or approval_missing:
+						decision_section += "\nL’escalade reste provisoire : compléter la chronologie et retrouver l’approbation manquante avant d’affirmer que le dossier est complet."
+					else:
+						decision_section += "\nLe dossier est mieux étayé, mais les traces ne désignent toujours pas un responsable individuel ni son intention."
+				1:
+					decision_section += "Orientation choisie : surveillance avant publication. Maintenir une copie vérifiable et organiser une reproduction contrôlée ; la surveillance ne vaut pas résolution de l’anomalie."
+					if approval_missing:
+						decision_section += "\nPriorité : retrouver la référence d’approbation absente des pièces consultées."
+					if trace_count < 5:
+						decision_section += "\nLa chronologie reste incomplète (%d/5 traces) ; ne pas publier de conclusion définitive." % trace_count
+				2:
+					decision_section += "Orientation choisie : clôture comme incident de configuration. Cette décision administrative ne supprime pas les éléments observés et ne démontre pas que l’incident est résolu."
+					if approval_missing or trace_count < 5:
+						decision_section += "\nALERTE DE CLÔTURE PRÉMATURÉE : approbation manquante : %s ; chronologie : %d/5. Garder ces lacunes explicitement dans le compte rendu." % ["oui" if approval_missing else "non", trace_count]
+				paragraphs.append(decision_section)
+			selected_count += 1
 		if selected_count == 0:
 			paragraphs.append("Aucun élément n’a été sélectionné. Choisissez au moins une section avant de transmettre une conclusion.")
 		paragraphs.append("CONCLUSION PROVISOIRE\nLes traces justifient une revue documentée. Les causes exactes et les responsabilités individuelles ne sont pas établies par ce seul dossier.")
@@ -5380,6 +5408,19 @@ func _render_orchid_campaign_dashboard(summary: Label) -> void:
 	var ending = CampaignStore.load_ending()
 	var ending_label := "rapport transmis" if ending == "published" else ("copie locale conservée" if ending == "preserved" else "non décidée")
 	lines.append("CONCLUSION : %s" % ending_label)
+	if committee >= 0 and committee < committee_names.size():
+		var trace_count := 0
+		for trace_id in ["night_rule", "night_download", "night_install", "night_activation", "night_notification"]:
+			if evidence.has(trace_id):
+				trace_count += 1
+		var approval_missing := not evidence.has("compliance_approval")
+		match committee:
+			0:
+				lines.append("SUITE DU COMITÉ : escalade documentée ; chronologie %d/5. %s" % [trace_count, "Escalade provisoire : approbation à retrouver." if approval_missing else "L’approbation est présente dans les pièces, sans établir l’identité du responsable."])
+			1:
+				lines.append("SUITE DU COMITÉ : surveillance avant publication ; conserver les traces et organiser une reproduction contrôlée. %s" % ("L’approbation reste introuvable." if approval_missing else "Vérifier encore la chaîne de déploiement avant publication."))
+			2:
+				lines.append("RISQUE DE CLÔTURE : %sChronologie %d/5. La clôture administrative ne prouve pas la résolution de l’incident." % ["approbation manquante ; " if approval_missing else "", trace_count])
 	var cinematic_score = CampaignStore.load_case_answer("cinematic_outcome_score")
 	lines.append("")
 	lines.append("BILAN NARRATIF")
