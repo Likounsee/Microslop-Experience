@@ -7068,22 +7068,97 @@ func _execute_run_command(command_edit: LineEdit, result_label: Label) -> void:
 
 
 func _open_task_manager() -> void:
-	var app := _open_window("Gestionnaire des tâches", "Processus\n\nMicroslop Experience     En cours d’exécution\nBureau Windows simulé     En cours d’exécution\nUtilisation CPU : non mesurée\nUtilisation mémoire : non mesurée\n\nLes statistiques matérielles réelles ne sont pas disponibles dans cette simulation.", Vector2(540, 360))
+	var app := _open_window("Gestionnaire des tâches", "Gérez les fenêtres ouvertes dans la simulation.", Vector2(620, 420))
 	var content := _get_window_content(app)
 	if content == null:
 		return
+	for child in content.get_children():
+		content.remove_child(child)
+		child.queue_free()
+	var heading := Label.new()
+	heading.text = "Applications et fenêtres"
+	heading.add_theme_color_override("font_color", Color("24344d"))
+	heading.add_theme_font_size_override("font_size", 18)
+	content.add_child(heading)
+	var description := Label.new()
+	description.text = "État des fenêtres simulées. Les mesures CPU et mémoire du système réel ne sont pas accessibles."
+	description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	description.add_theme_color_override("font_color", Color("596780"))
+	content.add_child(description)
+	var list := VBoxContainer.new()
+	list.name = "TaskManagerProcessList"
+	list.add_theme_constant_override("separation", 5)
+	content.add_child(list)
 	var refresh_button := Button.new()
-	refresh_button.text = "Actualiser la liste"
+	refresh_button.text = "Actualiser"
 	refresh_button.pressed.connect(func():
-		if is_instance_valid(app):
-			var refreshed_content := _get_window_content(app)
-			if refreshed_content != null:
-				for child in refreshed_content.get_children():
-					if child is Label and child.text.begins_with("Processus"):
-						child.text = "Processus\n\nMicroslop Experience     En cours d’exécution\nBureau Windows simulé     En cours d’exécution\nUtilisation CPU : non mesurée\nUtilisation mémoire : non mesurée\n\nDernière actualisation : maintenant"
-						break
+		if is_instance_valid(app) and is_instance_valid(list):
+			_refresh_task_manager_processes(list, app)
 	)
 	content.add_child(refresh_button)
+	_refresh_task_manager_processes(list, app)
+
+
+func _refresh_task_manager_processes(list: VBoxContainer, task_manager: Control) -> void:
+	for child in list.get_children():
+		list.remove_child(child)
+		child.queue_free()
+	if not is_instance_valid(_window_layer):
+		return
+	var process_count := 0
+	for candidate in _window_layer.get_children():
+		if not candidate is Control or not candidate.has_meta("app_id"):
+			continue
+		var process_window := candidate as Control
+		process_count += 1
+		var app_id := str(process_window.get_meta("app_id", ""))
+		var title := str(process_window.get_meta("window_title", app_id))
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		list.add_child(row)
+		var process_label := Label.new()
+		var state_text := "En cours d’exécution" if process_window.visible else "Réduite"
+		if process_window.visible and app_id == _active_app_id:
+			state_text = "Au premier plan"
+		process_label.text = "%s — %s" % [title, state_text]
+		process_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		process_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		process_label.add_theme_color_override("font_color", Color("34445d"))
+		process_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		row.add_child(process_label)
+		var switch_button := Button.new()
+		switch_button.text = "Basculer" if not process_window.visible else "Afficher"
+		switch_button.disabled = not process_window.visible
+		switch_button.pressed.connect(func():
+			if is_instance_valid(process_window):
+				if process_window.has_method("restore_from_taskbar") and not process_window.visible:
+					process_window.call("restore_from_taskbar")
+				process_window.move_to_front()
+				_active_app_id = app_id
+				if process_window.has_signal("window_activated"):
+					process_window.emit_signal("window_activated")
+				_update_taskbar_indicators()
+		)
+		row.add_child(switch_button)
+		var end_button := Button.new()
+		end_button.text = "Terminer"
+		end_button.disabled = process_window == task_manager
+		end_button.pressed.connect(func():
+			if is_instance_valid(process_window) and process_window != task_manager:
+				process_window.queue_free()
+				if is_instance_valid(list):
+					_refresh_task_manager_processes(list, task_manager)
+		)
+		row.add_child(end_button)
+	if process_count == 0:
+		var empty_label := Label.new()
+		empty_label.text = "Aucune fenêtre ouverte."
+		list.add_child(empty_label)
+	var summary := Label.new()
+	summary.text = "Fenêtres suivies : %d · CPU et mémoire réels : indisponibles dans cette simulation." % process_count
+	summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	summary.add_theme_color_override("font_color", Color("596780"))
+	list.add_child(summary)
 
 func _open_snipping_tool() -> void:
 	var app := _open_window("Outil Capture d’écran", "Capturez le bureau simulé et enregistrez l’image dans les données locales du jeu.", Vector2(500, 270))
