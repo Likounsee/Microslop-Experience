@@ -6707,11 +6707,11 @@ func _open_settings() -> void:
 
 	volume.value_changed.connect(func(value: float):
 
-		SettingsStore.values["master_volume"] = value / 100.0
+		if not SettingsStore.set_value_and_save("master_volume", value / 100.0):
+			volume.value = float(SettingsStore.values.get("master_volume", 0.8)) * 100.0
+			_show_notification("Paramètre non enregistré", "Le volume précédent a été restauré.")
 
 		SettingsStore.apply_audio_settings()
-
-		SettingsStore.save_settings()
 
 	)
 
