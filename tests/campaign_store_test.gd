@@ -244,6 +244,26 @@ func _run_tests() -> void:
 	_check(not FileAccess.file_exists(backup_path), "successful save removes stale corrupt backup")
 	_check(not FileAccess.file_exists(absolute_path + ".tmp"), "successful save cleans temporary file after corrupt backup cleanup")
 
+	# If both copies are malformed, keep them intact rather than destroying recovery evidence.
+	var known_good_path := absolute_path + ".known_good"
+	_check(DirAccess.copy_absolute(absolute_path, known_good_path) == OK, "preserve known-good fixture before dual-corruption test")
+	var malformed_primary_text := "[campaign\nprimary = broken"
+	var malformed_backup_text := "[campaign\nbackup = broken"
+	var malformed_primary_file := FileAccess.open(absolute_path, FileAccess.WRITE)
+	if malformed_primary_file != null:
+		malformed_primary_file.store_string(malformed_primary_text)
+		malformed_primary_file.close()
+	var malformed_backup_file := FileAccess.open(backup_path, FileAccess.WRITE)
+	if malformed_backup_file != null:
+		malformed_backup_file.store_string(malformed_backup_text)
+		malformed_backup_file.close()
+	_check(store.load_case_answer("backup_recovery_fixture") == -1, "reject load when both primary and backup are malformed")
+	_check(FileAccess.get_file_as_string(absolute_path) == malformed_primary_text, "preserve malformed primary for diagnosis")
+	_check(FileAccess.get_file_as_string(backup_path) == malformed_backup_text, "preserve malformed backup for diagnosis")
+	_check(DirAccess.remove_absolute(absolute_path) == OK, "remove malformed primary after dual-corruption test")
+	_check(DirAccess.rename_absolute(known_good_path, absolute_path) == OK, "restore known-good fixture after dual-corruption test")
+	_check(DirAccess.remove_absolute(backup_path) == OK, "remove malformed backup after dual-corruption test")
+
 	# A directory at the save path simulates a location ConfigFile cannot read or overwrite.
 	if FileAccess.file_exists(absolute_path):
 		DirAccess.remove_absolute(absolute_path)
