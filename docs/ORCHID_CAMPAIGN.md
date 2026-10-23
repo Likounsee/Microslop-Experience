@@ -337,6 +337,12 @@ Lorsqu’un rapport est soumis plusieurs fois, la sauvegarde reconstruit les mar
 Validation : le contrôle automatique Godot doit être vérifié sur le commit correspondant. Le scénario à jouer manuellement consiste à soumettre un rapport incomplet, le corriger puis le soumettre à nouveau, et confirmer que le tableau et le dossier ne présentent plus l’ancien résultat comme s’il était encore courant.
 
 
+### Lecture défensive des données de campagne
+
+Les fonctions de lecture valident maintenant aussi les valeurs sauvegardées : une version de campagne d’un type inattendu retombe sur la valeur historique par défaut, les réponses de dossier hors de la plage autorisée sont ignorées, et un brouillon ou une conclusion de type invalide n’est pas exposé à l’interface. Le chargement des preuves filtre les identifiants vides ou dupliqués. La capture de l’état initial cinématique accepte également une sauvegarde dont la section de référence a un type inattendu, sans provoquer de conversion de dictionnaire invalide.
+
+Ces protections limitent les erreurs de type sur des sauvegardes altérées ; elles ne remplacent pas une validation complète du fichier ni un test de reprise en jeu.
+
 ### Sauvegardes de campagne — protection contre les fichiers illisibles
 
 Les écritures de progression, de conclusion, de preuves, de réponses et de brouillon relisent désormais le fichier existant avant de le modifier. Une sauvegarde absente reste autorisée pour une nouvelle partie, mais une erreur de lecture différente de « fichier introuvable » interrompt l’écriture au lieu de remplacer potentiellement les données par un fichier neuf. Les réponses de dossier dont la collection sauvegardée n’est pas un dictionnaire sont traitées comme une collection vide plutôt que de provoquer une conversion de type invalide. La progression en mémoire n’est actualisée qu’après la réussite de l’écriture sur disque.
