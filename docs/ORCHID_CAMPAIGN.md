@@ -279,3 +279,12 @@ La dernière sollicitation de l’épilogue est également enregistrée comme re
 ### Conséquences narratives visibles
 
 À partir du deuxième mouvement de la séquence cinématique, un panneau « État du dossier » récapitule les conséquences de plusieurs choix antérieurs : traitement de l’alerte des fichiers, prudence autour du brouillon support, réponse à Léa et choix de la pause locale. Les scènes rappellent les limites des éléments disponibles au lieu de transformer un choix en vérité absolue. Ces rappels sont dérivés des réponses sauvegardées localement ; ils n’ajoutent aucune télémétrie réelle.
+
+### Sprint — rejeu complet et conséquences tardives visibles
+
+La fonction de rejeu de la cinématique efface désormais les 39 emplacements de choix (indices 0 à 38), y compris ceux de l’épilogue, et retire les preuves propres aux choix cinématiques. Les indicateurs de conséquence directement écrits par cette séquence sont réinitialisés afin qu’un nouveau parcours ne récupère pas involontairement l’ancien résultat. Les autres preuves, le brouillon du rapport, la conclusion de campagne et la progression de mission sont conservés.
+
+Le panneau « État du dossier » expose aussi les décisions tardives : qualité du rapport, protocole d’échantillonnage, garde-fous de mise en production, communication du premier résultat et réponse à la dernière sollicitation. Les textes rappellent les limites des preuves plutôt que de présenter le score comme une vérité absolue.
+
+Validation : le workflow GitHub Actions a terminé avec succès sur le commit de correction de la sauvegarde ; le workflow du commit ajoutant les conséquences tardives était encore en attente lors de la dernière vérification. Aucun test manuel dans l’interface Godot n’a été effectué.
+
