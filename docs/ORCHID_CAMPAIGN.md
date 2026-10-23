@@ -372,3 +372,9 @@ Validation restante : vérifier la CI après ces changements et tester dans Godo
 Les choix narratifs sont stockés dans le dictionnaire `case_answers`, et non comme clés directes de la section `campaign`. Le rejeu effaçait auparavant les éventuelles clés de premier niveau mais pouvait donc laisser les choix réellement sauvegardés (y compris les choix des scènes 0 et 38 et le score de fin) dans le dictionnaire. Le reset retire maintenant les 39 réponses de scène ainsi que les résultats dérivés propres à la cinématique, tout en conservant les réponses d’autres dossiers. Le test de non-régression utilise désormais la structure de sauvegarde réelle et vérifie les deux côtés : réponses cinématiques supprimées, réponse sans rapport conservée.
 
 Validation automatisée attendue sur le commit courant : la CI doit passer avant de considérer la correction vérifiée. Le test manuel de rejeu et de reprise dans Godot reste à faire.
+
+### Sauvegarde ORCHID — étapes et scores hors plage de réponse simple
+
+La même fonction de persistance est partagée par des réponses à trois choix, des numéros d'étape, des scores signés et le marqueur de réinitialisation `-1`. La validation précédente, limitée à 0–2, rejetait silencieusement les valeurs pourtant nécessaires à la reprise des sprints, parcours transversaux et exercices de crise. La fonction accepte désormais les entiers bornés de -1000 à 1000, aussi bien à l’écriture qu’à la lecture : cela couvre les scores négatifs, les étapes et le sentinelle de reset tout en rejetant les valeurs extrêmes. Les tests de persistance couvrent explicitement ces cas.
+
+La CI doit être verte sur le dernier commit avant de considérer ce correctif validé. Le test en jeu de fermeture/réouverture des parcours reste à effectuer manuellement dans Godot.
