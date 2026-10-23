@@ -101,6 +101,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 					_minimize_all_windows()
 				key_event.accept()
 				return
+			KEY_HOME:
+				_minimize_other_windows()
+				key_event.accept()
+				return
 			KEY_LEFT:
 				var active_window_left := _get_active_visible_window()
 				if is_instance_valid(active_window_left):
@@ -199,6 +203,21 @@ func _restore_all_minimized_windows() -> void:
 		if is_instance_valid(active_window) and active_window.has_signal("window_activated"):
 			active_window.emit_signal("window_activated")
 	_update_taskbar_indicators()
+
+func _minimize_other_windows() -> void:
+	if not is_instance_valid(_window_layer):
+		return
+	var active_window := _get_active_visible_window()
+	if not is_instance_valid(active_window):
+		return
+	var active_id := str(active_window.get_meta("app_id", ""))
+	for window in _window_layer.get_children():
+		if window is Control and window != active_window and window.visible and window.has_method("_animate_minimize"):
+			window.call("_animate_minimize")
+	_active_app_id = active_id
+	active_window.move_to_front()
+	_update_taskbar_indicators()
+
 
 func _notification(what: int) -> void:
 
