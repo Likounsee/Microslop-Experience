@@ -3758,12 +3758,12 @@ func _open_browser() -> void:
 	var has_escalated_copy := evidence.has("explorer_orchid_file_escalated")
 	var evidence_context := ""
 	if has_local_copy:
-		evidence_context = "\\n\\nINDICE DÉJÀ CONSERVÉ : vous disposez d’une copie locale. Comparez-la à l’archive avant de conclure."
+		evidence_context = "\n\nINDICE DÉJÀ CONSERVÉ : vous disposez d’une copie locale. Comparez-la à l’archive avant de conclure."
 	elif has_escalated_copy:
-		evidence_context = "\\n\\nINDICE TRANSMIS : la conformité a reçu un signalement, mais l’approbation manquante n’est pas encore vérifiée."
+		evidence_context = "\n\nINDICE TRANSMIS : la conformité a reçu un signalement, mais l’approbation manquante n’est pas encore vérifiée."
 	else:
-		evidence_context = "\\n\\nPISTE : le fichier ORCHID_telemetry_review.txt, s’il a été découvert dans l’explorateur, permet de comparer le compteur affiché au journal disponible."
-	results.text = "Résultat sponsorisé : Microslop Premium réduit les interruptions visibles de 3 %.\\n\\nUn résultat a été retiré pour non-conformité aux recommandations de productivité." + evidence_context
+		evidence_context = "\n\nPISTE : le fichier ORCHID_telemetry_review.txt, s’il a été découvert dans l’explorateur, permet de comparer le compteur affiché au journal disponible."
+	results.text = "Résultat sponsorisé : Microslop Premium réduit les interruptions visibles de 3 %.\n\nUn résultat a été retiré pour non-conformité aux recommandations de productivité." + evidence_context
 	content.add_child(results)
 
 	var search := Button.new()
@@ -3772,18 +3772,21 @@ func _open_browser() -> void:
 		var query := address.text.strip_edges()
 		var normalized_query := query.to_lower()
 		var relevant := normalized_query.contains("orchid") or normalized_query.contains("interruption") or normalized_query.contains("télémétrie") or normalized_query.contains("telemetrie")
+		var current_evidence: Array = CampaignStore.load_evidence()
+		var has_local_copy_now := current_evidence.has("explorer_orchid_file_preserved")
+		var has_escalated_copy_now := current_evidence.has("explorer_orchid_file_escalated")
 		CampaignStore.save_evidence("browser_orchid_search_performed")
 		CampaignStore.save_case_answer("browser_orchid_query_relevant", 1 if relevant else 0)
 		if relevant:
-			results.text = "Résultats pour : « %s »\\n\\n1. [ARCHIVE INTERNE] ORCHID : optimiser le temps d’attention\\n2. Microslop Premium — SPONSORISÉ\\n3. Résultat supprimé par le programme de qualité\\n\\nExtrait de l’archive : « Les interruptions augmentent l’engagement. Ne pas informer l’utilisateur. »" % query
-			if has_local_copy:
-				results.text += "\\n\\nCORROBORATION : votre copie locale signale que le compteur « 18 fichiers analysés » a été injecté par le module de notification. Le journal consulté ne prouve pas un accès aux documents."
-			elif has_escalated_copy:
-				results.text += "\\n\\nSUIVI : le signalement existe, mais recherchez le registre d’approbation avant d’attribuer une responsabilité."
+			results.text = "Résultats pour : « %s »\n\n1. [ARCHIVE INTERNE] ORCHID : optimiser le temps d’attention\n2. Microslop Premium — SPONSORISÉ\n3. Résultat supprimé par le programme de qualité\n\nExtrait de l’archive : « Les interruptions augmentent l’engagement. Ne pas informer l’utilisateur. »" % query
+			if has_local_copy_now:
+				results.text += "\n\nCORROBORATION : votre copie locale signale que le compteur « 18 fichiers analysés » a été injecté par le module de notification. Le journal consulté ne prouve pas un accès aux documents."
+			elif has_escalated_copy_now:
+				results.text += "\n\nSUIVI : le signalement existe, mais recherchez le registre d’approbation avant d’attribuer une responsabilité."
 			else:
-				results.text += "\\n\\nÀ VÉRIFIER : cherchez le journal de télémétrie dans l’explorateur. Une archive seule ne suffit pas à établir toute la chronologie."
+				results.text += "\n\nÀ VÉRIFIER : cherchez le journal de télémétrie dans l’explorateur. Une archive seule ne suffit pas à établir toute la chronologie."
 		else:
-			results.text = "Résultats pour : « %s »\\n\\n1. Microslop Premium — SPONSORISÉ\\n2. Microslop AI — recommandé\\n3. Le résultat utile est momentanément indisponible.\\n\\nLe classement privilégie la promotion plutôt que la pertinence. Essayez « ORCHID télémétrie » pour retrouver les éléments internes." % query
+			results.text = "Résultats pour : « %s »\n\n1. Microslop Premium — SPONSORISÉ\n2. Microslop AI — recommandé\n3. Le résultat utile est momentanément indisponible.\n\nLe classement privilégie la promotion plutôt que la pertinence. Essayez « ORCHID télémétrie » pour retrouver les éléments internes." % query
 	)
 	content.add_child(search)
 
