@@ -50,19 +50,14 @@ func _run_tests() -> void:
 	var normalized := store.load_evidence()
 	_check(normalized.size() == 1 and normalized[0] == "evidence_after_malformed", "normalize malformed evidence")
 
-	# An unreadable existing file must not be overwritten by a save attempt.
-	var file := FileAccess.open(TEST_SAVE_PATH, FileAccess.WRITE)
-	if file != null:
-		file.store_string("[campaign\nmission_step = \"unterminated\n")
-		file.close()
-	_check(not store.save_progress(1), "refuse to overwrite unreadable save")
-	var verify := FileAccess.open(TEST_SAVE_PATH, FileAccess.READ)
-	var saved_text := verify.get_as_text() if verify != null else ""
-	if verify != null:
-		verify.close()
-	_check(saved_text == "[campaign\nmission_step = \"unterminated\n", "preserve unreadable save contents")
-
+	# A directory at the save path simulates a location ConfigFile cannot read or overwrite.
 	if FileAccess.file_exists(absolute_path):
+		DirAccess.remove_absolute(absolute_path)
+	var directory_error := DirAccess.make_dir_absolute(absolute_path)
+	_check(directory_error == OK, "create unreadable save location")
+	_check(not store.save_progress(1), "refuse to overwrite unreadable save location")
+	_check(DirAccess.dir_exists_absolute(absolute_path), "preserve unreadable save location")
+	if DirAccess.dir_exists_absolute(absolute_path):
 		DirAccess.remove_absolute(absolute_path)
 	store.queue_free()
 	if failures.is_empty():
