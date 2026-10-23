@@ -4546,9 +4546,27 @@ func _open_orchid_report_studio() -> void:
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	status.custom_minimum_size = Vector2(0, 42)
 	content.add_child(status)
+	var last_saved_text := editor.text
+	var update_draft_status := func():
+		var normalized_text := editor.text.strip_edges()
+		var words := normalized_text.replace("\\n", " ").replace("\\t", " ").split(" ", false)
+		var word_count := 0
+		for chunk in words:
+			for word in chunk.split("\\n", false):
+				if not word.is_empty():
+					word_count += 1
+		if editor.text == last_saved_text:
+			status.text = "%d caractères · %d mots · brouillon synchronisé" % [editor.text.length(), word_count]
+		else:
+			status.text = "%d caractères · %d mots · modifications non sauvegardées" % [editor.text.length(), word_count]
+	editor.text_changed.connect(func():
+		update_draft_status.call()
+	)
+	update_draft_status.call()
 	editor.focus_exited.connect(func():
 		if CampaignStore.save_report_draft(editor.text):
-			status.text = "Sauvegarde automatique du brouillon (%d caractères)." % editor.text.length()
+			last_saved_text = editor.text
+			status.text = "Sauvegarde automatique réussie (%d caractères)." % editor.text.length()
 		else:
 			status.text = "Échec de la sauvegarde automatique : utilisez le bouton de sauvegarde et vérifiez la progression."
 	)
@@ -4558,6 +4576,8 @@ func _open_orchid_report_studio() -> void:
 			status.text = "Aucun brouillon sauvegardé à restaurer. Le texte actuel n’a pas été modifié."
 			return
 		editor.text = saved_draft
+		last_saved_text = saved_draft
+		update_draft_status.call()
 		status.text = "Dernier brouillon sauvegardé restauré (%d caractères)." % saved_draft.length()
 	)
 	assemble.pressed.connect(func():
@@ -4630,6 +4650,8 @@ func _open_orchid_report_studio() -> void:
 	)
 	save.pressed.connect(func():
 		if CampaignStore.save_report_draft(editor.text):
+			last_saved_text = editor.text
+			update_draft_status.call()
 			status.text = "Brouillon sauvegardé localement (%d caractères). Vous pourrez le retrouver en rouvrant le studio." % editor.text.length()
 			_show_notification("Brouillon ORCHID enregistré", "Votre rapport a été sauvegardé dans la progression locale.")
 		else:
