@@ -12,6 +12,47 @@ const MAX_CASE_ANSWER := 1000
 
 var mission_step: int = MIN_MISSION_STEP
 
+## Writes to a sibling temporary file, validates it, then swaps it into place.
+## The previous save is retained as a backup until the replacement succeeds.
+func _save_config_atomic(config: ConfigFile) -> bool:
+	var target_path := ProjectSettings.globalize_path(save_path)
+	var temporary_path := target_path + ".tmp"
+	var backup_path := target_path + ".bak"
+	var write_error := config.save(temporary_path)
+	if write_error != OK:
+		push_warning("Impossible d'écrire la sauvegarde temporaire ORCHID : %s" % write_error)
+		return false
+
+	var verification := ConfigFile.new()
+	var verify_error := verification.load(temporary_path)
+	if verify_error != OK:
+		DirAccess.remove_absolute(temporary_path)
+		push_warning("La sauvegarde temporaire ORCHID est illisible : %s" % verify_error)
+		return false
+
+	var had_previous := FileAccess.file_exists(target_path)
+	if had_previous:
+		if FileAccess.file_exists(backup_path):
+			DirAccess.remove_absolute(backup_path)
+		var backup_error := DirAccess.rename_absolute(target_path, backup_path)
+		if backup_error != OK:
+			DirAccess.remove_absolute(temporary_path)
+			push_warning("Impossible de protéger l'ancienne sauvegarde ORCHID : %s" % backup_error)
+			return false
+
+	var replace_error := DirAccess.rename_absolute(temporary_path, target_path)
+	if replace_error != OK:
+		if had_previous:
+			DirAccess.rename_absolute(backup_path, target_path)
+		DirAccess.remove_absolute(temporary_path)
+		push_warning("Impossible de remplacer la sauvegarde ORCHID : %s" % replace_error)
+		return false
+
+	if had_previous:
+		DirAccess.remove_absolute(backup_path)
+	return true
+
+
 ## Returns only unique, non-empty evidence IDs from potentially malformed save data.
 func _normalized_evidence(raw: Variant) -> Array:
 	var evidence: Array = []
@@ -51,7 +92,7 @@ func save_progress(step: int) -> bool:
 		return false
 	config.set_value("campaign", "mission_step", next_step)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
-	var error := config.save(save_path)
+	var error := _save_config_atomic(config)
 	if error != OK:
 		push_warning("Impossible d'enregistrer la progression de campagne : %s" % error)
 		return false
@@ -70,7 +111,7 @@ func save_ending(ending: String) -> bool:
 		return false
 	config.set_value("campaign", "ending", ending)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
-	var save_error := config.save(save_path)
+	var save_error := _save_config_atomic(config)
 	if save_error != OK:
 		push_warning("Impossible d'enregistrer la conclusion ORCHID : %s" % save_error)
 		return false
@@ -91,7 +132,7 @@ func save_evidence(evidence_id: String) -> bool:
 		evidence.append(evidence_id)
 	config.set_value("campaign", "evidence", evidence)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
-	var error := config.save(save_path)
+	var error := _save_config_atomic(config)
 	if error != OK:
 		push_warning("Impossible d'enregistrer les indices ORCHID : %s" % error)
 		return false
@@ -120,7 +161,7 @@ func save_case_answer(case_id: String, answer: int) -> bool:
 	answers[case_id] = answer
 	config.set_value("campaign", "case_answers", answers)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
-	var error := config.save(save_path)
+	var error := _save_config_atomic(config)
 	if error != OK:
 		push_warning("Impossible d'enregistrer la réponse ORCHID : %s" % error)
 		return false
@@ -153,7 +194,7 @@ func save_case_answers_with_evidence(answers_to_save: Dictionary, evidence_id: S
 		evidence.append(evidence_id)
 	config.set_value("campaign", "evidence", evidence)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
-	var save_error := config.save(save_path)
+	var save_error := _save_config_atomic(config)
 	if save_error != OK:
 		push_warning("Impossible d'enregistrer la décision ORCHID et sa preuve : %s" % save_error)
 		return false
@@ -197,7 +238,7 @@ func reset_case_progress(answers_to_reset: Dictionary, evidence_prefixes: Array 
 			kept_evidence.append(evidence_id)
 	config.set_value("campaign", "evidence", kept_evidence)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
-	var save_error := config.save(save_path)
+	var save_error := _save_config_atomic(config)
 	if save_error != OK:
 		push_warning("Impossible de réinitialiser le parcours ORCHID : %s" % save_error)
 		return false
@@ -249,7 +290,7 @@ func save_report_draft(draft: String) -> bool:
 		return false
 	config.set_value("campaign", "report_draft", draft)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
-	var error := config.save(save_path)
+	var error := _save_config_atomic(config)
 	if error != OK:
 		push_warning("Impossible d’enregistrer le brouillon ORCHID : %s" % error)
 		return false
@@ -281,7 +322,7 @@ func save_report_review(draft: String, outcome: int) -> bool:
 	evidence.append(evidence_id)
 	config.set_value("campaign", "evidence", evidence)
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
-	var error := config.save(save_path)
+	var error := _save_config_atomic(config)
 	if error != OK:
 		push_warning("Impossible d'enregistrer la revue complète du rapport ORCHID : %s" % error)
 		return false
@@ -315,7 +356,7 @@ func capture_cinematic_baseline(case_id: String) -> bool:
 		"value": config.get_value("campaign", case_id)
 	}
 	config.set_value("campaign", "cinematic_baseline", baseline)
-	return config.save(save_path) == OK
+	return _save_config_atomic(config) == OK
 
 ## Restores only values first changed by cinematic choices, preserving earlier workday settings.
 func restore_cinematic_baseline(config: ConfigFile) -> void:
@@ -381,7 +422,7 @@ func reset_cinematic_progress() -> bool:
 		config.erase_section_key("campaign", "cinematic_outcome_score")
 
 	config.set_value("campaign", "version", CAMPAIGN_VERSION)
-	var save_error := config.save(save_path)
+	var save_error := _save_config_atomic(config)
 	if save_error != OK:
 		push_warning("Impossible de réinitialiser la séquence ORCHID : %s" % save_error)
 		return false
