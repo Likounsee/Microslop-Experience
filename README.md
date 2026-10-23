@@ -139,3 +139,6 @@ A twelve-decision incident exercise is available from the ORCHID archive, spanni
 ### Dossier transversal ORCHID
 
 Nouveau parcours jouable en dix étapes, du triage du signalement à la passation documentée. Il sauvegarde les décisions, produit des preuves, relie le confinement à la politique de notifications et propose un bilan rejouable. Les scénarios sont fictifs. Voir [la documentation de campagne](docs/ORCHID_CAMPAIGN.md).
+
+
+Les décisions des parcours ORCHID (cinématique, sprint, workflow et exercice de crise) enregistrent désormais leurs réponses et leur marqueur de preuve dans une seule écriture de sauvegarde. En cas d’échec disque, l’interface n’applique pas le score local ni ne valide le choix comme enregistré. La suite de tests couvre aussi les écritures atomiques et leur échec.
