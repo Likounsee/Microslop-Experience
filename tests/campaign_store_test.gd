@@ -262,9 +262,9 @@ func _run_tests() -> void:
 	_check(malformed_draft_fixture.load(TEST_SAVE_PATH) == OK, "load save before malformed report draft fixture")
 	if malformed_draft_fixture.load(TEST_SAVE_PATH) == OK:
 		malformed_draft_fixture.set_value("campaign", "report_draft", 123)
-		var malformed_answers: Dictionary = malformed_draft_fixture.get_value("campaign", "case_answers", {})
-		malformed_answers["report_studio_reviewed"] = 2
-		malformed_draft_fixture.set_value("campaign", "case_answers", malformed_answers)
+		var malformed_draft_answers: Dictionary = malformed_draft_fixture.get_value("campaign", "case_answers", {})
+		malformed_draft_answers["report_studio_reviewed"] = 2
+		malformed_draft_fixture.set_value("campaign", "case_answers", malformed_draft_answers)
 		malformed_draft_fixture.set_value("campaign", "evidence", ["report_studio_reviewed", "report_studio_revision_requested", "evidence_test"])
 		_check(malformed_draft_fixture.save(TEST_SAVE_PATH) == OK, "seed malformed draft with stale review metadata")
 	_check(store.save_report_draft("Recovered report after malformed data."), "replace malformed report draft")
