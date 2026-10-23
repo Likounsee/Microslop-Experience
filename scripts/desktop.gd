@@ -4497,8 +4497,12 @@ func _open_orchid_report_studio() -> void:
 	var review := Button.new()
 	review.text = "Soumettre le brouillon au comité fictif"
 	review.pressed.connect(func():
+		# Persist the exact submitted text before changing the review state. A failed save must not look like a completed submission.
+		if not CampaignStore.save_report_draft(editor.text):
+			status.text = "Soumission interrompue : impossible de sauvegarder le brouillon. Aucun résultat de revue n’a été enregistré."
+			return
 		var normalized_report := editor.text.to_lower()
-		var word_count := normalized_report.replace("\n", " ").replace("\t", " ").split(" ", false)
+		var word_count := normalized_report.replace("\r", " ").replace("\n", " ").replace("\t", " ").split(" ", false)
 		var has_limits := normalized_report.contains("limites") or normalized_report.contains("ne prouvent pas") or normalized_report.contains("pas établis") or normalized_report.contains("pas établies") or normalized_report.contains("reste inconnu")
 		var has_action := normalized_report.contains("mesures") or normalized_report.contains("demande") or normalized_report.contains("vérifier") or normalized_report.contains("contrôler") or normalized_report.contains("obtenir")
 		if word_count.size() < 55:
