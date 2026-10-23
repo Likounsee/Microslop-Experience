@@ -40,6 +40,26 @@ func _run_tests() -> void:
 	_check(reloaded.save_settings(), "replace an existing settings file")
 	_check(not FileAccess.file_exists(absolute_path + ".bak"), "replacement cleans backup after success")
 
+	# Simulate a crash after the old file was moved to .bak but before the
+	# replacement reached the primary path.
+	var saved_settings_text := FileAccess.get_file_as_string(absolute_path)
+	var backup_file := FileAccess.open(absolute_path + ".bak", FileAccess.WRITE)
+	_check(backup_file != null, "create interrupted-save backup fixture")
+	if backup_file != null:
+		backup_file.store_string(saved_settings_text)
+		backup_file.close()
+	var malformed_primary := FileAccess.open(absolute_path, FileAccess.WRITE)
+	_check(malformed_primary != null, "create malformed primary settings fixture")
+	if malformed_primary != null:
+		malformed_primary.store_string("[settings\\nvsync = broken")
+		malformed_primary.close()
+	var recovery_store = SettingsStoreScript.new()
+	recovery_store.settings_path = TEST_SETTINGS_PATH
+	root.add_child(recovery_store)
+	_check(recovery_store.values["fps_limit"] == 120, "recover settings values from verified backup")
+	_check(FileAccess.file_exists(absolute_path), "restore recovered settings to primary path")
+	_check(not FileAccess.file_exists(absolute_path + ".bak"), "consume backup after successful recovery")
+
 	# A directory at the destination forces the final rename to fail. The in-memory
 	# value must roll back instead of claiming a setting was saved.
 	var blocked_path := TEST_SETTINGS_PATH + "_blocked"
@@ -63,6 +83,7 @@ func _run_tests() -> void:
 		DirAccess.remove_absolute(blocked_absolute)
 	store.queue_free()
 	reloaded.queue_free()
+	recovery_store.queue_free()
 	blocked_store.queue_free()
 	if failures.is_empty():
 		print("SettingsStore tests passed.")
