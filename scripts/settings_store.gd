@@ -103,6 +103,7 @@ func save_settings() -> bool:
 
 	error = DirAccess.rename_absolute(absolute_temporary, absolute_target)
 	if error != OK:
+		DirAccess.remove_absolute(absolute_temporary)
 		if had_previous and FileAccess.file_exists(absolute_backup):
 			DirAccess.rename_absolute(absolute_backup, absolute_target)
 		push_warning("Unable to replace settings file: %s" % error)
