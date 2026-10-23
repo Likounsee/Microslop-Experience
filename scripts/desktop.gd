@@ -3765,8 +3765,12 @@ func _open_browser() -> void:
 
 	var search := Button.new()
 	search.text = "Rechercher"
-	search.pressed.connect(func():
+	var run_search := func() -> void:
 		var query := address.text.strip_edges()
+		if query.is_empty():
+			results.text = "Saisissez un terme ou une adresse avant de lancer la recherche."
+			address.grab_focus()
+			return
 		var normalized_query := query.to_lower()
 		var relevant := normalized_query.contains("orchid") or normalized_query.contains("interruption") or normalized_query.contains("télémétrie") or normalized_query.contains("telemetrie")
 		var current_evidence: Array = CampaignStore.load_evidence()
@@ -3784,6 +3788,9 @@ func _open_browser() -> void:
 				results.text += "\n\nÀ VÉRIFIER : cherchez le journal de télémétrie dans l’explorateur. Une archive seule ne suffit pas à établir toute la chronologie."
 		else:
 			results.text = "Résultats pour : « %s »\n\n1. Microslop Premium — SPONSORISÉ\n2. Microslop AI — recommandé\n3. Le résultat utile est momentanément indisponible.\n\nLe classement privilégie la promotion plutôt que la pertinence. Essayez « ORCHID télémétrie » pour retrouver les éléments internes." % query
+	search.pressed.connect(run_search)
+	address.text_submitted.connect(func(_submitted: String):
+		run_search.call()
 	)
 	content.add_child(search)
 
