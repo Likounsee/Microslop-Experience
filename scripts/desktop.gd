@@ -4620,7 +4620,7 @@ func _open_orchid_report_studio() -> void:
 					decision_section += "Orientation choisie : clôture comme incident de configuration. Cette décision administrative ne supprime pas les éléments observés et ne démontre pas que l’incident est résolu."
 					if approval_missing or trace_count < 5:
 						decision_section += "\nALERTE DE CLÔTURE PRÉMATURÉE : approbation manquante : %s ; chronologie : %d/5. Garder ces lacunes explicitement dans le compte rendu." % ["oui" if approval_missing else "non", trace_count]
-				paragraphs.append(decision_section)
+			paragraphs.append(decision_section)
 			selected_count += 1
 		if selected_count == 0:
 			paragraphs.append("Aucun élément n’a été sélectionné. Choisissez au moins une section avant de transmettre une conclusion.")
