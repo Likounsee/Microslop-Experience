@@ -5338,6 +5338,7 @@ func _render_orchid_campaign_dashboard(summary: Label) -> void:
 		{"name":"Contrôles de conformité", "ids":["compliance_signature", "compliance_channel", "compliance_approval", "compliance_notice", "compliance_finding"]},
 		{"name":"Pièces annexes", "ids":["support_ticket", "survey_bias", "night_log_reconstructed", "incident_report"]},
 		{"name":"Recoupement explorateur / navigateur", "ids":["explorer_orchid_file_discovered", "explorer_orchid_file_opened", "explorer_orchid_file_preserved", "explorer_orchid_file_escalated", "browser_orchid_search_performed", "browser_orchid_archive_opened"]},
+		{"name":"Journal restauré depuis la corbeille", "ids":["recycle_bin_orchid_log_inspected", "recycle_bin_orchid_log_restored"]},
 		{"name":"Séquence narrative (39 scènes)", "ids":["cinematic_scene_00", "cinematic_scene_01", "cinematic_scene_02", "cinematic_scene_03", "cinematic_scene_04", "cinematic_scene_05", "cinematic_scene_06", "cinematic_scene_07", "cinematic_scene_08", "cinematic_scene_09", "cinematic_scene_10", "cinematic_scene_11", "cinematic_scene_12", "cinematic_scene_13", "cinematic_scene_14", "cinematic_scene_15", "cinematic_scene_16", "cinematic_scene_17", "cinematic_scene_18", "cinematic_scene_19", "cinematic_scene_20", "cinematic_scene_21", "cinematic_scene_22", "cinematic_scene_23", "cinematic_scene_24", "cinematic_scene_25", "cinematic_scene_26", "cinematic_scene_27", "cinematic_scene_28", "cinematic_scene_29", "cinematic_scene_30", "cinematic_scene_31", "cinematic_scene_32", "cinematic_scene_33", "cinematic_scene_34", "cinematic_scene_35", "cinematic_scene_38", "cinematic_scene_37", "cinematic_scene_36", "cinematic_outcome_calculated"]},
 		{"name":"Parcours ORCHID (41 séquences)", "ids":["workday_stage_00", "workday_stage_01", "workday_stage_02", "workday_stage_03", "workday_stage_04", "workday_stage_05", "workday_stage_06", "workday_stage_07", "workday_stage_08", "workday_stage_09", "workday_stage_10", "workday_stage_11", "workday_stage_12", "workday_stage_13", "workday_stage_14", "workday_stage_15", "workday_stage_16", "workday_stage_17", "workday_stage_18", "workday_stage_19", "workday_stage_20", "workday_stage_21", "workday_stage_22", "workday_stage_23", "workday_stage_24", "workday_stage_25", "workday_stage_26", "workday_stage_27", "workday_stage_28", "workday_stage_29", "workday_stage_30", "workday_stage_31", "workday_stage_32", "workday_stage_33", "workday_stage_34", "workday_stage_35", "workday_stage_36", "workday_stage_37", "workday_stage_38", "workday_stage_39", "workday_stage_40"]},
 		{"name":"Enquête de terrain (12 défis)", "ids":["field_stage_00", "field_stage_01", "field_stage_02", "field_stage_03", "field_stage_04", "field_stage_05", "field_stage_06", "field_stage_07", "field_stage_08", "field_stage_09", "field_stage_10", "field_stage_11", "field_investigation_completed"]},
@@ -5796,7 +5797,8 @@ func _open_orchid_casebook() -> void:
 		{"id":"assistant_script","title":"05 · Réponse de l’assistant","body":"SOURCE : Microslop AI · Aide contextuelle\n\nPremière réponse : « ORCHID est probablement un projet interne sans incidence sur votre expérience. » Après une demande d’explication, l’assistant parle d’un objectif de rétention et de « fenêtres d’opportunité » avant la fin d’une tâche.\n\nIl ne sait pas qui a validé le programme et plaisante nerveusement sur le fait de ne signaler la conversation à personne.\n\nPISTE : l’assistant n’est pas nécessairement le concepteur. Son discours ressemble à un script qui minimise le sujet jusqu’à ce qu’une question précise le force à en dire plus."},
 		{"id":"browser_sponsor","title":"06 · Résultat sponsorisé","body":"SOURCE : Microslop Browser · Recherche « désactiver les notifications »\n\nLe premier résultat propose Microslop Premium pour « une expérience plus sereine ». L’archive interne apparaît plus bas ; un résultat critique est signalé comme retiré par le programme de qualité, sans nom de responsable ni explication consultable.\n\nPISTE : le navigateur ne supprime pas toute information. Il la noie sous des recommandations commerciales et rend la source la plus utile plus difficile à trouver."},
 		{"id":"quality_survey","title":"07 · Enquête de satisfaction","body":"SOURCE : Équipe Expérience · Brouillon de questionnaire\n\nQuestion 1 : « Avez-vous apprécié l’interruption qui vous a aidé à découvrir cette enquête ? »\nQuestion 2 : « Souhaitez-vous davantage de conseils pour mieux gérer votre temps ? »\nQuestion 3 : « Si non, quel contenu pourrait vous convaincre de rester ? »\n\nAucune option ne permet de répondre simplement : « Je ne veux plus être interrompu. »\n\nPISTE : même le mécanisme de retour utilisateur est biaisé. Le questionnaire transforme un refus en occasion de proposer davantage de contenu."},
-		{"id":"experiment_04","title":"08 · Résultat d’expérience","body":"SOURCE : Équipe Expérience · Test A/B 04-B\n\nGroupe A reçoit une notification au début d’une tâche longue. Groupe B reçoit la même notification juste après l’avoir terminée. Le rapport indique davantage de retours vers l’application pour le groupe A, puis recommande de généraliser cette variante.\n\nUne note précise : « Ne pas confondre retour dans l’application et satisfaction déclarée. Le premier indicateur est plus stable. »\n\nPISTE : l’équipe connaît la différence entre garder quelqu’un actif et l’aider réellement. Le choix de la métrique est lui-même une décision morale."}
+		{"id":"experiment_04","title":"08 · Résultat d’expérience","body":"SOURCE : Équipe Expérience · Test A/B 04-B\n\nGroupe A reçoit une notification au début d’une tâche longue. Groupe B reçoit la même notification juste après l’avoir terminée. Le rapport indique davantage de retours vers l’application pour le groupe A, puis recommande de généraliser cette variante.\n\nUne note précise : « Ne pas confondre retour dans l’application et satisfaction déclarée. Le premier indicateur est plus stable. »\n\nPISTE : l’équipe connaît la différence entre garder quelqu’un actif et l’aider réellement. Le choix de la métrique est lui-même une décision morale."},
+		{"id":"recycle_bin_orchid_log_restored","title":"09 · Journal restauré depuis la corbeille","body":"SOURCE : Corbeille · ORCHID_deployment_trace.log\n\nLe journal associe le déploiement à un canal STABLE, alors que le paquet porte l’étiquette DEV_RING_INTERNAL. L’approbation de diffusion n’apparaît pas dans la copie consultée.\n\nPISTE : cet écart mérite une comparaison avec l’historique de déploiement et la revue de conformité. Il ne permet pas, à lui seul, d’identifier qui a pris la décision."}
 	]
 
 	for entry in entries:
@@ -5807,10 +5809,10 @@ func _open_orchid_casebook() -> void:
 		evidence_button.add_theme_color_override("font_color", Color("263247"))
 		evidence_button.add_theme_stylebox_override("normal", _flat_style(Color("f1f5fa"), 7))
 		evidence_button.add_theme_stylebox_override("hover", _flat_style(Color("dce8f8"), 7))
-		evidence_button.pressed.connect(_select_orchid_evidence.bind(entry, detail, status, entries.size()))
+		evidence_button.pressed.connect(_select_orchid_evidence.bind(entry, detail, status, entries))
 		list_panel.add_child(evidence_button)
 
-	_refresh_orchid_evidence_status(status, entries.size())
+	_refresh_orchid_evidence_status(status, entries)
 	detail.text = "Sélectionnez une pièce à gauche.\n\nVotre objectif : vérifier si les traces se confirment mutuellement ou si elles proviennent toutes de la même source."
 	var theory := Button.new()
 	theory.text = "Reconstituer la chaîne des événements"
@@ -6173,15 +6175,19 @@ func _refresh_orchid_lab_progress(progress: Label, puzzles: Array) -> void:
 	progress.text = "ANALYSES CORRECTES : %d / %d" % [completed, puzzles.size()]
 
 
-func _select_orchid_evidence(entry: Dictionary, detail: Label, status: Label, total: int) -> void:
+func _select_orchid_evidence(entry: Dictionary, detail: Label, status: Label, entries: Array) -> void:
 	CampaignStore.save_evidence(str(entry["id"]))
 	detail.text = str(entry["body"])
-	_refresh_orchid_evidence_status(status, total)
+	_refresh_orchid_evidence_status(status, entries)
 
 
-func _refresh_orchid_evidence_status(status: Label, total: int) -> void:
-	var found = CampaignStore.load_evidence().size()
-	status.text = "PIÈCES EXAMINÉES : %d / %d — progression sauvegardée" % [mini(found, total), total]
+func _refresh_orchid_evidence_status(status: Label, entries: Array) -> void:
+	var saved_evidence: Array = CampaignStore.load_evidence()
+	var found := 0
+	for entry in entries:
+		if saved_evidence.has(str(entry["id"])):
+			found += 1
+	status.text = "PIÈCES EXAMINÉES : %d / %d — progression sauvegardée" % [found, entries.size()]
 
 
 func _open_recycle_bin() -> void:
