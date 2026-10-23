@@ -143,6 +143,10 @@ func save_report_review(draft: String, outcome: int) -> bool:
 	var raw_evidence: Variant = config.get_value("campaign", "evidence", [])
 	var evidence: Array = raw_evidence if raw_evidence is Array else []
 	var evidence_id := "report_studio_reviewed" if outcome == 2 else "report_studio_revision_requested"
+	var stale_evidence_id := "report_studio_revision_requested" if outcome == 2 else "report_studio_reviewed"
+	# Keep only the evidence matching the latest review result; older opposite outcomes are stale.
+	while evidence.has(stale_evidence_id):
+		evidence.erase(stale_evidence_id)
 	if not evidence.has(evidence_id):
 		evidence.append(evidence_id)
 	config.set_value("campaign", "evidence", evidence)
